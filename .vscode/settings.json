@@ -1,0 +1,20 @@
+{
+  "git.ignoreLimitWarning": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "indentRainbow.ignoreErrorLanguages": ["*"],
+  "indentRainbow.colorOnWhiteSpaceOnly": true,
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  "workbench.editor.customLabels.patterns": {
+    "**/src/**/page.tsx": "${dirname} / page",
+    "**/src/**/index.tsx": "${dirname} / index",
+    "**/src/**/schema.ts": "${dirname} / schema"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

@@ -1,0 +1,150 @@
+// prettier-ignore
+
+{
+    "reactTypescriptFunctionalComponent": {
+        "prefix": "rc",
+        "description": "React Typescript Arrow Functional Component With Export And Module Scss",
+        "body": [
+            "import React from 'react';",
+            "import styles from './${TM_FILENAME_BASE}.module.scss';\n",
+    
+            "interface IProps {}\n",
+    
+            "const ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}$0: React.FC<IProps> = () => {",
+            "\treturn (",
+            "\t\t<div>${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}$0</div>",
+            "\t);",
+            "};\n",
+    
+            "export default ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}$0;\n"
+        ]
+    },
+  
+    "nextPage": {
+        "prefix": "np",
+        "description": "Next Page",
+        "body": [
+            "import type { NextPage } from 'next';\n",
+    
+            "interface IProps {}\n",
+    
+            "const ${1:PAGE_NAME}: NextPage<IProps> = ({ }) => {",
+            "\treturn (",
+            "\t\t<div>${1:PAGE_NAME}</div>",
+            "\t);",
+            "};\n",
+    
+            "export default ${1:PAGE_NAME};\n"
+        ]
+    },
+  
+    "nextInitialPropsPage": {
+        "prefix": "np-initial",
+        "description": "Next page with initial props",
+        "body": [
+            "import type { NextPage } from 'next';",
+            "import wrapper from '@/redux/store';\n",
+    
+            "interface IProps extends IInitialProps {}",
+            "interface IInitialProps {}\n",
+    
+            "const ${1:PAGE_NAME}: NextPage<IProps> = ({ }) => {",
+            "\treturn (",
+            "\t\t<div>${1:PAGE_NAME}</div>",
+            "\t);",
+            "};\n",
+    
+            "${1:PAGE_NAME}.getInitialProps = wrapper.getInitialPageProps(store => async (context) => {\n",
+    
+            "\tconst returnProps: IInitialProps = {};",
+            "\treturn returnProps;",
+            "});\n",
+    
+            "export default ${1:PAGE_NAME};\n"
+        ]
+    },
+  
+    "nextServerSideRenderingPage": {
+        "prefix": "np-ssr",
+        "description": "Next page with server side rendering",
+        "body": [
+            "import type { GetServerSideProps, NextPage } from 'next';\n",
+    
+            "interface IProps extends IServerSideProps {}",
+            "interface IServerSideProps {}\n",
+    
+            "const ${1:PAGE_NAME}: NextPage<IProps> = ({ }) => {",
+            "\treturn (",
+            "\t\t<div>${1:PAGE_NAME}</div>",
+            "\t);",
+            "};\n",
+    
+            "export const getServerSideProps: GetServerSideProps<IServerSideProps> = async (context) => {\n",
+    
+            "\treturn { props: {} };",
+            "}\n",
+    
+            "export default ${1:PAGE_NAME};\n"
+        ]
+    },
+  
+    "nextStaticPage": {
+        "prefix": "np-static",
+        "description": "Next page with static page props",
+        "body": [
+            "import type { GetStaticProps, NextPage } from 'next';\n",
+    
+            "interface IProps extends IStaticProps {}",
+            "interface IStaticProps {}\n",
+    
+            "const ${1:PAGE_NAME}: NextPage<IProps> = ({ }) => {",
+            "\treturn (",
+            "\t\t<div>${1:PAGE_NAME}</div>",
+            "\t);",
+            "};\n",
+    
+            "export const getStaticProps: GetStaticProps<IStaticProps> = async (context) => {\n",
+    
+            "\treturn { props: {} };",
+            "}\n",
+    
+            "export default ${1:PAGE_NAME};\n"
+        ]
+    },
+  
+    "reactUseStateHook": {
+        "prefix": "r-state",
+        "description": "React useState Hook",
+        "body": "const [${1:state}, set${1:state}] = useState(null);"
+    },
+  
+    "reactUseEffectHook": {
+        "prefix": "r-effect",
+        "description": "React useEffect Hook",
+        "body": "useEffect(() => {\n\n}, []);"
+    },
+  
+    "reactMutableUseRefHook": {
+        "prefix": "r-ref-mutable",
+        "description": "React Mutable useRef Hook",
+        "body": "const ${1:input}Ref = useRef<${2:string} | null>(null);"
+    },
+  
+    "reactImmutableUseRefHook": {
+        "prefix": "r-ref-immutable",
+        "description": "React Immutable useRef Hook",
+        "body": "const ${1:input}Ref = useRef<${2:string}>();"
+    },
+  
+    "reactReduxUseDispatchHook": {
+        "prefix": "r-dispatch",
+        "description": "React Redux useDispatch Hook",
+        "body": "const dispatch = useAppDispatch();"
+    },
+  
+    "reactReduxUseSelectorHook": {
+        "prefix": "r-selector",
+        "description": "React Redux useSelector Hook",
+        "body": "const ${1}Data = useAppSelector((state) => state.${1|appSettings,auth|});"
+    }
+}

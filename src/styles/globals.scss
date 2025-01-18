@@ -1,0 +1,51 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@import './variables';
+@import './utility';
+
+@layer base {
+  * {
+    @apply m-0 box-border border-border p-0;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* For Chrome, Safari, Edge, and Opera */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* For Firefox */
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+.PhoneInputCountry {
+  padding: 6px 8px;
+  background: hsl(var(--background));
+  border-radius: calc(var(--radius) - 2px);
+  border-width: 1px;
+  border-color: transparent;
+}
+
+.PhoneInput[data-error='true'] {
+  & .PhoneInputCountry,
+  .PhoneInputInput {
+    border-color: hsl(var(--destructive));
+  }
+}
+
+.PhoneInputInput {
+  padding: 6px 8px;
+  background: hsl(var(--background));
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 14px;
+  border-width: 1px;
+  border-color: transparent;
+}

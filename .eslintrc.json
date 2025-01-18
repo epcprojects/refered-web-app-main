@@ -1,0 +1,32 @@
+{
+  "plugins": ["@typescript-eslint"],
+  "extends": ["next/core-web-vitals", "next/typescript", "plugin:@typescript-eslint/recommended", "prettier"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-inferrable-types": "off",
+    "@typescript-eslint/no-empty-object-type": "off",
+    "@typescript-eslint/no-empty-interface": "off",
+    "@typescript-eslint/ban-types": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "eqeqeq": "error",
+    "prefer-template": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        // prettier-ignore
+        "patterns": [
+          "..*", 
+          "clsx", 
+          "lodash", 
+          "tailwind-merge", 
+          "tailwindcss-animate",
+          "next-themes",
+          "next/link",
+          "usehooks-ts",
+          "date-fns"
+        ]
+      }
+    ]
+  }
+}
