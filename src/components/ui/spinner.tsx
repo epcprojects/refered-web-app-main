@@ -3,7 +3,7 @@
 import { cn } from '@/utils/cn.utils';
 import { VariantProps, cva } from 'class-variance-authority';
 import React from 'react';
-import { LuLoader2 } from 'react-icons/lu';
+import { LuLoader } from 'react-icons/lu';
 
 interface IProps extends VariantProps<typeof spinnerVariants> {
   size?: 'sm' | 'md' | 'lg' | string;
@@ -36,7 +36,7 @@ const sizes = {
 
 const Spinner: React.FC<IProps> = ({ size = 'sm', className, containerClassName, container, color }) => (
   <span className={cn(spinnerVariants({ container }), containerClassName)}>
-    <LuLoader2 size={['sm', 'md', 'lg'].includes(size) ? sizes[size as keyof typeof sizes] : size} className={cn('animate-spin', spinnerVariants({ color }), className)} />
+    <LuLoader size={['sm', 'md', 'lg'].includes(size) ? sizes[size as keyof typeof sizes] : size} className={cn('animate-spin', spinnerVariants({ color }), className)} />
   </span>
 );
 Spinner.displayName = 'Spinner';

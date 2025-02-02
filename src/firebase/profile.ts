@@ -22,6 +22,8 @@ export interface IProfile {
   LastName: string;
   PhoneNo: string;
   email: string;
+  State?: string;
+  City?: string;
   userEmail: string;
   Keywords: string[];
   ImageUrl?: string;
@@ -87,6 +89,7 @@ export const GetAllProfiles = async (body: GetAllProfiles_Body): GetAllProfiles_
   return { users: allProfiles.filter((item) => item.UserType === 'Normal'), businesses: allProfiles.filter((item) => item.UserType === 'Business') };
 };
 
+//TODO: Refactor this to include Referrals by favourites.
 export type GetProfilesForSearch_Body = { loggedInUserId: string; searchTerm: string; targetType?: IProfile['UserType']; lastItemId: string | undefined };
 export type GetProfilesForSearch_Response = Promise<{ users: IProfileWithFavorites[]; businesses: IProfileWithFavorites[] }>;
 export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): GetProfilesForSearch_Response => {
@@ -94,56 +97,52 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
   if (favoritesResponse.error !== null || favoritesResponse.result === null) throw new Error(firebaseErrorMsg(favoritesResponse.error));
   const allFavorites = favoritesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id })) as IFavorite[];
 
-  if (!!body.searchTerm === false && body.targetType === undefined) {
-    let userProfiles: IProfileWithFavorites[] = [];
-    const userProfilesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.profile), where('Verified', '==', '1'), where('UserType', '==', 'Normal'), orderBy('FirstName', 'asc'), limit(7))));
-    if (userProfilesResponse.result !== null) userProfiles = userProfilesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id, isFavorite: !!allFavorites.find((fav) => fav.UserId === item.data().UserId) })) as IProfileWithFavorites[];
-    // userProfiles = userProfiles.filter((item) => item.UserId !== body.loggedInUserId);
+  const fetchProfiles = async (userType: string, searchTerm?: string, lastItemId?: string) => {
+    const constraints: any = [where('Verified', '==', '1'), where('UserType', '==', userType), orderBy('FirstName', 'asc')];
+    if (searchTerm) constraints.push(where('Keywords', 'array-contains', searchTerm.toLowerCase()));
+    if (lastItemId) {
+      const lastItemDocSnap = await getDoc(doc(firebase.firestore, firebase.collections.profile, lastItemId));
+      if (lastItemDocSnap.exists()) {
+        constraints.push(startAfter(lastItemDocSnap));
+      }
+    }
 
-    let businessProfiles: IProfileWithFavorites[] = [];
-    const businessProfilesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.profile), where('Verified', '==', '1'), where('UserType', '==', 'Business'), orderBy('FirstName', 'asc'), limit(7))));
-    if (businessProfilesResponse.result !== null) businessProfiles = businessProfilesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id, isFavorite: !!allFavorites.find((fav) => fav.UserId === item.data().UserId) })) as IProfileWithFavorites[];
-    // businessProfiles = businessProfiles.filter((item) => item.UserId !== body.loggedInUserId);
+    const profileResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.profile), ...constraints, limit(firebase.pagination.pageSize))));
 
-    return { users: userProfiles, businesses: businessProfiles };
+    if (profileResponse.result === null) return [];
+    return Promise.all(
+      profileResponse.result.docs.map(async (item) => {
+        const groupDataResult = await asyncGuard(() => getDoc(doc(firebase.firestore, firebase.collections.groupTypes, item.data().GroupId || '')));
+        return {
+          ...item.data(),
+          id: item.id,
+          groupData: groupDataResult.result?.data() || null,
+          isFavorite: !!allFavorites.find((fav) => fav.UserId === item.data().UserId),
+        };
+      }),
+    ) as Promise<IProfileWithFavorites[]>;
+  };
+
+  if (!body.searchTerm && body.targetType === undefined) {
+    return {
+      users: await fetchProfiles('Normal'),
+      businesses: await fetchProfiles('Business'),
+    };
   }
 
-  if (!!body.searchTerm === true && body.targetType === undefined) {
-    let userProfiles: IProfileWithFavorites[] = [];
-    const userProfilesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.profile), where('Verified', '==', '1'), where('UserType', '==', 'Normal'), where('Keywords', 'array-contains', body.searchTerm.toLowerCase()), orderBy('FirstName', 'asc'), limit(7))));
-    if (userProfilesResponse.result !== null) userProfiles = userProfilesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id, isFavorite: !!allFavorites.find((fav) => fav.UserId === item.data().UserId) })) as IProfileWithFavorites[];
-    // userProfiles = userProfiles.filter((item) => item.UserId !== body.loggedInUserId);
-
-    let businessProfiles: IProfileWithFavorites[] = [];
-    const businessProfilesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.profile), where('Verified', '==', '1'), where('UserType', '==', 'Business'), where('Keywords', 'array-contains', body.searchTerm.toLowerCase()), orderBy('FirstName', 'asc'), limit(7))));
-    if (businessProfilesResponse.result !== null) businessProfiles = businessProfilesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id, isFavorite: !!allFavorites.find((fav) => fav.UserId === item.data().UserId) })) as IProfileWithFavorites[];
-    // businessProfiles = businessProfiles.filter((item) => item.UserId !== body.loggedInUserId);
-
-    return { users: userProfiles, businesses: businessProfiles };
+  if (body.searchTerm && body.targetType === undefined) {
+    return {
+      users: await fetchProfiles('Normal', body.searchTerm),
+      businesses: await fetchProfiles('Business', body.searchTerm),
+    };
   }
 
-  if (!!body.searchTerm === false && body.targetType !== undefined) {
-    const lastItemDocSnap = body.lastItemId === undefined ? [] : await getDoc(doc(collection(firebase.firestore, firebase.collections.profile), body.lastItemId));
-
-    let profiles: IProfileWithFavorites[] = [];
-    const profileResponse = await asyncGuard(() => (body.lastItemId === undefined ? getDocs(query(collection(firebase.firestore, firebase.collections.profile), where('Verified', '==', '1'), where('UserType', '==', body.targetType), orderBy('FirstName', 'asc'), limit(firebase.pagination.pageSize))) : getDocs(query(collection(firebase.firestore, firebase.collections.profile), where('UserType', '==', body.targetType), orderBy('FirstName', 'asc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize)))));
-    if (profileResponse.result !== null) profiles = profileResponse.result.docs.map((item) => ({ ...item.data(), id: item.id, isFavorite: !!allFavorites.find((fav) => fav.ProfileId === item.data().UserId) })) as IProfileWithFavorites[];
-    // profiles =  profiles.filter((item) => item.UserId !== body.loggedInUserId);
-
-    if (body.targetType === 'Normal') return { users: profiles, businesses: [] };
-    else return { users: [], businesses: profiles };
+  if (!body.searchTerm && body.targetType !== undefined) {
+    return body.targetType === 'Normal' ? { users: await fetchProfiles(body.targetType, undefined, body.lastItemId), businesses: [] } : { users: [], businesses: await fetchProfiles(body.targetType, undefined, body.lastItemId) };
   }
 
-  if (!!body.searchTerm === true && body.targetType !== undefined) {
-    const lastItemDocSnap = body.lastItemId === undefined ? [] : await getDoc(doc(collection(firebase.firestore, firebase.collections.profile), body.lastItemId));
-
-    let profiles: IProfileWithFavorites[] = [];
-    const profileResponse = await asyncGuard(() => (body.lastItemId === undefined ? getDocs(query(collection(firebase.firestore, firebase.collections.profile), where('Verified', '==', '1'), where('UserType', '==', body.targetType), where('Keywords', 'array-contains', body.searchTerm.toLowerCase()), orderBy('FirstName', 'asc'), limit(firebase.pagination.pageSize))) : getDocs(query(collection(firebase.firestore, firebase.collections.profile), where('UserType', '==', body.targetType), where('Keywords', 'array-contains', body.searchTerm.toLowerCase()), orderBy('FirstName', 'asc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize)))));
-    if (profileResponse.result !== null) profiles = profileResponse.result.docs.map((item) => ({ ...item.data(), id: item.id, isFavorite: !!allFavorites.find((fav) => fav.ProfileId === item.data().UserId) })) as IProfileWithFavorites[];
-    // profiles =  profiles.filter((item) => item.UserId !== body.loggedInUserId);
-
-    if (body.targetType === 'Normal') return { users: profiles, businesses: [] };
-    else return { users: [], businesses: profiles };
+  if (body.searchTerm && body.targetType !== undefined) {
+    return body.targetType === 'Normal' ? { users: await fetchProfiles(body.targetType, body.searchTerm, body.lastItemId), businesses: [] } : { users: [], businesses: await fetchProfiles(body.targetType, body.searchTerm, body.lastItemId) };
   }
 
   return { users: [], businesses: [] };

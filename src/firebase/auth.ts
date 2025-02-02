@@ -5,11 +5,12 @@ import { asyncGuard, firebaseErrorMsg, generateTokensForSentence } from '@/utils
 import { ConfirmationResult, createUserWithEmailAndPassword, deleteUser, EmailAuthProvider, linkWithPhoneNumber, signInWithCredential, signInWithPhoneNumber, signOut, updatePassword, User } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { GetProfileData, IProfile, MarkProfileAsVerified } from './profile';
+import { UploadFile } from './upload';
 
 export const handleDeformatPhoneNumberForAPI = (phoneNo: string) => (phoneNo === undefined ? '' : `+${phoneNo.replace(/[^0-9]/g, '')}`);
 export const handleConvertPhoneToEmailForAPI = (phoneNo: string) => `${handleDeformatPhoneNumberForAPI(phoneNo)}@getreferd.co`;
 
-export type SignupBusiness_Body = Pick<IProfile, 'UserType' | 'FirstName' | 'LastName' | 'PhoneNo' | 'email' | 'BusinessId' | 'BusinessName' | 'BusinessTypeName'> & { password: string };
+export type SignupBusiness_Body = Pick<IProfile, 'UserType' | 'FirstName' | 'LastName' | 'PhoneNo' | 'email' | 'ImageUrl' | 'BusinessId' | 'BusinessName' | 'BusinessTypeName' | 'State' | 'City'> & { password: string; profileImageFile?: File | null };
 export type SignupBusiness_Response = Promise<{ isSuccess: boolean }>;
 export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>): SignupBusiness_Response => {
   await handleDeleteInCompleteUser(handleConvertPhoneToEmailForAPI(body.PhoneNo));
@@ -17,6 +18,20 @@ export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>
   const response = await asyncGuard(() => createUserWithEmailAndPassword(firebase.auth, handleConvertPhoneToEmailForAPI(body.PhoneNo), body.password));
   if (response.error !== null || response.result === null) throw new Error(firebaseErrorMsg(response.error));
   const signedUpUser = response.result.user;
+
+  let imageUrl = '';
+
+  //Making sure to upload profile picture after sign-in.
+  if (body.profileImageFile) {
+    try {
+      const uploadedUrl = await UploadFile({ file: body.profileImageFile, type: 'avatar' });
+      imageUrl = uploadedUrl;
+    } catch (error) {
+      console.error('Error uploading DP:', error);
+      await deleteUser(signedUpUser);
+      throw new Error(firebaseErrorMsg('Error uploading profile picture'));
+    }
+  }
 
   const profileDataCompiled: Omit<IProfile, 'id'> = {
     UserType: 'Business',
@@ -27,10 +42,13 @@ export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>
     LastName: body.LastName,
     PhoneNo: body.PhoneNo,
     email: handleConvertPhoneToEmailForAPI(body.PhoneNo),
+    State: body.State,
+    City: body.City,
     userEmail: body.email,
     BusinessId: body.BusinessId,
     BusinessName: body.BusinessName,
     BusinessTypeName: body.BusinessTypeName,
+    ImageUrl: imageUrl,
     Keywords: [...generateTokensForSentence([body.FirstName, body.LastName].join(' ')), ...(!!body.BusinessName ? generateTokensForSentence(body.BusinessName.trim().toLowerCase()) : [])],
     ReferralAmount: process.env.NEXT_PUBLIC_DEFAULT_REFERRAL_AMOUNT || '5',
   };
@@ -46,7 +64,7 @@ export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>
   return { isSuccess: true };
 };
 
-export type SignupPersonal_Body = Pick<IProfile, 'UserType' | 'FirstName' | 'LastName' | 'PhoneNo' | 'email'> & { password: string };
+export type SignupPersonal_Body = Pick<IProfile, 'UserType' | 'ImageUrl' | 'FirstName' | 'LastName' | 'PhoneNo' | 'email' | 'State' | 'City'> & { password: string; profileImageFile?: File | null };
 export type SignupPersonal_Response = Promise<{ isSuccess: boolean }>;
 export const SignupPersonal = async (body: Omit<SignupPersonal_Body, 'UserType'>): SignupPersonal_Response => {
   await handleDeleteInCompleteUser(handleConvertPhoneToEmailForAPI(body.PhoneNo));
@@ -54,6 +72,20 @@ export const SignupPersonal = async (body: Omit<SignupPersonal_Body, 'UserType'>
   const response = await asyncGuard(() => createUserWithEmailAndPassword(firebase.auth, handleConvertPhoneToEmailForAPI(body.PhoneNo), body.password));
   if (response.error !== null || response.result === null) throw new Error(firebaseErrorMsg(response.error));
   const signedUpUser = response.result.user;
+
+  let imageUrl = '';
+
+  //Making sure to upload profile picture after sign-in.
+  if (body.profileImageFile) {
+    try {
+      const uploadedUrl = await UploadFile({ file: body.profileImageFile, type: 'avatar' });
+      imageUrl = uploadedUrl;
+    } catch (error) {
+      console.error('Error uploading DP:', error);
+      await deleteUser(signedUpUser);
+      throw new Error(firebaseErrorMsg('Error uploading profile picture'));
+    }
+  }
 
   const profileDataCompiled: Omit<IProfile, 'id'> = {
     UserType: 'Normal',
@@ -64,7 +96,10 @@ export const SignupPersonal = async (body: Omit<SignupPersonal_Body, 'UserType'>
     LastName: body.LastName,
     PhoneNo: body.PhoneNo,
     email: handleConvertPhoneToEmailForAPI(body.PhoneNo),
+    State: body.State,
+    City: body.City,
     userEmail: body.email,
+    ImageUrl: imageUrl,
     Keywords: [...generateTokensForSentence([body.FirstName, body.LastName].join(' '))],
   };
 

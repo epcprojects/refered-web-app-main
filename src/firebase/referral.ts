@@ -3,6 +3,7 @@ import { asyncGuard, firebaseErrorMsg } from '@/utils/lodash.utils';
 import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { firebase } from '.';
 import { GetOrCreateChatGroup } from './chat';
+import { GetAllFavoritesByUserId } from './favorite';
 import { SendNotification } from './notifications';
 import { IProfile } from './profile';
 
@@ -42,6 +43,42 @@ export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body
   const allReferralsWithProfile = allReferrals.map((item) => ({ ...item, referredByUser: allProfiles.find((profile) => profile.UserId === item.referredByUserId), referredToUser: allProfiles.find((profile) => profile.UserId === item.referredToUserId), referredBusinessUser: allProfiles.find((profile) => profile.UserId === item.referredBusinessUserId) }));
 
   return allReferralsWithProfile;
+};
+
+export type GetProfileReferralsByUserFavourites_Body = { profileUserId: string; userId: string; lastItemId: string | undefined };
+export type GetProfileReferralsByUserFavourites_Response = Promise<IReferral[]>;
+export const GetProfileReferralsByUserFavourites = async (body: GetProfileReferralsByUserFavourites_Body): GetProfileReferralsByUserFavourites_Response => {
+  const { result: userFavourites, error: userFavouritesError } = await asyncGuard(() =>
+    GetAllFavoritesByUserId({
+      userId: body.userId, //Auth user id
+      lastItemId: undefined,
+    }),
+  );
+
+  if (userFavouritesError !== null || userFavourites === null) throw new Error('Something went wrong!');
+  const profileReferralsByFavourites: IReferral[] = [];
+
+  if (userFavourites.length) {
+    // Fetching business|profile referrals list
+    const { result: profileReferrals } = await asyncGuard(() =>
+      GetAllReferralsByUserId({
+        userId: body.profileUserId,
+        lastItemId: undefined,
+      }),
+    );
+
+    userFavourites.forEach((favourite) => {
+      //Business or profile referrals
+      profileReferrals?.map((referral) => {
+        //If Auth user's favourite has referred profile|user referrals
+        if (favourite.UserId === referral.referredByUserId && favourite.UserId !== body.profileUserId && !profileReferralsByFavourites.find((pbf) => pbf.referredByUserId === favourite.UserId)) {
+          profileReferralsByFavourites.push(referral);
+        }
+      });
+    });
+  }
+
+  return profileReferralsByFavourites;
 };
 
 export type RedeemReferral_Body = { id: string; referralData: IReferral };
