@@ -12,7 +12,7 @@ import { firebase } from '@/firebase';
 import { handleDeformatPhoneNumberForAPI } from '@/firebase/auth';
 import { GetOrCreateChatGroup } from '@/firebase/chat';
 import { IProfile } from '@/firebase/profile';
-import { GetAllReferralsByUserId, IReferral, RedeemReferral, UpdateReferralChatGroupId } from '@/firebase/referral';
+import { GetAllReferralsByUserId, GetProfileReferralsByUserFavourites, IReferral, RedeemReferral, UpdateReferralChatGroupId } from '@/firebase/referral';
 import { useAppStore } from '@/hooks/use-app-store';
 import { date } from '@/utils/date.utils';
 import { asyncGuard, initials, unionBy } from '@/utils/lodash.utils';
@@ -73,10 +73,57 @@ const ProfileReferralsList: React.FC<IProps> = ({ profileData }) => {
 
 export default ProfileReferralsList;
 
-const ReferralUserChip: React.FC<{ id: string; src?: string; name: string }> = ({ id, src, name }) => (
+interface IReferralsByFavourites extends IProps {
+  businessOrProfileId: string;
+  shade?: 'dark' | 'light';
+}
+
+export const ReferralsByFavourites: React.FC<IReferralsByFavourites> = ({ businessOrProfileId, profileData, shade = 'light' }) => {
+  const [isAllFetched, setIsAllFetched] = useState(false);
+  const [data, setData] = useState<IReferral[]>([]);
+  const [isFetchingData, setIsFetchingData] = useState(true);
+
+  const handleFetchReferralsData = async () => {
+    setIsFetchingData(true);
+    const response = await asyncGuard(() => GetProfileReferralsByUserFavourites({ userId: profileData?.uid, profileUserId: businessOrProfileId, lastItemId: undefined }));
+    if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
+    else {
+      setData((prev) => unionBy(prev, response.result, 'id'));
+      if (response.result.length < firebase.pagination.pageSize) setIsAllFetched(true);
+    }
+    setIsFetchingData(false);
+  };
+
+  useEffect(() => {
+    handleFetchReferralsData();
+  }, []);
+
+  if (!isFetchingData && data.length === 0) return null;
+
+  return (
+    <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
+      {isFetchingData ? (
+        <span className={`text-xs ${shade === 'light' ? 'text-muted-foreground' : ''}`}>Loading...</span>
+      ) : (
+        <React.Fragment>
+          <div className="flex items-center justify-center gap-1">
+            <RiShareForwardFill className="text-info" />
+            <span className={`text-xs ${shade === 'light' ? 'text-muted-foreground' : ''}`}>Referred by</span>
+          </div>
+
+          {data.map((value) => (
+            <ReferralUserChip id={value.referredByUser?.UserId || ''} src={value.referredByUser?.ImageUrl || ''} name={value.referredByUser?.FirstName || ''} />
+          ))}
+        </React.Fragment>
+      )}
+    </div>
+  );
+};
+
+export const ReferralUserChip: React.FC<{ id: string; src?: string; name: string }> = ({ id, src, name }) => (
   <NextLink href={`${AppPages.PROFILE}/${id}`} className="flex cursor-pointer items-center gap-1 rounded-full border-1 border-border p-[3px] transition-all hover:bg-slate-100">
     <Avatar src={src} alt="Profile Picture" fallback={initials('Mohsin').slice(0, 1)} className="!h-4 !w-4" fallbackClassName="!text-[9px]" />
-    <span className="xs:max-w-18 2xs:max-w-10 mr-0.5 w-max max-w-16 overflow-hidden text-ellipsis whitespace-nowrap text-[11px]">{name}</span>
+    <span className="mr-0.5 w-max max-w-16 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] 2xs:max-w-10 xs:max-w-18">{name}</span>
   </NextLink>
 );
 
@@ -133,13 +180,13 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
             )}
           </p>
           {type === 'business' ? (
-            <div className="2xs:flex-row 2xs:items-center mt-1.5 flex flex-col items-start gap-1.5">
+            <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
               <ReferralUserChip id={data.referredByUser?.UserId || ''} src={data.referredByUser?.ImageUrl} name={[data.referredByUser?.FirstName].join(' ').trim()} />
               <span className="text-xs text-muted-foreground">to</span>
               <ReferralUserChip id={data.referredToUser?.UserId || ''} src={data.referredToUser?.ImageUrl} name={[data.referredToUser?.FirstName].join(' ').trim()} />
             </div>
           ) : (
-            <div className="2xs:flex-row 2xs:items-center mt-1.5 flex flex-col items-start gap-1.5">
+            <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
               <div className="flex items-center justify-center gap-1">
                 <RiShareForwardFill className="text-info" />
                 <span className="text-xs text-muted-foreground">Referred {type === 'to' ? 'by' : 'to'}</span>

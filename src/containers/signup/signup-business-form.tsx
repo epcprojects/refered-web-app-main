@@ -58,7 +58,7 @@ export const signupBusinessFormSchema = z.object({
     .refine(
       (val) => {
         if (val && val !== '') {
-          return ValidateUSFormatPhoneNumber(val); // Validate the phone number format
+          return !ValidateUSFormatPhoneNumber(val); // Validate the phone number format
         }
         return true;
       },

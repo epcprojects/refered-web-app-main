@@ -48,7 +48,7 @@ export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>
     BusinessId: body.BusinessId,
     BusinessName: body.BusinessName,
     BusinessTypeName: body.BusinessTypeName,
-    ImageUrl: body.ImageUrl,
+    ImageUrl: imageUrl,
     Keywords: [...generateTokensForSentence([body.FirstName, body.LastName].join(' ')), ...(!!body.BusinessName ? generateTokensForSentence(body.BusinessName.trim().toLowerCase()) : [])],
     ReferralAmount: process.env.NEXT_PUBLIC_DEFAULT_REFERRAL_AMOUNT || '5',
   };

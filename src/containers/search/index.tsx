@@ -7,14 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { AppPages } from '@/constants/app-pages.constants';
 import { firebase } from '@/firebase';
-import { GetProfilesForSearch, IProfileWithFavorites } from '@/firebase/profile';
+import { GetProfilesForSearch, IProfile, IProfileWithFavorites } from '@/firebase/profile';
 import { useAppStore } from '@/hooks/use-app-store';
 import { asyncGuard, debounce, initials, unionBy } from '@/utils/lodash.utils';
 import NextLink from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { RiHeart2Fill } from 'react-icons/ri';
+import { RiHeart2Fill, RiMapPin2Line, RiNewsLine } from 'react-icons/ri';
 import { toast } from 'sonner';
 import { useEventListener } from 'usehooks-ts';
+import { ReferralsByFavourites } from '../profile/profile-referrals-list';
 import SearchHeader from './search-header';
 
 interface IProps {}
@@ -124,13 +125,29 @@ const SearchIndex: React.FC<IProps> = () => {
                       <Avatar src={item.ImageUrl} alt={[item.FirstName, item.LastName].join(' ').trim()} fallback={initials([item.FirstName, item.LastName].join(' ').trim()).slice(0, 2)} />
                       <div className="flex w-full max-w-full flex-1 flex-col overflow-hidden">
                         <h3 className="my-auto w-[97%] overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{group.seeMore === 'businesses' ? item.BusinessName?.trim() : [item.FirstName, item.LastName].join(' ').trim()}</h3>
-                        {group.seeMore === 'businesses' ? (
-                          <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                            <span>{item.BusinessTypeName}</span>
-                            <span className="mt-1">•</span>
-                            <span>{[item.FirstName, item.LastName].join(' ').trim()}</span>
-                          </p>
-                        ) : null}
+                        <div className="mt-1.5">
+                          {item.groupData?.name && (
+                            <div className="mb-1 flex gap-1 text-muted-foreground">
+                              <RiMapPin2Line size={15} />
+                              <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                                <span>{item.groupData?.name || 'No Region'}</span>
+                              </p>
+                            </div>
+                          )}
+                          {group.seeMore === 'businesses' && (
+                            <div className="flex gap-1 text-muted-foreground">
+                              <RiNewsLine size={15} />
+                              <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                                <span>{item.BusinessTypeName}</span>
+                                <span className="mt-1">•</span>
+                                <span>{[item.FirstName, item.LastName].join(' ').trim()}</span>
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Referred by */}
+                        {globalStore?.currentUser && group.title === 'Business' && globalStore?.currentUser?.uid !== item?.UserId && <ReferralsByFavourites businessOrProfileId={item.UserId} profileData={globalStore.currentUser as unknown as IProfile} />}
                       </div>
                     </div>
                     {item.isFavorite ? <RiHeart2Fill size={24} /> : null}
