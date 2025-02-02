@@ -9,7 +9,7 @@ import { GetProfileData, IProfile, MarkProfileAsVerified } from './profile';
 export const handleDeformatPhoneNumberForAPI = (phoneNo: string) => (phoneNo === undefined ? '' : `+${phoneNo.replace(/[^0-9]/g, '')}`);
 export const handleConvertPhoneToEmailForAPI = (phoneNo: string) => `${handleDeformatPhoneNumberForAPI(phoneNo)}@getreferd.co`;
 
-export type SignupBusiness_Body = Pick<IProfile, 'UserType' | 'FirstName' | 'LastName' | 'PhoneNo' | 'email' | 'BusinessId' | 'BusinessName' | 'BusinessTypeName'> & { password: string };
+export type SignupBusiness_Body = Pick<IProfile, 'UserType' | 'FirstName' | 'LastName' | 'PhoneNo' | 'email' | 'ImageUrl' | 'BusinessId' | 'BusinessName' | 'BusinessTypeName'> & { password: string };
 export type SignupBusiness_Response = Promise<{ isSuccess: boolean }>;
 export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>): SignupBusiness_Response => {
   await handleDeleteInCompleteUser(handleConvertPhoneToEmailForAPI(body.PhoneNo));
@@ -31,6 +31,7 @@ export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>
     BusinessId: body.BusinessId,
     BusinessName: body.BusinessName,
     BusinessTypeName: body.BusinessTypeName,
+    ImageUrl: body.ImageUrl,
     Keywords: [...generateTokensForSentence([body.FirstName, body.LastName].join(' ')), ...(!!body.BusinessName ? generateTokensForSentence(body.BusinessName.trim().toLowerCase()) : [])],
     ReferralAmount: process.env.NEXT_PUBLIC_DEFAULT_REFERRAL_AMOUNT || '5',
   };
@@ -46,9 +47,10 @@ export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>
   return { isSuccess: true };
 };
 
-export type SignupPersonal_Body = Pick<IProfile, 'UserType' | 'FirstName' | 'LastName' | 'PhoneNo' | 'email'> & { password: string };
+export type SignupPersonal_Body = Pick<IProfile, 'UserType' | 'ImageUrl' | 'FirstName' | 'LastName' | 'PhoneNo' | 'email'> & { password: string };
 export type SignupPersonal_Response = Promise<{ isSuccess: boolean }>;
 export const SignupPersonal = async (body: Omit<SignupPersonal_Body, 'UserType'>): SignupPersonal_Response => {
+  console.log('🚀 ~ SignupPersonal ~ body:', body);
   await handleDeleteInCompleteUser(handleConvertPhoneToEmailForAPI(body.PhoneNo));
 
   const response = await asyncGuard(() => createUserWithEmailAndPassword(firebase.auth, handleConvertPhoneToEmailForAPI(body.PhoneNo), body.password));
@@ -65,6 +67,7 @@ export const SignupPersonal = async (body: Omit<SignupPersonal_Body, 'UserType'>
     PhoneNo: body.PhoneNo,
     email: handleConvertPhoneToEmailForAPI(body.PhoneNo),
     userEmail: body.email,
+    ImageUrl: body.ImageUrl,
     Keywords: [...generateTokensForSentence([body.FirstName, body.LastName].join(' '))],
   };
 
