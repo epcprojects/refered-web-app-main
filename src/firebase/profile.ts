@@ -22,6 +22,8 @@ export interface IProfile {
   LastName: string;
   PhoneNo: string;
   email: string;
+  State?: string;
+  City?: string;
   userEmail: string;
   Keywords: string[];
   ImageUrl?: string;

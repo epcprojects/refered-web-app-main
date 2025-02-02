@@ -2,6 +2,7 @@
 
 import { Form } from '@/components/form';
 import FieldButton from '@/components/form/field-button';
+import FieldSelectDropdown from '@/components/form/field-dropdown';
 import FieldInput from '@/components/form/field-input';
 import FieldPasswordInput from '@/components/form/field-password-input';
 import FieldSelectButton from '@/components/form/field-select-button';
@@ -10,9 +11,9 @@ import Link from '@/components/ui/link';
 import UpdateProfileAvatar from '@/components/ui/update-profile-avatar';
 import { AppPages } from '@/constants/app-pages.constants';
 import { AppRegex } from '@/constants/app-regex.constants';
+import { USA_CITY_AND_STATES } from '@/constants/countries.constants';
 import SelectBusinessTypeOptions from '@/containers/common/select-business-type-options';
 import { handleDeformatPhoneNumberForAPI, Signout, SignupBusiness } from '@/firebase/auth';
-import { UploadFile } from '@/firebase/upload';
 import { useAppStore } from '@/hooks/use-app-store';
 import { cn } from '@/utils/cn.utils';
 import { asyncGuard, ValidateUSFormatPhoneNumber } from '@/utils/lodash.utils';
@@ -48,6 +49,8 @@ export const signupBusinessFormSchema = z.object({
     .min(1, { message: ZOD.ERROR.REQUIRED() })
     .max(30, { message: ZOD.ERROR.MAX_LENGTH(30) })
     .trim(),
+  states: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
+  cities: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
   phoneNumber: z
     .string({ required_error: 'Phone number is required' })
     .min(1, { message: 'Phone number is required' })
@@ -74,6 +77,11 @@ export const signupBusinessFormSchema = z.object({
 const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
   const router = useRouter();
   const globalStore = useAppStore('Global');
+  const USA_CITIES_ARRAY = Object.keys(USA_CITY_AND_STATES);
+  const USA_CITIES = USA_CITIES_ARRAY.map((val) => ({ label: val, value: val }));
+  const USA_STATES = Object.values(USA_CITY_AND_STATES)
+    .flat()
+    .map((val) => ({ label: val, value: val }));
 
   const form = useForm<signupBusinessFormSchemaType>({ resolver: zodResolver(signupBusinessFormSchema) });
 
@@ -98,15 +106,9 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
       return;
     }
 
-    let profilePicUrl = '';
     globalStore?.setIsTemporarySignin(true);
 
-    if (selectedProfilePic !== null) {
-      const uploadImageResponse = await asyncGuard(() => UploadFile({ type: 'avatar', file: selectedProfilePic }));
-      if (uploadImageResponse.result !== null) profilePicUrl = uploadImageResponse.result;
-    }
-
-    const response = await asyncGuard(() => SignupBusiness({ ImageUrl: profilePicUrl, FirstName: values.firstName, LastName: values.lastName, email: values.email, password: values.password, PhoneNo: values.phoneNumber || '', BusinessName: values.businessName, BusinessId: values.businessTypeId, BusinessTypeName: values.businessTypeName }));
+    const response = await asyncGuard(() => SignupBusiness({ profileImageFile: selectedProfilePic, FirstName: values.firstName, LastName: values.lastName, email: values.email, password: values.password, PhoneNo: values.phoneNumber || '', BusinessName: values.businessName, BusinessId: values.businessTypeId, BusinessTypeName: values.businessTypeName, State: values.states, City: values.cities }));
     globalStore?.setIsTemporarySignin(false);
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
@@ -131,6 +133,10 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
           <FieldInput form={form} name="lastName" placeholder="Last Name" />
         </div>
         <FieldInput form={form} name="phoneNumber" placeholder="Phone Number" />
+        <div className="grid w-full grid-cols-2 gap-2.5">
+          <FieldSelectDropdown form={form} options={USA_STATES} placeholder="State" name="states" />
+          <FieldSelectDropdown form={form} options={USA_CITIES} placeholder="City" name="cities" />
+        </div>
         {/* <FieldPhoneNumberNew form={form} name="phoneNumber" placeholder="Phone Number" /> */}
         <FieldInput form={form} name="email" placeholder="Email Address" />
         {/* <div className="mb-1">
