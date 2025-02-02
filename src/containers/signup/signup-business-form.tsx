@@ -4,24 +4,24 @@ import { Form } from '@/components/form';
 import FieldButton from '@/components/form/field-button';
 import FieldInput from '@/components/form/field-input';
 import FieldPasswordInput from '@/components/form/field-password-input';
-import FieldPhoneNumberNew from '@/components/form/field-phone-number-new';
 import FieldSelectButton from '@/components/form/field-select-button';
 import AuthCardLayout from '@/components/layout/auth-card-layout';
 import Link from '@/components/ui/link';
+import UpdateProfileAvatar from '@/components/ui/update-profile-avatar';
 import { AppPages } from '@/constants/app-pages.constants';
 import { AppRegex } from '@/constants/app-regex.constants';
 import SelectBusinessTypeOptions from '@/containers/common/select-business-type-options';
 import { handleDeformatPhoneNumberForAPI, Signout, SignupBusiness } from '@/firebase/auth';
+import { UploadFile } from '@/firebase/upload';
 import { useAppStore } from '@/hooks/use-app-store';
 import { cn } from '@/utils/cn.utils';
-import { asyncGuard } from '@/utils/lodash.utils';
+import { asyncGuard, ValidateUSFormatPhoneNumber } from '@/utils/lodash.utils';
 import { ZOD } from '@/utils/zod.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiCheckboxCircleLine } from 'react-icons/ri';
-import { formatPhoneNumber } from 'react-phone-number-input';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -49,10 +49,18 @@ export const signupBusinessFormSchema = z.object({
     .max(30, { message: ZOD.ERROR.MAX_LENGTH(30) })
     .trim(),
   phoneNumber: z
-    .string({ required_error: ZOD.ERROR.REQUIRED() })
-    .min(1, { message: ZOD.ERROR.REQUIRED() })
+    .string({ required_error: 'Phone number is required' })
+    .min(1, { message: 'Phone number is required' })
     .nullable()
-    .refine((val) => val !== '' && val !== null && val !== undefined && !!formatPhoneNumber(val), { message: ZOD.ERROR.REQUIRED() }),
+    .refine(
+      (val) => {
+        if (val && val !== '') {
+          return ValidateUSFormatPhoneNumber(val); // Validate the phone number format
+        }
+        return true;
+      },
+      { message: 'Invalid US phone number format +123456789' },
+    ),
   email: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(1, { message: ZOD.ERROR.REQUIRED() }).email({ message: ZOD.ERROR.EMAIL() }).trim().toLowerCase(),
   password: z
     .string({ required_error: ZOD.ERROR.REQUIRED() })
@@ -70,6 +78,7 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
   const form = useForm<signupBusinessFormSchemaType>({ resolver: zodResolver(signupBusinessFormSchema) });
 
   const [openedBusinessTypeOptions, setOpenedBusinessTypeOptions] = useState(false);
+  const [selectedProfilePic, setSelectedProfilePic] = useState<File | null>(null);
 
   const businessTypeName = form.watch('businessTypeName');
   const businessTypeId = form.watch('businessTypeId');
@@ -84,8 +93,20 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
   };
 
   const onSubmit = async (values: signupBusinessFormSchemaType) => {
+    if (!!selectedProfilePic === false) {
+      toast.error('Profile picture is required!');
+      return;
+    }
+
+    let profilePicUrl = '';
     globalStore?.setIsTemporarySignin(true);
-    const response = await asyncGuard(() => SignupBusiness({ FirstName: values.firstName, LastName: values.lastName, email: values.email, password: values.password, PhoneNo: values.phoneNumber || '', BusinessName: values.businessName, BusinessId: values.businessTypeId, BusinessTypeName: values.businessTypeName }));
+
+    if (selectedProfilePic !== null) {
+      const uploadImageResponse = await asyncGuard(() => UploadFile({ type: 'avatar', file: selectedProfilePic }));
+      if (uploadImageResponse.result !== null) profilePicUrl = uploadImageResponse.result;
+    }
+
+    const response = await asyncGuard(() => SignupBusiness({ ImageUrl: profilePicUrl, FirstName: values.firstName, LastName: values.lastName, email: values.email, password: values.password, PhoneNo: values.phoneNumber || '', BusinessName: values.businessName, BusinessId: values.businessTypeId, BusinessTypeName: values.businessTypeName }));
     globalStore?.setIsTemporarySignin(false);
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
@@ -102,13 +123,15 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
   return (
     <AuthCardLayout title="Tell us about your business" onBack={handleGoBack} coverImageSrc="/images/auth-cover-03.jpg">
       <Form form={form} onSubmit={onSubmit} className="grid w-full gap-2.5">
+        <UpdateProfileAvatar setSelectedProfilePic={setSelectedProfilePic} profileName="ABC" profilePicUrl="" />
         <FieldSelectButton form={form} name="businessTypeName" placeholder="Select from Business" className="mb-2" onClick={handleToggleOpenBusinessTypeOptions} />
         <FieldInput form={form} name="businessName" placeholder="Business Name" />
         <div className="grid w-full grid-cols-2 gap-2.5">
           <FieldInput form={form} name="firstName" placeholder="First Name" />
           <FieldInput form={form} name="lastName" placeholder="Last Name" />
         </div>
-        <FieldPhoneNumberNew form={form} name="phoneNumber" placeholder="Phone Number" />
+        <FieldInput form={form} name="phoneNumber" placeholder="Phone Number" />
+        {/* <FieldPhoneNumberNew form={form} name="phoneNumber" placeholder="Phone Number" /> */}
         <FieldInput form={form} name="email" placeholder="Email Address" />
         {/* <div className="mb-1">
           <FieldInput form={form} name="email" placeholder="Email Address" errorConfig={{ disableErrorMsg: true }} />
