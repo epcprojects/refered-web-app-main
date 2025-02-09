@@ -14,7 +14,7 @@ import React, { useMemo, useState } from 'react';
 import { RiArrowLeftSLine, RiClipboardLine, RiHeart2Fill, RiHeart2Line, RiMapPin2Fill, RiNewsLine, RiPencilFill, RiPhoneFill, RiShareBoxLine } from 'react-icons/ri';
 import { toast } from 'sonner';
 import { useCopyToClipboard } from 'usehooks-ts';
-import { ReferralsByFavourites } from './profile-referrals-list';
+import { MutualFavourites } from './profile-referrals-list';
 
 interface IProps {
   data: IProfileWithFavorites;
@@ -119,7 +119,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
             </div>
           ))}
           {/* Referred by */}
-          {globalStore?.currentUser && data && globalStore?.currentUser?.uid !== data?.UserId && <ReferralsByFavourites shade="dark" businessOrProfileId={data.UserId} profileData={globalStore.currentUser as unknown as IProfile} />}
+          {globalStore?.currentUser && data && globalStore?.currentUser?.uid !== data?.UserId && <MutualFavourites shade="dark" businessOrProfileId={data.UserId} profileData={globalStore.currentUser as unknown as IProfile} />}
         </div>
       </div>
     </div>

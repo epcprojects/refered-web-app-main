@@ -3,7 +3,7 @@ import { asyncGuard, firebaseErrorMsg } from '@/utils/lodash.utils';
 import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { firebase } from '.';
 import { GetOrCreateChatGroup } from './chat';
-import { GetAllFavoritesByUserId } from './favorite';
+import { GetAllFavoritesByUserId, GetAllWhoFavouriteThisUser, IFavorite } from './favorite';
 import { SendNotification } from './notifications';
 import { IProfile } from './profile';
 
@@ -47,7 +47,8 @@ export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body
 
 export type GetProfileReferralsByUserFavourites_Body = { profileUserId: string; userId: string; lastItemId: string | undefined };
 export type GetProfileReferralsByUserFavourites_Response = Promise<IReferral[]>;
-export const GetProfileReferralsByUserFavourites = async (body: GetProfileReferralsByUserFavourites_Body): GetProfileReferralsByUserFavourites_Response => {
+export const GetMutualFavouritesForProfile = async (body: GetProfileReferralsByUserFavourites_Body): Promise<IFavorite[]> => {
+  // My favourites List
   const { result: userFavourites, error: userFavouritesError } = await asyncGuard(() =>
     GetAllFavoritesByUserId({
       userId: body.userId, //Auth user id
@@ -56,29 +57,29 @@ export const GetProfileReferralsByUserFavourites = async (body: GetProfileReferr
   );
 
   if (userFavouritesError !== null || userFavourites === null) throw new Error('Something went wrong!');
-  const profileReferralsByFavourites: IReferral[] = [];
+  const favouritesCompiled: IFavorite[] = [];
 
+  //If my favourites found
   if (userFavourites.length) {
-    // Fetching business|profile referrals list
-    const { result: profileReferrals } = await asyncGuard(() =>
-      GetAllReferralsByUserId({
+    const { result: usersWhoFavourite } = await asyncGuard(() =>
+      GetAllWhoFavouriteThisUser({
         userId: body.profileUserId,
         lastItemId: undefined,
       }),
     );
 
-    userFavourites.forEach((favourite) => {
-      //Business or profile referrals
-      profileReferrals?.map((referral) => {
-        //If Auth user's favourite has referred profile|user referrals
-        if (favourite.UserId === referral.referredByUserId && favourite.UserId !== body.profileUserId && !profileReferralsByFavourites.find((pbf) => pbf.referredByUserId === favourite.UserId)) {
-          profileReferralsByFavourites.push(referral);
-        }
+    if (usersWhoFavourite) {
+      userFavourites.forEach((myfavourite) => {
+        usersWhoFavourite.forEach((userWhoFavourite) => {
+          if (myfavourite?.email === userWhoFavourite?.email) {
+            favouritesCompiled.push(userWhoFavourite);
+          }
+        });
       });
-    });
+    }
   }
 
-  return profileReferralsByFavourites;
+  return favouritesCompiled;
 };
 
 export type RedeemReferral_Body = { id: string; referralData: IReferral };

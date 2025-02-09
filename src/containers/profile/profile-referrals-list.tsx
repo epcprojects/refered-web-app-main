@@ -11,8 +11,9 @@ import { AppPages } from '@/constants/app-pages.constants';
 import { firebase } from '@/firebase';
 import { handleDeformatPhoneNumberForAPI } from '@/firebase/auth';
 import { GetOrCreateChatGroup } from '@/firebase/chat';
+import { IFavorite } from '@/firebase/favorite';
 import { IProfile } from '@/firebase/profile';
-import { GetAllReferralsByUserId, GetProfileReferralsByUserFavourites, IReferral, RedeemReferral, UpdateReferralChatGroupId } from '@/firebase/referral';
+import { GetAllReferralsByUserId, GetMutualFavouritesForProfile, IReferral, RedeemReferral, UpdateReferralChatGroupId } from '@/firebase/referral';
 import { useAppStore } from '@/hooks/use-app-store';
 import { date } from '@/utils/date.utils';
 import { asyncGuard, initials, unionBy } from '@/utils/lodash.utils';
@@ -24,6 +25,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
 import { RiMessage3Line, RiPhoneFill, RiShareForwardFill } from 'react-icons/ri';
 import { toast } from 'sonner';
+import ProfileListDialog from './profile-list-dialog';
 
 interface IProps {
   profileData: IProfile;
@@ -73,29 +75,29 @@ const ProfileReferralsList: React.FC<IProps> = ({ profileData }) => {
 
 export default ProfileReferralsList;
 
-interface IReferralsByFavourites extends IProps {
+interface IMutualFavourites extends IProps {
   businessOrProfileId: string;
   shade?: 'dark' | 'light';
 }
 
-export const ReferralsByFavourites: React.FC<IReferralsByFavourites> = ({ businessOrProfileId, profileData, shade = 'light' }) => {
-  const [isAllFetched, setIsAllFetched] = useState(false);
-  const [data, setData] = useState<IReferral[]>([]);
+export const MutualFavourites: React.FC<IMutualFavourites> = ({ businessOrProfileId, profileData, shade = 'light' }) => {
+  const [data, setData] = useState<IFavorite[]>([]);
   const [isFetchingData, setIsFetchingData] = useState(true);
 
-  const handleFetchReferralsData = async () => {
+  const handleFetchMutualFavourites = async () => {
     setIsFetchingData(true);
-    const response = await asyncGuard(() => GetProfileReferralsByUserFavourites({ userId: profileData?.uid, profileUserId: businessOrProfileId, lastItemId: undefined }));
+    const response = await asyncGuard(() => GetMutualFavouritesForProfile({ userId: profileData?.uid, profileUserId: businessOrProfileId, lastItemId: undefined }));
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
       setData((prev) => unionBy(prev, response.result, 'id'));
-      if (response.result.length < firebase.pagination.pageSize) setIsAllFetched(true);
+
+      // if (response.result.length < firebase.pagination.pageSize) setIsAllFetched(true);
     }
     setIsFetchingData(false);
   };
 
   useEffect(() => {
-    handleFetchReferralsData();
+    handleFetchMutualFavourites();
   }, []);
 
   if (!isFetchingData && data.length === 0) return null;
@@ -112,8 +114,10 @@ export const ReferralsByFavourites: React.FC<IReferralsByFavourites> = ({ busine
           </div>
 
           {data.map((value) => (
-            <ReferralUserChip id={value.referredByUser?.UserId || ''} src={value.referredByUser?.ImageUrl || ''} name={value.referredByUser?.FirstName || ''} />
+            <ReferralUserChip id={value.ProfileId || ''} src={value?.ImageUrl || ''} name={value?.FirstName || ''} />
           ))}
+
+          {data.length > 3 && <ProfileListDialog data={data} count={data.length - 3} />}
         </React.Fragment>
       )}
     </div>

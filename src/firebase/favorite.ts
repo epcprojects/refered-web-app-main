@@ -3,7 +3,7 @@ import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, Ti
 import { firebase } from '.';
 import { IProfile } from './profile';
 
-export interface IFavorite extends Pick<IProfile, 'BusinessId' | 'BusinessName' | 'BusinessTypeName' | 'FirstName' | 'LastName' | 'ImageUrl' | 'UserId' | 'UserType'> {
+export interface IFavorite extends Pick<IProfile, 'BusinessId' | 'BusinessName' | 'BusinessTypeName' | 'FirstName' | 'LastName' | 'ImageUrl' | 'UserId' | 'UserType' | 'email'> {
   id: string;
   ProfileId: string;
   favoritedAt: Timestamp;
@@ -23,6 +23,18 @@ export const GetAllFavoritesByUserId = async (body: GetAllFavoritesByUserId_Body
   const allProfiles = profileResponse.result.docs.map((item) => ({ ...item.data(), id: item.id })) as IProfile[];
 
   const resultCompiled = (response.result.docs.map((item) => ({ ...(allProfiles.find((profile) => profile.UserId === item.data().UserId) || {}), ...item.data(), id: item.id })) as IFavorite[]) || [];
+  return resultCompiled;
+};
+
+export const GetAllWhoFavouriteThisUser = async (body: GetAllFavoritesByUserId_Body): GetAllFavoritesByUserId_Response => {
+  const response = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.favorites), where('UserId', '==', body.userId), orderBy('favoritedAt', 'asc'))));
+  if (response.error !== null || response.result === null) throw new Error(firebaseErrorMsg(response.error));
+
+  const profileResponse = await asyncGuard(() => getDocs(collection(firebase.firestore, firebase.collections.profile)));
+  if (profileResponse.error !== null || profileResponse.result === null) throw new Error(firebaseErrorMsg(profileResponse.error));
+  const allProfiles = profileResponse.result.docs.map((item) => ({ ...item.data(), id: item.id })) as IProfile[];
+
+  const resultCompiled = (response.result.docs.map((item) => ({ ...(allProfiles.find((profile) => profile.UserId === item.data().ProfileId) || {}), ...item.data(), id: item.id })) as IFavorite[]) || [];
   return resultCompiled;
 };
 

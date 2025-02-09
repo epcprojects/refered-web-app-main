@@ -15,7 +15,7 @@ import React, { useEffect, useState } from 'react';
 import { RiHeart2Fill, RiMapPin2Line, RiNewsLine } from 'react-icons/ri';
 import { toast } from 'sonner';
 import { useEventListener } from 'usehooks-ts';
-import { ReferralsByFavourites } from '../profile/profile-referrals-list';
+import { MutualFavourites } from '../profile/profile-referrals-list';
 import SearchHeader from './search-header';
 
 interface IProps {}
@@ -147,7 +147,7 @@ const SearchIndex: React.FC<IProps> = () => {
                         </div>
 
                         {/* Referred by */}
-                        {globalStore?.currentUser && group.title === 'Business' && globalStore?.currentUser?.uid !== item?.UserId && <ReferralsByFavourites businessOrProfileId={item.UserId} profileData={globalStore.currentUser as unknown as IProfile} />}
+                        {globalStore?.currentUser && group.title === 'Business' && globalStore?.currentUser?.uid !== item?.UserId && <MutualFavourites businessOrProfileId={item.UserId} profileData={globalStore.currentUser as unknown as IProfile} />}
                       </div>
                     </div>
                     {item.isFavorite ? <RiHeart2Fill size={24} /> : null}
