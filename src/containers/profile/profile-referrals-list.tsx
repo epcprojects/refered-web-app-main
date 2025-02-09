@@ -113,7 +113,7 @@ export const MutualFavourites: React.FC<IMutualFavourites> = ({ businessOrProfil
             <span className={`text-xs ${shade === 'light' ? 'text-muted-foreground' : ''}`}>Referred by</span>
           </div>
 
-          {data.map((value) => (
+          {data.slice(0, 3).map((value) => (
             <ReferralUserChip id={value.ProfileId || ''} src={value?.ImageUrl || ''} name={value?.FirstName || ''} />
           ))}
 
