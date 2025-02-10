@@ -16,7 +16,7 @@ import SelectBusinessTypeOptions from '@/containers/common/select-business-type-
 import { handleDeformatPhoneNumberForAPI, Signout, SignupBusiness } from '@/firebase/auth';
 import { useAppStore } from '@/hooks/use-app-store';
 import { cn } from '@/utils/cn.utils';
-import { asyncGuard, ValidateUSFormatPhoneNumber } from '@/utils/lodash.utils';
+import { asyncGuard } from '@/utils/lodash.utils';
 import { ZOD } from '@/utils/zod.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -51,19 +51,7 @@ export const signupBusinessFormSchema = z.object({
     .trim(),
   states: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
   cities: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
-  phoneNumber: z
-    .string({ required_error: 'Phone number is required' })
-    .min(1, { message: 'Phone number is required' })
-    .nullable()
-    .refine(
-      (val) => {
-        if (val && val !== '') {
-          return !ValidateUSFormatPhoneNumber(val); // Validate the phone number format
-        }
-        return true;
-      },
-      { message: 'Invalid US phone number format +123456789' },
-    ),
+  phoneNumber: z.string({ required_error: 'Phone number is required' }).min(1, { message: 'Phone number is required' }),
   email: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(1, { message: ZOD.ERROR.REQUIRED() }).email({ message: ZOD.ERROR.EMAIL() }).trim().toLowerCase(),
   password: z
     .string({ required_error: ZOD.ERROR.REQUIRED() })
