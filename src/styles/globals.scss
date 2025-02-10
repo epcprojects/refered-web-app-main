@@ -49,3 +49,22 @@
   border-width: 1px;
   border-color: transparent;
 }
+
+.CheckboxRoot {
+  width: 20px;
+  height: 20px;
+  background: hsl(var(--background));
+  border-radius: var(--radius);
+  border-color: hsl(var(--destructive));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.CheckboxRoot[data-state='checked'] {
+  background-color: black;
+}
+
+.CheckboxIndicator {
+  color: black;
+}

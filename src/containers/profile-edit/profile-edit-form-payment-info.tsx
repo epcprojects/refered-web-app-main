@@ -1,5 +1,6 @@
 import { Form } from '@/components/form';
 import FieldButton from '@/components/form/field-button';
+import FieldCheckbox from '@/components/form/field-checkbox';
 import FieldInput from '@/components/form/field-input';
 import AuthCardLayout from '@/components/layout/auth-card-layout';
 import { AppPages } from '@/constants/app-pages.constants';
@@ -27,6 +28,7 @@ const profilePaymentInfoFormSchema = z.object({
   cashAppId: z.string().optional(),
   paypalId: z.string().optional(),
   venmoId: z.string().optional(),
+  markDefault: z.any(),
 });
 
 const ProfileEditFormPaymentInfo: React.FC<IProps> = ({ handleGoBack, data, handleGetFormData }) => {
@@ -68,6 +70,7 @@ const ProfileEditFormPaymentInfo: React.FC<IProps> = ({ handleGoBack, data, hand
         {typeWatch === 'cashApp' ? <FieldInput form={form} name="cashAppId" placeholder={startCase(typeWatch + 'ID')} /> : null}
         {typeWatch === 'paypal' ? <FieldInput form={form} name="paypalId" placeholder={startCase(typeWatch + 'ID')} /> : null}
         {typeWatch === 'venmo' ? <FieldInput form={form} name="venmoId" placeholder={startCase(typeWatch + 'ID')} /> : null}
+        <FieldCheckbox form={form} labelConfig={{ value: 'Mark it default' }} name="markDefault" />
         <FieldButton form={form} type="submit" classes={{ container: 'w-full mt-2.5' }} label="Submit" variant="secondary" />
       </Form>
     </AuthCardLayout>

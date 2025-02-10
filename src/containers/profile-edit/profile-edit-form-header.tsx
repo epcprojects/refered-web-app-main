@@ -2,11 +2,9 @@
 
 import Avatar from '@/components/ui/avatar';
 import { Spinner } from '@/components/ui/spinner';
-import { AppPages } from '@/constants/app-pages.constants';
 import { cn } from '@/utils/cn.utils';
 import { file } from '@/utils/file.utils';
 import { initials } from '@/utils/lodash.utils';
-import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';
 import { RiArrowLeftSLine, RiCameraFill } from 'react-icons/ri';
 import { toast } from 'sonner';
@@ -16,14 +14,13 @@ interface IProps {
   profilePicUrl: string | undefined;
   setSelectedProfilePic: (val: File | null) => void;
   isSubmitting: boolean;
+  handleGoBack: () => void;
 }
 
 const maxSizeInMBs = 3;
 const allowedFormats = file.allowedImageFormats;
 
-const ProfileEditFormHeader: React.FC<IProps> = ({ profileName, profilePicUrl, setSelectedProfilePic, isSubmitting }) => {
-  const router = useRouter();
-
+const ProfileEditFormHeader: React.FC<IProps> = ({ profileName, profilePicUrl, setSelectedProfilePic, handleGoBack, isSubmitting }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedProfilePicUrl, setSelectedProfilePicUrl] = useState<string | null>(null);
 
@@ -37,11 +34,6 @@ const ProfileEditFormHeader: React.FC<IProps> = ({ profileName, profilePicUrl, s
       setSelectedProfilePic(files[0]);
       setSelectedProfilePicUrl(URL.createObjectURL(files[0]));
     }
-  };
-
-  const handleGoBack = () => {
-    if (document.referrer) router.back();
-    else router.push(AppPages.HOME);
   };
 
   return (
