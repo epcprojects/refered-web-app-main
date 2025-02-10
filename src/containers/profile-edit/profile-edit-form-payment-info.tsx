@@ -9,8 +9,9 @@ import { useAppStore } from '@/hooks/use-app-store';
 import { cn } from '@/utils/cn.utils';
 import { asyncGuard, startCase } from '@/utils/lodash.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CheckedState } from '@radix-ui/react-checkbox';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -34,6 +35,7 @@ const profilePaymentInfoFormSchema = z.object({
 const ProfileEditFormPaymentInfo: React.FC<IProps> = ({ handleGoBack, data, handleGetFormData }) => {
   const router = useRouter();
   const globalStore = useAppStore('Global');
+  const [checked, setChecked] = useState<CheckedState>(false);
 
   const form = useForm<profilePaymentInfoFormSchemaType>({ resolver: zodResolver(profilePaymentInfoFormSchema), defaultValues: { type: 'cashApp', cashAppId: data.cashAppId, paypalId: data.paypalId, venmoId: data.venmoId } });
 
@@ -70,7 +72,7 @@ const ProfileEditFormPaymentInfo: React.FC<IProps> = ({ handleGoBack, data, hand
         {typeWatch === 'cashApp' ? <FieldInput form={form} name="cashAppId" placeholder={startCase(typeWatch + 'ID')} /> : null}
         {typeWatch === 'paypal' ? <FieldInput form={form} name="paypalId" placeholder={startCase(typeWatch + 'ID')} /> : null}
         {typeWatch === 'venmo' ? <FieldInput form={form} name="venmoId" placeholder={startCase(typeWatch + 'ID')} /> : null}
-        <FieldCheckbox form={form} labelConfig={{ value: 'Mark it default' }} name="markDefault" />
+        <FieldCheckbox form={form} labelConfig={{ value: 'Mark it default' }} onCheckedChange={setChecked} name="markDefault" />
         <FieldButton form={form} type="submit" classes={{ container: 'w-full mt-2.5' }} label="Submit" variant="secondary" />
       </Form>
     </AuthCardLayout>
