@@ -5,15 +5,16 @@ import { Spinner } from '@/components/ui/spinner';
 import { AppPages } from '@/constants/app-pages.constants';
 import { handleDeformatPhoneNumberForAPI } from '@/firebase/auth';
 import { ToggleMarkFavorite } from '@/firebase/favorite';
-import { IProfileWithFavorites } from '@/firebase/profile';
+import { IProfile, IProfileWithFavorites } from '@/firebase/profile';
 import { useAppStore } from '@/hooks/use-app-store';
 import { asyncGuard, initials } from '@/utils/lodash.utils';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
-import { RiArrowLeftSLine, RiClipboardLine, RiHeart2Fill, RiHeart2Line, RiMapPin2Fill, RiNewsLine, RiPencilFill, RiPhoneFill, RiShareBoxLine } from 'react-icons/ri';
+import { RiAddLine, RiArrowLeftSLine, RiClipboardLine, RiHeart2Fill, RiHeart2Line, RiMapPin2Fill, RiNewsLine, RiPencilFill, RiPhoneFill, RiShareBoxLine } from 'react-icons/ri';
 import { toast } from 'sonner';
 import { useCopyToClipboard } from 'usehooks-ts';
+import { MutualFavourites } from './profile-referrals-list';
 
 interface IProps {
   data: IProfileWithFavorites;
@@ -117,6 +118,21 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
               <span className="mt-0.5">{item.title}</span>
             </div>
           ))}
+
+          {/* Select Payment */}
+          {!isBusinessProfile && (
+            <NextLink href={AppPages.EDIT_PROFILE + '?q=payment'} className="mt-3 rounded-full p-1 pl-0 transition-all duration-300 hover:bg-foreground/5 hover:pl-1">
+              <button className="flex flex-row items-center gap-2 text-sm font-medium">
+                <span>
+                  <RiAddLine size={17} />
+                </span>
+                <span>Select Venmo, Paypal, CashApp</span>
+              </button>
+            </NextLink>
+          )}
+
+          {/* Referred by */}
+          {globalStore?.currentUser && data && globalStore?.currentUser?.uid !== data?.UserId && <MutualFavourites shade="dark" businessOrProfileId={data.UserId} profileData={globalStore.currentUser as unknown as IProfile} />}
         </div>
       </div>
     </div>

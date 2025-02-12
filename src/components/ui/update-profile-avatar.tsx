@@ -1,26 +1,23 @@
 'use client';
 
 import Avatar from '@/components/ui/avatar';
-import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/utils/cn.utils';
 import { file } from '@/utils/file.utils';
 import { initials } from '@/utils/lodash.utils';
 import React, { useRef, useState } from 'react';
-import { RiArrowLeftSLine, RiCameraFill } from 'react-icons/ri';
+import { RiCameraFill } from 'react-icons/ri';
 import { toast } from 'sonner';
 
 interface IProps {
   profileName: string;
   profilePicUrl: string | undefined;
   setSelectedProfilePic: (val: File | null) => void;
-  isSubmitting: boolean;
-  handleGoBack: () => void;
 }
 
 const maxSizeInMBs = 3;
 const allowedFormats = file.allowedImageFormats;
 
-const ProfileEditFormHeader: React.FC<IProps> = ({ profileName, profilePicUrl, setSelectedProfilePic, handleGoBack, isSubmitting }) => {
+const UpdateProfileAvatar: React.FC<IProps> = ({ profileName, profilePicUrl, setSelectedProfilePic }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedProfilePicUrl, setSelectedProfilePicUrl] = useState<string | null>(null);
 
@@ -37,20 +34,7 @@ const ProfileEditFormHeader: React.FC<IProps> = ({ profileName, profilePicUrl, s
   };
 
   return (
-    <div className="relative space-y-3 bg-primary px-5 py-4 pb-14">
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center gap-1">
-          <button type="button" onClick={handleGoBack} className="mt-[1px] cursor-pointer rounded-full transition-all hover:-translate-x-0.5 hover:bg-foreground/5">
-            <RiArrowLeftSLine size={22} />
-          </button>
-          <h3 className="text-lg font-medium">Edit Profile</h3>
-        </div>
-        <div className="flex flex-row gap-1">
-          <button type="submit" className="rounded-full px-1.5 py-0 text-lg font-medium transition-all hover:bg-foreground/5 disabled:opacity-75" disabled={isSubmitting}>
-            {isSubmitting ? <Spinner className="py-1" size="30" /> : 'Continue'}
-          </button>
-        </div>
-      </div>
+    <div className="relative mb-10 space-y-3 px-5 py-4 pb-14">
       <input type="file" ref={fileInputRef} className="hidden" onChange={handleSelectImage} max={file.ConvertMBstoBytes(maxSizeInMBs)} accept={allowedFormats.map((item) => `.${item}`.toLowerCase()).toString()} />
       <div className={cn('absolute -bottom-[45%] left-[50%] translate-x-[-50%]')}>
         <Avatar src={!!selectedProfilePicUrl ? selectedProfilePicUrl : profilePicUrl} alt={profileName} fallback={initials(profileName).slice(0, 2)} fallbackClassName="text-xl font-semibold" className="!h-24 !w-24 border-2 border-card" />
@@ -62,4 +46,4 @@ const ProfileEditFormHeader: React.FC<IProps> = ({ profileName, profilePicUrl, s
   );
 };
 
-export default ProfileEditFormHeader;
+export default UpdateProfileAvatar;

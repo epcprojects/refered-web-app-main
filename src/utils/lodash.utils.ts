@@ -58,4 +58,9 @@ const generateTokensForSentence = (val: string) => {
   return keywords;
 };
 
-export { asyncGuard, axiosErrorMsg, ceil, clamp, concat, debounce, firebaseErrorMsg, generateTokens, generateTokensForSentence, initials, isEqual, isValidUrl, padStart, reverse, round, specialCasingToNormal, startCase, startsWith, unionBy };
+const ValidateUSFormatPhoneNumber = (value: string) => {
+  const phoneRegex = /^\+1 \d{3}-\d{3}-\d{4}$/; // Validates the format +1 234-567-8901
+  return phoneRegex.test(value);
+};
+
+export { asyncGuard, axiosErrorMsg, ceil, clamp, concat, debounce, firebaseErrorMsg, generateTokens, generateTokensForSentence, initials, isEqual, isValidUrl, padStart, reverse, round, specialCasingToNormal, startCase, startsWith, unionBy, ValidateUSFormatPhoneNumber };

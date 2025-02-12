@@ -3,6 +3,7 @@ import { asyncGuard, firebaseErrorMsg } from '@/utils/lodash.utils';
 import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { firebase } from '.';
 import { GetOrCreateChatGroup } from './chat';
+import { GetAllFavoritesByUserId, GetAllWhoFavouriteThisUser, IFavorite } from './favorite';
 import { SendNotification } from './notifications';
 import { IProfile } from './profile';
 
@@ -42,6 +43,43 @@ export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body
   const allReferralsWithProfile = allReferrals.map((item) => ({ ...item, referredByUser: allProfiles.find((profile) => profile.UserId === item.referredByUserId), referredToUser: allProfiles.find((profile) => profile.UserId === item.referredToUserId), referredBusinessUser: allProfiles.find((profile) => profile.UserId === item.referredBusinessUserId) }));
 
   return allReferralsWithProfile;
+};
+
+export type GetProfileReferralsByUserFavourites_Body = { profileUserId: string; userId: string; lastItemId: string | undefined };
+export type GetProfileReferralsByUserFavourites_Response = Promise<IReferral[]>;
+export const GetMutualFavouritesForProfile = async (body: GetProfileReferralsByUserFavourites_Body): Promise<IFavorite[]> => {
+  // My favourites List
+  const { result: userFavourites, error: userFavouritesError } = await asyncGuard(() =>
+    GetAllFavoritesByUserId({
+      userId: body.userId, //Auth user id
+      lastItemId: undefined,
+    }),
+  );
+
+  if (userFavouritesError !== null || userFavourites === null) throw new Error('Something went wrong!');
+  const favouritesCompiled: IFavorite[] = [];
+
+  //If my favourites found
+  if (userFavourites.length) {
+    const { result: usersWhoFavourite } = await asyncGuard(() =>
+      GetAllWhoFavouriteThisUser({
+        userId: body.profileUserId,
+        lastItemId: undefined,
+      }),
+    );
+
+    if (usersWhoFavourite) {
+      userFavourites.forEach((myfavourite) => {
+        usersWhoFavourite.forEach((userWhoFavourite) => {
+          if (myfavourite?.email === userWhoFavourite?.email) {
+            favouritesCompiled.push(userWhoFavourite);
+          }
+        });
+      });
+    }
+  }
+
+  return favouritesCompiled;
 };
 
 export type RedeemReferral_Body = { id: string; referralData: IReferral };

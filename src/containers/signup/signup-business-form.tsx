@@ -2,14 +2,16 @@
 
 import { Form } from '@/components/form';
 import FieldButton from '@/components/form/field-button';
+import FieldSelectDropdown from '@/components/form/field-dropdown';
 import FieldInput from '@/components/form/field-input';
 import FieldPasswordInput from '@/components/form/field-password-input';
-import FieldPhoneNumberNew from '@/components/form/field-phone-number-new';
 import FieldSelectButton from '@/components/form/field-select-button';
 import AuthCardLayout from '@/components/layout/auth-card-layout';
 import Link from '@/components/ui/link';
+import UpdateProfileAvatar from '@/components/ui/update-profile-avatar';
 import { AppPages } from '@/constants/app-pages.constants';
 import { AppRegex } from '@/constants/app-regex.constants';
+import { USA_CITY_AND_STATES } from '@/constants/countries.constants';
 import SelectBusinessTypeOptions from '@/containers/common/select-business-type-options';
 import { handleDeformatPhoneNumberForAPI, Signout, SignupBusiness } from '@/firebase/auth';
 import { useAppStore } from '@/hooks/use-app-store';
@@ -21,7 +23,6 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiCheckboxCircleLine } from 'react-icons/ri';
-import { formatPhoneNumber } from 'react-phone-number-input';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -48,11 +49,9 @@ export const signupBusinessFormSchema = z.object({
     .min(1, { message: ZOD.ERROR.REQUIRED() })
     .max(30, { message: ZOD.ERROR.MAX_LENGTH(30) })
     .trim(),
-  phoneNumber: z
-    .string({ required_error: ZOD.ERROR.REQUIRED() })
-    .min(1, { message: ZOD.ERROR.REQUIRED() })
-    .nullable()
-    .refine((val) => val !== '' && val !== null && val !== undefined && !!formatPhoneNumber(val), { message: ZOD.ERROR.REQUIRED() }),
+  states: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
+  cities: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
+  phoneNumber: z.string({ required_error: 'Phone number is required' }).min(1, { message: 'Phone number is required' }),
   email: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(1, { message: ZOD.ERROR.REQUIRED() }).email({ message: ZOD.ERROR.EMAIL() }).trim().toLowerCase(),
   password: z
     .string({ required_error: ZOD.ERROR.REQUIRED() })
@@ -66,10 +65,16 @@ export const signupBusinessFormSchema = z.object({
 const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
   const router = useRouter();
   const globalStore = useAppStore('Global');
+  const USA_CITIES_ARRAY = Object.keys(USA_CITY_AND_STATES);
+  const USA_CITIES = USA_CITIES_ARRAY.map((val) => ({ label: val, value: val }));
+  const USA_STATES = Object.values(USA_CITY_AND_STATES)
+    .flat()
+    .map((val) => ({ label: val, value: val }));
 
   const form = useForm<signupBusinessFormSchemaType>({ resolver: zodResolver(signupBusinessFormSchema) });
 
   const [openedBusinessTypeOptions, setOpenedBusinessTypeOptions] = useState(false);
+  const [selectedProfilePic, setSelectedProfilePic] = useState<File | null>(null);
 
   const businessTypeName = form.watch('businessTypeName');
   const businessTypeId = form.watch('businessTypeId');
@@ -84,8 +89,14 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
   };
 
   const onSubmit = async (values: signupBusinessFormSchemaType) => {
+    if (!!selectedProfilePic === false) {
+      toast.error('Profile picture is required!');
+      return;
+    }
+
     globalStore?.setIsTemporarySignin(true);
-    const response = await asyncGuard(() => SignupBusiness({ FirstName: values.firstName, LastName: values.lastName, email: values.email, password: values.password, PhoneNo: values.phoneNumber || '', BusinessName: values.businessName, BusinessId: values.businessTypeId, BusinessTypeName: values.businessTypeName }));
+
+    const response = await asyncGuard(() => SignupBusiness({ profileImageFile: selectedProfilePic, FirstName: values.firstName, LastName: values.lastName, email: values.email, password: values.password, PhoneNo: values.phoneNumber || '', BusinessName: values.businessName, BusinessId: values.businessTypeId, BusinessTypeName: values.businessTypeName, State: values.states, City: values.cities }));
     globalStore?.setIsTemporarySignin(false);
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
@@ -102,13 +113,19 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
   return (
     <AuthCardLayout title="Tell us about your business" onBack={handleGoBack} coverImageSrc="/images/auth-cover-03.jpg">
       <Form form={form} onSubmit={onSubmit} className="grid w-full gap-2.5">
+        <UpdateProfileAvatar setSelectedProfilePic={setSelectedProfilePic} profileName="ABC" profilePicUrl="" />
         <FieldSelectButton form={form} name="businessTypeName" placeholder="Select from Business" className="mb-2" onClick={handleToggleOpenBusinessTypeOptions} />
         <FieldInput form={form} name="businessName" placeholder="Business Name" />
         <div className="grid w-full grid-cols-2 gap-2.5">
           <FieldInput form={form} name="firstName" placeholder="First Name" />
           <FieldInput form={form} name="lastName" placeholder="Last Name" />
         </div>
-        <FieldPhoneNumberNew form={form} name="phoneNumber" placeholder="Phone Number" />
+        <FieldInput form={form} name="phoneNumber" mask="(999) 999-9999" placeholder="Phone Number" />
+        <div className="grid w-full grid-cols-2 gap-2.5">
+          <FieldSelectDropdown form={form} options={USA_STATES} placeholder="State" name="states" />
+          <FieldSelectDropdown form={form} options={USA_CITIES} placeholder="City" name="cities" />
+        </div>
+        {/* <FieldPhoneNumberNew form={form} name="phoneNumber" placeholder="Phone Number" /> */}
         <FieldInput form={form} name="email" placeholder="Email Address" />
         {/* <div className="mb-1">
           <FieldInput form={form} name="email" placeholder="Email Address" errorConfig={{ disableErrorMsg: true }} />

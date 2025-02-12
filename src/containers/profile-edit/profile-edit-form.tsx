@@ -1,6 +1,7 @@
 'use client';
 
 import { Form } from '@/components/form';
+import { AppPages } from '@/constants/app-pages.constants';
 import { AppRegex } from '@/constants/app-regex.constants';
 import { handleDeformatPhoneNumberForAPI } from '@/firebase/auth';
 import { IProfileWithFavorites, UpdateBusinessUserProfile, UpdatePersonalUserProfile } from '@/firebase/profile';
@@ -9,7 +10,8 @@ import { useAppStore } from '@/hooks/use-app-store';
 import { asyncGuard } from '@/utils/lodash.utils';
 import { ZOD } from '@/utils/zod.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -87,6 +89,8 @@ const businessProfileFormDefaultValues = (data: IProps['data']): businessProfile
 
 const ProfileEditForm: React.FC<IProps> = ({ data }) => {
   const globalStore = useAppStore('Global');
+  const query = useSearchParams();
+  const router = useRouter();
 
   const form = useForm<businessProfileFormSchemaType>({ resolver: zodResolver(businessProfileFormSchema), defaultValues: businessProfileFormDefaultValues(data) });
 
@@ -158,16 +162,40 @@ const ProfileEditForm: React.FC<IProps> = ({ data }) => {
     return;
   };
 
+  const handleGoBackHome = () => {
+    if (document.referrer) router.back();
+    else router.push(AppPages.HOME);
+  };
+
+  useLayoutEffect(() => {
+    if (query.get('q') === 'payment') {
+      setCanProceed(true);
+    }
+  }, []);
+
   useEffect(() => {
     form.clearErrors();
   }, []);
 
   if (openedBusinessTypeOptions) return <SelectBusinessTypeOptions handleGoBack={handleToggleOpenBusinessTypeOptions} selectedOption={!!businessTypeIdWatch === false ? null : { label: businessTypeNameWatch, value: businessTypeIdWatch }} handleSelectOption={handleSelectBusinessType} notForAuthPage />;
   else if (openedGroupOptions) return <SelectGroupOptions handleGoBack={handleToggleOpenGroupOptions} selectedOption={!!groupIdWatch === false ? null : { label: groupNameWatch, value: groupIdWatch }} handleSelectOption={handleSelectGroup} notForAuthPage />;
-  else if (canProceed) return <ProfileEditFormPaymentInfo handleGoBack={() => setCanProceed(false)} handleGetFormData={() => form.getValues()} data={data} />;
+  else if (canProceed)
+    return (
+      <ProfileEditFormPaymentInfo
+        handleGoBack={() => {
+          if (query.get('q') === 'payment') {
+            handleGoBackHome();
+          } else {
+            setCanProceed(false);
+          }
+        }}
+        handleGetFormData={() => form.getValues()}
+        data={data}
+      />
+    );
   return (
     <Form form={form} onSubmit={onSubmit} className="flex flex-col gap-14">
-      <ProfileEditFormHeader isSubmitting={form.formState.isSubmitting} profileName={[data.FirstName, data.LastName].join(' ').trim()} profilePicUrl={data.ImageUrl} setSelectedProfilePic={setSelectedProfilePic} />
+      <ProfileEditFormHeader isSubmitting={form.formState.isSubmitting} handleGoBack={handleGoBackHome} profileName={[data.FirstName, data.LastName].join(' ').trim()} profilePicUrl={data.ImageUrl} setSelectedProfilePic={setSelectedProfilePic} />
       <ProfileEditFormBody form={form} handleToggleOpenBusinessTypeOptions={handleToggleOpenBusinessTypeOptions} handleToggleOpenGroupOptions={handleToggleOpenGroupOptions} selectedProfilePic={selectedProfilePic} isBusinessForm={isBusinessForm} />
     </Form>
   );
