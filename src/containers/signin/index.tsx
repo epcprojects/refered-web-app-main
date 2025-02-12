@@ -2,9 +2,9 @@
 
 import { Form } from '@/components/form';
 import FieldButton from '@/components/form/field-button';
+import FieldInput from '@/components/form/field-input';
 import FieldLink from '@/components/form/field-link';
 import FieldPasswordInput from '@/components/form/field-password-input';
-import FieldPhoneNumberNew from '@/components/form/field-phone-number-new';
 import AuthCardLayout from '@/components/layout/auth-card-layout';
 import Link from '@/components/ui/link';
 import { AppPages } from '@/constants/app-pages.constants';
@@ -58,7 +58,7 @@ const SigninIndex: React.FC<IProps> = () => {
   return (
     <AuthCardLayout title="Sign in to Continue" coverImageSrc="/images/auth-cover-01.jpg">
       <Form form={form} onSubmit={onSubmit} className="grid w-full gap-2.5">
-        <FieldPhoneNumberNew form={form} name="phoneNumber" placeholder="Phone Number" />
+        <FieldInput form={form} name="phoneNumber" mask="(999) 999-9999" placeholder="Phone Number" />
         <FieldPasswordInput form={form} name="password" placeholder="Password" />
         <FieldLink form={form} href={AppPages.FORGOT_PASSWORD} label="Forgot Password?" classes={{ container: 'w-max ml-auto mt-1' }} />
         <FieldButton form={form} type="submit" classes={{ container: 'w-full mt-2.5' }} label="Sign in" variant="secondary" />

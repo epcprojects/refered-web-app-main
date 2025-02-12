@@ -12,6 +12,7 @@ export interface SelectProps {
   containerClassName?: string;
   options: { label: string; value: string }[];
   placeholder?: string;
+  defaultValue?: string | null;
   onChange?: (value: string) => void;
 }
 
@@ -22,9 +23,9 @@ const SelectStyles = {
   option: (isActive: boolean) => cn('px-3 py-2 text-sm cursor-pointer', isActive ? 'bg-gray-200' : 'hover:bg-gray-100'),
 };
 
-const Select: React.FC<SelectProps> = ({ containerClassName, error, noErrorIcon = false, leftElement, rightElement, options, placeholder, onChange }) => {
+const Select: React.FC<SelectProps> = ({ containerClassName, error, noErrorIcon = false, leftElement, rightElement, options, placeholder, onChange, defaultValue = null }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(defaultValue);
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null);
   const [lastKey, setLastKey] = useState<string | null>(null);
   const [cycleIndex, setCycleIndex] = useState(0);
@@ -79,6 +80,10 @@ const Select: React.FC<SelectProps> = ({ containerClassName, error, noErrorIcon 
   };
 
   useEffect(() => {
+    if (defaultValue) setSelected(defaultValue);
+  }, [defaultValue]);
+
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, highlightIndex, lastKey, cycleIndex]);
@@ -102,7 +107,7 @@ const Select: React.FC<SelectProps> = ({ containerClassName, error, noErrorIcon 
           !selected && 'text-gray-400', // Ensures the placeholder has a lighter color when nothing is selected
         )}
       >
-        {selected ? options.find((o) => o.value === selected)?.label : placeholder}
+        {selected && options ? options.find((o) => o.value === selected)?.label : placeholder}
       </div>
       <FaChevronDown size={14} className="ml-auto text-gray-500" />
       {isOpen && (

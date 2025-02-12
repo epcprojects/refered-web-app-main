@@ -1,3 +1,4 @@
+import { profilePaymentInfoFormSchemaType } from '@/containers/profile-edit/profile-edit-form-payment-info';
 import { date } from '@/utils/date.utils';
 import { asyncGuard, firebaseErrorMsg, generateTokensForSentence, unionBy } from '@/utils/lodash.utils';
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
@@ -40,6 +41,7 @@ export interface IProfile {
   cashAppId?: string;
   paypalId?: string;
   venmoId?: string;
+  default?: profilePaymentInfoFormSchemaType['type'];
 }
 
 const getProfileByUserIdQuery = (userId: string) => query(collection(firebase.firestore, firebase.collections.profile), where('UserId', '==', userId));
@@ -186,7 +188,7 @@ export const UpdateBusinessUserProfile = async ({ id, ...body }: UpdateBusinessU
   return { ...querySnapshot.docs[0].data(), id: querySnapshot.docs[0].id, ...body } as IProfile;
 };
 
-export type UpdateUserPaymentInfo_Body = Pick<IProfile, 'id' | 'cashAppId' | 'paypalId' | 'venmoId'>;
+export type UpdateUserPaymentInfo_Body = Pick<IProfile, 'id' | 'cashAppId' | 'paypalId' | 'venmoId' | 'default'>;
 export type UpdateUserPaymentInfo_Response = Promise<IProfile>;
 export const UpdateUserPaymentInfo = async ({ id, ...body }: UpdateUserPaymentInfo_Body): UpdateUserPaymentInfo_Response => {
   const querySnapshot = await getDocs(getProfileByUserIdQuery(id));

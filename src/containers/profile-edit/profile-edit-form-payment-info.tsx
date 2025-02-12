@@ -23,7 +23,7 @@ interface IProps {
   data: IProfileWithFavorites;
 }
 
-type profilePaymentInfoFormSchemaType = z.infer<typeof profilePaymentInfoFormSchema>;
+export type profilePaymentInfoFormSchemaType = z.infer<typeof profilePaymentInfoFormSchema>;
 const profilePaymentInfoFormSchema = z.object({
   type: z.enum(['cashApp', 'paypal', 'venmo']),
   cashAppId: z.string().optional(),
@@ -41,12 +41,15 @@ const ProfileEditFormPaymentInfo: React.FC<IProps> = ({ handleGoBack, data, hand
 
   const typeWatch = form.watch('type');
 
-  const handleUpdateType = (val: string) => form.setValue('type', val as any);
+  const handleUpdateType = (val: string) => {
+    form.setValue('type', val as any);
+    setChecked(val === data.default);
+  };
   const onSubmit = async (values: profilePaymentInfoFormSchemaType) => {
     const { cashAppId, paypalId, venmoId, type } = values;
     const profileData = handleGetFormData();
 
-    const response = await asyncGuard(() => UpdateUserPaymentInfo({ id: data.UserId, cashAppId: cashAppId || '', paypalId: paypalId || '', venmoId: venmoId || '' }));
+    const response = await asyncGuard(() => UpdateUserPaymentInfo({ id: data.UserId, cashAppId: cashAppId || '', paypalId: paypalId || '', venmoId: venmoId || '', ...(checked ? { default: type } : {}) }));
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
       if (globalStore?.currentUser) globalStore.setCurrentUserAndProfile({ user: globalStore.currentUser, profile: { ...response.result, groupData: { id: profileData.groupId, name: profileData.groupName } } });
@@ -72,7 +75,7 @@ const ProfileEditFormPaymentInfo: React.FC<IProps> = ({ handleGoBack, data, hand
         {typeWatch === 'cashApp' ? <FieldInput form={form} name="cashAppId" placeholder={startCase(typeWatch + 'ID')} /> : null}
         {typeWatch === 'paypal' ? <FieldInput form={form} name="paypalId" placeholder={startCase(typeWatch + 'ID')} /> : null}
         {typeWatch === 'venmo' ? <FieldInput form={form} name="venmoId" placeholder={startCase(typeWatch + 'ID')} /> : null}
-        <FieldCheckbox form={form} labelConfig={{ value: 'Mark it default' }} onCheckedChange={setChecked} name="markDefault" />
+        <FieldCheckbox form={form} labelConfig={{ value: 'Mark it default' }} checked={checked} onCheckedChange={setChecked} name="markDefault" />
         <FieldButton form={form} type="submit" classes={{ container: 'w-full mt-2.5' }} label="Submit" variant="secondary" />
       </Form>
     </AuthCardLayout>
