@@ -86,7 +86,7 @@ export const MutualFavourites: React.FC<IMutualFavourites> = ({ businessOrProfil
 
   const handleFetchMutualFavourites = async () => {
     setIsFetchingData(true);
-    const response = await asyncGuard(() => GetMutualFavouritesForProfile({ userId: profileData?.uid, profileUserId: businessOrProfileId, lastItemId: undefined }));
+    const response = await asyncGuard(() => GetMutualFavouritesForProfile({ userId: profileData?.uid || '', profileUserId: businessOrProfileId, lastItemId: undefined }));
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
       setData((prev) => unionBy(prev, response.result, 'id'));

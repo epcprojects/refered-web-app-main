@@ -8,6 +8,7 @@ import { IGroupType } from './group-types';
 export type IProfileWithFavorites = IProfile & { isFavorite: boolean };
 export interface IProfile {
   id: string;
+  uid?: string;
   UserType: 'Business' | 'Normal';
   UserId: string;
   Verified: '1' | '0';
