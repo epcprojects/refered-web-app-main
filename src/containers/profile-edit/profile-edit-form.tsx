@@ -45,6 +45,8 @@ export const businessProfileFormSchema = z.object({
     .max(30, { message: ZOD.ERROR.MAX_LENGTH(30) })
     .trim(),
   phoneNumber: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
+  states: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
+  cities: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
   groupName: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(1, { message: ZOD.ERROR.REQUIRED() }).trim(),
   groupId: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(1, { message: ZOD.ERROR.REQUIRED() }).trim(),
   zip: z.coerce
@@ -78,6 +80,8 @@ const businessProfileFormDefaultValues = (data: IProps['data']): businessProfile
   firstName: data.FirstName || '',
   lastName: data.LastName || '',
   phoneNumber: handleDeformatPhoneNumberForAPI(data.PhoneNo) || '',
+  cities: data.City || '',
+  states: data.State || '',
   groupName: data.groupData?.name || '',
   groupId: data.groupData?.id || '',
   zip: data.UserType === 'Normal' ? '0' : data.ZipCode || '',
