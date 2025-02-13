@@ -49,7 +49,17 @@ const ProfileEditFormPaymentInfo: React.FC<IProps> = ({ handleGoBack, data, hand
     const { cashAppId, paypalId, venmoId, type } = values;
     const profileData = handleGetFormData();
 
-    const response = await asyncGuard(() => UpdateUserPaymentInfo({ id: data.UserId, cashAppId: cashAppId || '', paypalId: paypalId || '', venmoId: venmoId || '', ...(checked ? { default: type } : {}) }));
+    let defaultObject = {};
+
+    if (type === data.default && checked === false) {
+      defaultObject = { default: 'none' };
+    }
+
+    if (checked) {
+      defaultObject = { default: type };
+    }
+
+    const response = await asyncGuard(() => UpdateUserPaymentInfo({ id: data.UserId, cashAppId: cashAppId || '', paypalId: paypalId || '', venmoId: venmoId || '', ...defaultObject }));
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
       if (globalStore?.currentUser) globalStore.setCurrentUserAndProfile({ user: globalStore.currentUser, profile: { ...response.result, groupData: { id: profileData.groupId, name: profileData.groupName } } });
