@@ -24,7 +24,7 @@ const ProfileEditFormBody: React.FC<IProps> = ({ form, isBusinessForm, handleTog
 
   const USA_STATES = Object.keys(USA_CITY_AND_STATES).map((val) => ({ label: val, value: val }));
 
-  const [DEFAULT_SELECTED_STATE, SET_DEFAULT_SELECTED_STATE] = useState<StateKeys>('California');
+  const [DEFAULT_SELECTED_STATE, SET_DEFAULT_SELECTED_STATE] = useState<StateKeys>((form.getValues('states') as StateKeys) ?? 'California');
 
   const USE_CITIES_OF_SELECTED_STATE = useCallback(() => {
     return USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE].map((val) => ({ label: val, value: val }));
