@@ -65,15 +65,15 @@ export const signupBusinessFormSchema = z.object({
 const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
   const router = useRouter();
   const globalStore = useAppStore('Global');
-  const USA_STATES = Object.keys(USA_CITY_AND_STATES).map((val) => ({ label: val, value: val }));
 
+  const form = useForm<signupBusinessFormSchemaType>({ resolver: zodResolver(signupBusinessFormSchema) });
+
+  const USA_STATES = Object.keys(USA_CITY_AND_STATES).map((val) => ({ label: val, value: val }));
   const [DEFAULT_SELECTED_STATE, SET_DEFAULT_SELECTED_STATE] = useState<StateKeys>('California');
 
   const USE_CITIES_OF_SELECTED_STATE = useCallback(() => {
     return USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE].map((val) => ({ label: val, value: val }));
   }, [DEFAULT_SELECTED_STATE]);
-
-  const form = useForm<signupBusinessFormSchemaType>({ resolver: zodResolver(signupBusinessFormSchema) });
 
   const [openedBusinessTypeOptions, setOpenedBusinessTypeOptions] = useState(false);
   const [selectedProfilePic, setSelectedProfilePic] = useState<File | null>(null);
@@ -109,6 +109,9 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
 
   useEffect(() => {
     if (!!passwordWatch) form.trigger('password');
+
+    form.setValue('states', DEFAULT_SELECTED_STATE);
+    form.setValue('cities', USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE][0]);
   }, [passwordWatch]);
 
   if (openedBusinessTypeOptions) return <SelectBusinessTypeOptions handleGoBack={handleToggleOpenBusinessTypeOptions} selectedOption={!!businessTypeId === false ? null : { label: businessTypeName, value: businessTypeId }} handleSelectOption={handleSelectBusinessType} />;

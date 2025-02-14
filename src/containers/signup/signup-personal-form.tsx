@@ -89,6 +89,9 @@ const SignupPersonalForm: React.FC<IProps> = ({ handleGoBack }) => {
 
   useEffect(() => {
     if (!!passwordWatch) form.trigger('password');
+
+    form.setValue('states', DEFAULT_SELECTED_STATE);
+    form.setValue('cities', USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE][0]);
   }, [passwordWatch]);
 
   return (

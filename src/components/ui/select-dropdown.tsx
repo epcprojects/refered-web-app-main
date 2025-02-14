@@ -80,7 +80,9 @@ const Select: React.FC<SelectProps> = ({ containerClassName, error, noErrorIcon 
   };
 
   useEffect(() => {
-    if (defaultValue) setSelected(defaultValue);
+    if (defaultValue) {
+      setSelected(defaultValue);
+    }
   }, [defaultValue]);
 
   useEffect(() => {

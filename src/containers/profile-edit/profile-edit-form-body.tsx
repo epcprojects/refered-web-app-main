@@ -6,7 +6,7 @@ import FieldSelectButton from '@/components/form/field-select-button';
 import FieldTextarea from '@/components/form/field-textarea';
 import { StateKeys, USA_CITY_AND_STATES } from '@/constants/countries.constants';
 import Image from 'next/image';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { RiLock2Fill } from 'react-icons/ri';
 import { businessProfileFormSchemaType } from './profile-edit-form';
@@ -29,6 +29,11 @@ const ProfileEditFormBody: React.FC<IProps> = ({ form, isBusinessForm, handleTog
   const USE_CITIES_OF_SELECTED_STATE = useCallback(() => {
     return USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE].map((val) => ({ label: val, value: val }));
   }, [DEFAULT_SELECTED_STATE]);
+
+  useEffect(() => {
+    form.setValue('states', DEFAULT_SELECTED_STATE);
+    form.setValue('cities', USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE][0]);
+  }, []);
 
   return (
     <div className="grid w-full gap-2.5 p-4">
