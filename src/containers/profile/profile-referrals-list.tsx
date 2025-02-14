@@ -23,7 +23,7 @@ import Image from 'next/image';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
-import { RiMessage3Line, RiPhoneFill, RiShareForwardFill } from 'react-icons/ri';
+import { RiMapPin2Line, RiMessage3Line, RiNewsLine, RiPhoneFill, RiShareForwardFill } from 'react-icons/ri';
 import { toast } from 'sonner';
 import ProfileListDialog from './profile-list-dialog';
 
@@ -177,9 +177,25 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
               'Referral made by'
             ) : (
               <>
-                <span>{data.referredBusinessUser?.BusinessTypeName}</span>
-                <span className="mt-0.5">•</span>
-                <span>{[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()} sdsd sdsdds</span>
+                {data.referredBusinessUser?.groupData?.name && (
+                  <div className="mb-1 mt-[5px] flex gap-1 text-muted-foreground">
+                    <RiMapPin2Line size={15} />
+                    <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                      <span>{data.referredBusinessUser?.groupData?.name || 'No Region'}</span>
+                    </p>
+                  </div>
+                )}
+
+                {(data.referredBusinessUser?.BusinessTypeName || data.referredBusinessUser?.FirstName || data.referredBusinessUser?.LastName) && (
+                  <div className="!ml-0 flex gap-1 text-muted-foreground">
+                    <RiNewsLine size={15} />
+                    <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                      <span>{data.referredBusinessUser?.BusinessTypeName}</span>
+                      <span className="mt-1">•</span>
+                      <span>{[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()}</span>
+                    </p>
+                  </div>
+                )}
               </>
             )}
           </p>

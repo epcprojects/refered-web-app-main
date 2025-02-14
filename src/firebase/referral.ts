@@ -22,15 +22,33 @@ export interface IReferral {
 
 export type GetAllReferralsByUserId_Body = { userId: string; lastItemId: string | undefined };
 export type GetAllReferralsByUserId_Response = Promise<IReferral[]>;
+// export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body): GetAllReferralsByUserId_Response => {
+//   const lastItemDocSnap = body.lastItemId === undefined ? [] : await getDoc(doc(collection(firebase.firestore, firebase.collections.referrals), body.lastItemId));
+
+//   // prettier-ignore
+//   const queries = [
+//     query(collection(firebase.firestore, firebase.collections.referrals), where('referredByUserId', '==', body.userId), orderBy('datetime', 'desc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize)),
+//     query(collection(firebase.firestore, firebase.collections.referrals), where('referredToUserId', '==', body.userId), orderBy('datetime', 'desc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize)),
+//     query(collection(firebase.firestore, firebase.collections.referrals), where('referredBusinessUserId', '==', body.userId), orderBy('datetime', 'desc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize))
+//   ];
+
+//   const allReferralsResponse = await asyncGuard(() => Promise.all(queries.map(getDocs)));
+//   if (allReferralsResponse.error !== null || allReferralsResponse.result === null) throw new Error(firebaseErrorMsg(allReferralsResponse.error));
+
+//   const allProfilesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.profile))));
+//   if (allProfilesResponse.error !== null || allProfilesResponse.result === null) throw new Error('Something went wrong!');
+
+//   const allProfiles = (allProfilesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id })) as IProfile[]) || [];
+//   const allReferrals = ([...allReferralsResponse.result[0].docs, ...allReferralsResponse.result[1].docs, ...allReferralsResponse.result[2].docs].map((item) => ({ ...item.data(), id: item.id })) as IReferral[]) || [];
+//   const allReferralsWithProfile = allReferrals.map((item) => ({ ...item, referredByUser: allProfiles.find((profile) => profile.UserId === item.referredByUserId), referredToUser: allProfiles.find((profile) => profile.UserId === item.referredToUserId), referredBusinessUser: allProfiles.find((profile) => profile.UserId === item.referredBusinessUserId) }));
+
+//   return allReferralsWithProfile;
+// };
+
 export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body): GetAllReferralsByUserId_Response => {
   const lastItemDocSnap = body.lastItemId === undefined ? [] : await getDoc(doc(collection(firebase.firestore, firebase.collections.referrals), body.lastItemId));
 
-  // prettier-ignore
-  const queries = [
-    query(collection(firebase.firestore, firebase.collections.referrals), where('referredByUserId', '==', body.userId), orderBy('datetime', 'desc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize)), 
-    query(collection(firebase.firestore, firebase.collections.referrals), where('referredToUserId', '==', body.userId), orderBy('datetime', 'desc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize)),
-    query(collection(firebase.firestore, firebase.collections.referrals), where('referredBusinessUserId', '==', body.userId), orderBy('datetime', 'desc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize))
-  ];
+  const queries = [query(collection(firebase.firestore, firebase.collections.referrals), where('referredByUserId', '==', body.userId), orderBy('datetime', 'desc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize)), query(collection(firebase.firestore, firebase.collections.referrals), where('referredToUserId', '==', body.userId), orderBy('datetime', 'desc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize)), query(collection(firebase.firestore, firebase.collections.referrals), where('referredBusinessUserId', '==', body.userId), orderBy('datetime', 'desc'), startAfter(lastItemDocSnap), limit(firebase.pagination.pageSize))];
 
   const allReferralsResponse = await asyncGuard(() => Promise.all(queries.map(getDocs)));
   if (allReferralsResponse.error !== null || allReferralsResponse.result === null) throw new Error(firebaseErrorMsg(allReferralsResponse.error));
@@ -40,9 +58,32 @@ export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body
 
   const allProfiles = (allProfilesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id })) as IProfile[]) || [];
   const allReferrals = ([...allReferralsResponse.result[0].docs, ...allReferralsResponse.result[1].docs, ...allReferralsResponse.result[2].docs].map((item) => ({ ...item.data(), id: item.id })) as IReferral[]) || [];
-  const allReferralsWithProfile = allReferrals.map((item) => ({ ...item, referredByUser: allProfiles.find((profile) => profile.UserId === item.referredByUserId), referredToUser: allProfiles.find((profile) => profile.UserId === item.referredToUserId), referredBusinessUser: allProfiles.find((profile) => profile.UserId === item.referredBusinessUserId) }));
 
-  return allReferralsWithProfile;
+  // Fetch group data for each profile
+  const fetchGroupData = async (profile?: IProfile) => {
+    if (profile?.GroupId) {
+      const groupDataResult = await asyncGuard(() => getDoc(doc(firebase.firestore, firebase.collections.groupTypes, profile.GroupId || '')));
+      return groupDataResult.result?.data() || null;
+    }
+    return null;
+  };
+
+  const allReferralsWithProfile = await Promise.all(
+    allReferrals.map(async (item) => {
+      const referredByUser = allProfiles.find((profile) => profile.UserId === item.referredByUserId);
+      const referredToUser = allProfiles.find((profile) => profile.UserId === item.referredToUserId);
+      const referredBusinessUser = allProfiles.find((profile) => profile.UserId === item.referredBusinessUserId);
+
+      return {
+        ...item,
+        referredByUser: { ...referredByUser, groupData: await fetchGroupData(referredByUser) },
+        referredToUser: { ...referredToUser, groupData: await fetchGroupData(referredToUser) },
+        referredBusinessUser: { ...referredBusinessUser, groupData: await fetchGroupData(referredBusinessUser) },
+      };
+    }),
+  );
+
+  return allReferralsWithProfile as IReferral[];
 };
 
 export type GetProfileReferralsByUserFavourites_Body = { profileUserId: string; userId: string; lastItemId: string | undefined };
