@@ -76,8 +76,8 @@ export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body
 
       return {
         ...item,
-        referredByUser: { ...referredByUser, groupData: await fetchGroupData(referredByUser) },
-        referredToUser: { ...referredToUser, groupData: await fetchGroupData(referredToUser) },
+        referredByUser: { ...referredByUser },
+        referredToUser: { ...referredToUser },
         referredBusinessUser: { ...referredBusinessUser, groupData: await fetchGroupData(referredBusinessUser) },
       };
     }),
