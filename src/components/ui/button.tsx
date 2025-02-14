@@ -88,7 +88,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ variant, size
   return (
     <Tooltip>
       <TooltipTrigger asChild>{comp}</TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent className="Tooltip">{tooltip}</TooltipContent>
     </Tooltip>
   );
 });

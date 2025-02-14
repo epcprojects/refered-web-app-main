@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { REFERRAL_FEE_TOOLTIP } from '@/constants/tooltips.constants';
 import { IProfileWithFavorites } from '@/firebase/profile';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import { RiInformationFill } from 'react-icons/ri';
+import { RiInformationFill, RiInformationLine } from 'react-icons/ri';
 
 interface IProps {
   data: IProfileWithFavorites;
@@ -16,7 +17,11 @@ const ProfileCompanyInfo: React.FC<IProps> = ({ data }) => (
     <div className="mb-4 mt-2 flex flex-row items-center gap-2">
       <Image src="/images/logo.png" alt="Logo" width={22} height={22} />
       <p className="text-sm">${data.ReferralAmount || 0} Referral</p>
-      <InfoDialog />
+      {/* <InfoDialog /> */}
+
+      <Button tooltip={REFERRAL_FEE_TOOLTIP} variant={'link/info'}>
+        <RiInformationLine className="text-muted-foreground" size={18} />
+      </Button>
     </div>
   </div>
 );
