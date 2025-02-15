@@ -7,21 +7,26 @@ interface IProps {}
 type Params = {
   businessId: string;
   referredById: string;
-  n: string;
-  btN: string;
-  bN: string;
 };
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { businessId, referredById, n, btN, bN } = params;
+type SearchParams = {
+  n?: string;
+  btN?: string;
+  bN?: string;
+};
+
+export async function generateMetadata({ params, searchParams }: { params: Params; searchParams: SearchParams }): Promise<Metadata> {
+  const { businessId, referredById } = params;
+  const { n = '', btN = '', bN = '' } = searchParams; // Default to empty string if undefined
+
   const imageUrl = `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_URL}/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/Public%2Freferd_${businessId}.webp?alt=media`;
 
   return {
     title: 'Refer`d',
     description: 'Join and refer!',
     openGraph: {
-      title: n,
-      description: `${btN} • ${bN}`,
+      title: n || 'Referral',
+      description: btN && bN ? `${btN} • ${bN}` : 'Referral program',
       url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referral/${businessId}/${referredById}?n=${n}&btN=${btN}&bN=${bN}`,
       siteName: 'Refered',
       images: [
