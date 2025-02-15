@@ -7,9 +7,9 @@ interface IProps {}
 type Params = {
   businessId: string;
   referredById: string;
-  n?: string;
-  btN?: string;
-  bN?: string;
+  n: string;
+  btN: string;
+  bN: string;
 };
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
