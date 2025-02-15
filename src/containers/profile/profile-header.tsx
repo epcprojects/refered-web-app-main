@@ -6,8 +6,10 @@ import { AppPages } from '@/constants/app-pages.constants';
 import { handleDeformatPhoneNumberForAPI } from '@/firebase/auth';
 import { ToggleMarkFavorite } from '@/firebase/favorite';
 import { IProfile, IProfileWithFavorites } from '@/firebase/profile';
+import { uploadBlobToFirebase } from '@/firebase/upload';
 import { useAppStore } from '@/hooks/use-app-store';
-import { asyncGuard, initials } from '@/utils/lodash.utils';
+import { file } from '@/utils/file.utils';
+import { asyncGuard, firebaseErrorMsg, initials } from '@/utils/lodash.utils';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
@@ -39,17 +41,35 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
     else router.push(AppPages.HOME);
   };
 
-  const handleShareProfile = async () => {
-    if (typeof window !== 'undefined' && navigator.share) {
+  const shareReferralLink = async (referralUrl: string) => {
+    if (navigator.share) {
       const response = await asyncGuard(() => navigator.share({ title: 'Referral Link', text: 'Share this referral link!', url: referralUrl }));
-      if (response.error === null || response.result !== null) {
-        const responseCopy = await asyncGuard(() => copy(referralUrl));
-        if (responseCopy.result === true) toast.success('Referral link copied!');
+      if (!response.error) {
+        const copied = await asyncGuard(() => copy(referralUrl));
+        if (copied.result) toast.success('Referral link copied!');
       }
     } else {
-      const response = await asyncGuard(() => copy(referralUrl));
-      if (response.result === true) toast.success('Referral link copied!');
+      const copied = await asyncGuard(() => copy(referralUrl));
+      if (copied.result) toast.success('Referral link copied!');
     }
+  };
+
+  const handleShareProfile = async () => {
+    if (typeof window === 'undefined') return;
+
+    const userId = data.UserId;
+    const canvas = await file.generateShareableCard(data);
+    if (!canvas) return;
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const { result: imageUrl, error } = await asyncGuard(() => uploadBlobToFirebase({ blob: blob, userId, ext: 'webp', type: 'public' }));
+
+      if (error || !imageUrl) throw new Error(firebaseErrorMsg(error));
+
+      const referralUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referd/${userId}`;
+      await shareReferralLink(referralUrl);
+    }, 'image/webp');
   };
 
   const handleToggleFavorite = async () => {
