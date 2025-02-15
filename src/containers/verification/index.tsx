@@ -46,6 +46,7 @@ const OtpVerificationIndex: React.FC<IProps> = () => {
   };
 
   const handleSendVerificationCode = async () => {
+    console.log('🚀 ~ phone:', phone);
     handleInitializeRecaptcha();
     const response = await asyncGuard(() => (type === 'resetPassword' ? SendForgotPasswordOTP({ PhoneNo: `${phone.trim()}` }) : SendOTP({ PhoneNo: `${phone.trim()}` })));
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
