@@ -16,16 +16,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { businessId, referredById, n, btN, bN } = params;
   const imageUrl = `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_URL}/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/Public%2Freferd_${businessId}.webp?alt=media`;
 
-  // const sanitizedTitle = n ?? 'Referral Link';
-  // const sanitizedHeadline = headline ?? 'Join using this exclusive referral link!';
-
   return {
     title: 'Refer`d',
     description: 'Join and refer!',
     openGraph: {
       title: n,
       description: `${btN} • ${bN}`,
-      url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referral/${businessId}/${referredById}`,
+      url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referral/${businessId}/${referredById}?n=${n}&btN=${btN}&bN=${bN}`,
       siteName: 'Refered',
       images: [
         {
