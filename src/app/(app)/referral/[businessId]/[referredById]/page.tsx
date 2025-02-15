@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     openGraph: {
       title: sanitizedTitle,
       description: sanitizedHeadline ?? 'Join using this exclusive referral link!',
-      url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referral/${businessId}/${referredById}`,
+      url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referral/${businessId}/${referredById}?n=${n}&h=${h}`,
       siteName: 'Refered',
       images: [
         {
