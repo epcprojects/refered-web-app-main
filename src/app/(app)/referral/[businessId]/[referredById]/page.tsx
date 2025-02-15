@@ -8,23 +8,34 @@ type Params = {
   businessId: string;
   referredById: string;
   n?: string;
-  h?: string;
+  btN?: string;
+  bN?: string;
 };
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { businessId, referredById, n, h } = params;
+  const { businessId, referredById, n, btN: businessTypeName, bN: businessName } = params;
   const imageUrl = `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_URL}/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/Public%2Freferd_${businessId}.webp?alt=media`;
 
+  let headline = businessTypeName || '';
+
+  if (businessTypeName) {
+    headline += ' • ';
+  }
+
+  if (businessName) {
+    headline += businessName;
+  }
+
   const sanitizedTitle = n ?? 'Referral Link';
-  const sanitizedHeadline = h ?? 'Join using this exclusive referral link!';
+  const sanitizedHeadline = headline ?? 'Join using this exclusive referral link!';
 
   return {
     title: 'Refer`d',
     description: 'Join and refer!',
     openGraph: {
       title: sanitizedTitle,
-      description: sanitizedHeadline ?? 'Join using this exclusive referral link!',
-      url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referral/${businessId}/${referredById}?n=${n}&h=${h}`,
+      description: sanitizedHeadline,
+      url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referral/${businessId}/${referredById}`,
       siteName: 'Refered',
       images: [
         {
