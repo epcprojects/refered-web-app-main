@@ -16,7 +16,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { formatPhoneNumber } from 'react-phone-number-input';
 import { toast } from 'sonner';
 import z from 'zod';
 
@@ -24,11 +23,7 @@ interface IProps {}
 
 export type signinFormSchemaType = z.infer<typeof signinFormSchema>;
 export const signinFormSchema = z.object({
-  phoneNumber: z
-    .string({ required_error: ZOD.ERROR.REQUIRED() })
-    .min(1, { message: ZOD.ERROR.REQUIRED() })
-    .nullable()
-    .refine((val) => val !== '' && val !== null && val !== undefined && !!formatPhoneNumber(val), { message: ZOD.ERROR.REQUIRED() }),
+  phoneNumber: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(10, { message: ZOD.ERROR.REQUIRED() }),
   password: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(1, { message: ZOD.ERROR.REQUIRED() }),
 });
 
