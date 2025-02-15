@@ -39,7 +39,7 @@ const OtpVerificationIndex: React.FC<IProps> = () => {
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   const type = useMemo(() => searchParams.get('type') as 'signin' | 'signup' | 'resetPassword', [searchParams]);
-  const phone = useMemo(() => '+' + searchParams.get('phone') || '', [searchParams]);
+  const phone = useMemo(() => '+' + searchParams.get('phone')?.trim() || '', [searchParams]);
 
   const handleInitializeRecaptcha = () => {
     if (!window.recaptchaVerifier) window.recaptchaVerifier = new RecaptchaVerifier(firebase.auth, 'recaptcha-container', { size: 'invisible', callback: () => {} });
