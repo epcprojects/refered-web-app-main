@@ -47,7 +47,7 @@ const OtpVerificationIndex: React.FC<IProps> = () => {
 
   const handleSendVerificationCode = async () => {
     handleInitializeRecaptcha();
-    const response = await asyncGuard(() => (type === 'resetPassword' ? SendForgotPasswordOTP({ PhoneNo: `+${phone.trim()}` }) : SendOTP({ PhoneNo: `+${phone.trim()}` })));
+    const response = await asyncGuard(() => (type === 'resetPassword' ? SendForgotPasswordOTP({ PhoneNo: `${phone.trim()}` }) : SendOTP({ PhoneNo: `${phone.trim()}` })));
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else setConfirmationResult(response.result);
     return Boolean(response.result !== null);
@@ -66,11 +66,11 @@ const OtpVerificationIndex: React.FC<IProps> = () => {
   const onSubmit = async (values: verificationFormSchemaType) => {
     if (confirmationResult === null) toast.error('Invalid or expired OTP entered!');
     else if (type === 'resetPassword') {
-      const response = await asyncGuard(() => VerifyForgotPasswordOTP({ PhoneNo: `+${phone.trim()}`, confirmationResult: confirmationResult, otp: values.code }));
+      const response = await asyncGuard(() => VerifyForgotPasswordOTP({ PhoneNo: `${phone.trim()}`, confirmationResult: confirmationResult, otp: values.code }));
       if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
       else router.push(AppPages.RESET_PASSWORD);
     } else {
-      const response = await asyncGuard(() => VerifyOTP({ PhoneNo: `+${phone.trim()}`, confirmationResult: confirmationResult, otp: values.code }));
+      const response = await asyncGuard(() => VerifyOTP({ PhoneNo: `${phone.trim()}`, confirmationResult: confirmationResult, otp: values.code }));
       if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
       else {
         router.replace(AppPages.VERIFICATION_SUCCESS);
