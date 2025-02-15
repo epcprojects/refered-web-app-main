@@ -34,7 +34,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   const isProfileDetailsPage = useMemo(() => pathname.includes(AppPages.PROFILE), [pathname]);
   const isBusinessProfile = useMemo(() => data.UserType === 'Business', [data]);
   const isMyProfile = useMemo(() => Boolean(globalStore?.currentUserProfile?.UserId === data.UserId), [data, globalStore]);
-  const referralUrl = useMemo(() => `${process.env.NEXT_PUBLIC_FRONTEND_URL}${isBusinessProfile ? `${AppPages.REFERRAL}/${data.UserId}/${globalStore?.currentUserProfile?.UserId}` : `${AppPages.PROFILE}/${data.UserId}`}`, [data, isBusinessProfile, globalStore]);
+  const referralUrl = useMemo(() => `${process.env.NEXT_PUBLIC_FRONTEND_URL}${isBusinessProfile ? `${AppPages.REFERRAL}/${data.UserId}/${globalStore?.currentUserProfile?.UserId}/` : `${AppPages.PROFILE}/${data.UserId}`}`, [data, isBusinessProfile, globalStore]);
 
   const handleGoBack = () => {
     if (document.referrer) router.back();
@@ -57,6 +57,11 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   const handleShareProfile = async () => {
     if (typeof window === 'undefined') return;
 
+    if (isMyProfile) {
+      await shareReferralLink(referralUrl);
+      return;
+    }
+
     const userId = data.UserId;
     const canvas = await file.generateShareableCard(data);
     if (!canvas) return;
@@ -67,8 +72,14 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
 
       if (error || !imageUrl) throw new Error(firebaseErrorMsg(error));
 
-      const referralUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referd/${userId}`;
-      await shareReferralLink(referralUrl);
+      const name = (data.FirstName + ' ' + data.LastName).trim();
+      let headline = `${data.BusinessTypeName}` || '';
+
+      if (data.BusinessName) {
+        headline += ` • ${data.BusinessName}`;
+      }
+
+      await shareReferralLink(referralUrl + `?n=${name}&h=${headline}`);
     }, 'image/webp');
   };
 
