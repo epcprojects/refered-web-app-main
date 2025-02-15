@@ -34,6 +34,7 @@ const SigninIndex: React.FC<IProps> = () => {
   const form = useForm<signinFormSchemaType>({ resolver: zodResolver(signinFormSchema) });
 
   const onSubmit = async (values: signinFormSchemaType) => {
+    console.log('🚀 ~ onSubmit ~ values:', values.phoneNumber);
     globalStore?.setIsTemporarySignin(true);
     const response = await asyncGuard(() => Signin({ PhoneNo: values.phoneNumber || '', password: values.password }));
     globalStore?.setIsTemporarySignin(false);

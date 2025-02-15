@@ -7,7 +7,8 @@ import { doc, setDoc } from 'firebase/firestore';
 import { GetProfileData, IProfile, MarkProfileAsVerified } from './profile';
 import { UploadFile } from './upload';
 
-export const handleDeformatPhoneNumberForAPI = (phoneNo: string) => (phoneNo === undefined ? '' : `+${phoneNo.replace(/[^0-9]/g, '')}`);
+// +1 Added for USA format
+export const handleDeformatPhoneNumberForAPI = (phoneNo: string) => (phoneNo === undefined ? '' : `+1${phoneNo.replace(/[^0-9]/g, '')}`);
 export const handleConvertPhoneToEmailForAPI = (phoneNo: string) => `${handleDeformatPhoneNumberForAPI(phoneNo)}@getreferd.co`;
 
 export type SignupBusiness_Body = Pick<IProfile, 'UserType' | 'FirstName' | 'LastName' | 'PhoneNo' | 'email' | 'ImageUrl' | 'BusinessId' | 'BusinessName' | 'BusinessTypeName' | 'State' | 'City'> & { password: string; profileImageFile?: File | null };
