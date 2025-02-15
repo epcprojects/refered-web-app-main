@@ -34,7 +34,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   const isProfileDetailsPage = useMemo(() => pathname.includes(AppPages.PROFILE), [pathname]);
   const isBusinessProfile = useMemo(() => data.UserType === 'Business', [data]);
   const isMyProfile = useMemo(() => Boolean(globalStore?.currentUserProfile?.UserId === data.UserId), [data, globalStore]);
-  const referralUrl = useMemo(() => `${process.env.NEXT_PUBLIC_FRONTEND_URL}${isBusinessProfile ? `${AppPages.REFERRAL}/${data.UserId}/${globalStore?.currentUserProfile?.UserId}/` : `${AppPages.PROFILE}/${data.UserId}`}`, [data, isBusinessProfile, globalStore]);
+  const referralUrl = useMemo(() => `${process.env.NEXT_PUBLIC_FRONTEND_URL}${isBusinessProfile ? `${AppPages.REFERRAL}/${data.UserId}/${globalStore?.currentUserProfile?.UserId}` : `${AppPages.PROFILE}/${data.UserId}`}`, [data, isBusinessProfile, globalStore]);
 
   const handleGoBack = () => {
     if (document.referrer) router.back();
@@ -73,13 +73,13 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
       if (error || !imageUrl) throw new Error(firebaseErrorMsg(error));
 
       const name = (data.FirstName + ' ' + data.LastName).trim();
-      let headline = `${data.BusinessTypeName}` || '';
+      let headline = data.BusinessTypeName || '';
 
       if (data.BusinessName) {
         headline += ` • ${data.BusinessName}`;
       }
 
-      await shareReferralLink(referralUrl + `?n=${name}&h=${headline}`);
+      await shareReferralLink(referralUrl + `?n=${name}&h=${headline}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
     }, 'image/webp');
   };
 

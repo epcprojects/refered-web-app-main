@@ -11,6 +11,10 @@ type Params = {
   h?: string;
 };
 
+const sanitizeInput = (value: string) => {
+  return value.replaceAll('%20', ' ').replaceAll('%E2%80%A2', '•');
+};
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { businessId, referredById, n: title, h: headline } = params;
   const imageUrl = `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_URL}/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/Public%2Freferd_${businessId}.webp?alt=media`;
@@ -19,8 +23,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     title: 'Refer`d',
     description: 'Join and refer!',
     openGraph: {
-      title: decodeURIComponent(title || '') || 'Referral Link',
-      description: decodeURIComponent(headline || '') ?? 'Join using this exclusive referral link!',
+      title: sanitizeInput(title || '') || 'Referral Link',
+      description: sanitizeInput(headline || '') ?? 'Join using this exclusive referral link!',
       url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referral/${businessId}/${referredById}`,
       siteName: 'Refered',
       images: [
