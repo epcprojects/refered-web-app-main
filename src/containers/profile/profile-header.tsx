@@ -72,7 +72,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
 
       if (error || !imageUrl) throw new Error(firebaseErrorMsg(error));
 
-      await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
+      await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
     }, 'image/webp');
   };
 

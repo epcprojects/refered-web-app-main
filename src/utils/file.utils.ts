@@ -44,11 +44,21 @@ const generateShareableCard = async (data: IProfileWithFavorites) => {
   // Draw Background
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-  // Draw Circular Profile Image
+  // Circular Profile Image Positioning
   const x = (canvas.width - overlaySize) / 2;
   const y = (canvas.height - overlaySize) / 2;
   const radius = overlaySize / 2;
 
+  // Draw White Circle Background for Profile Image
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x + radius, y + radius, radius, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.fillStyle = 'white'; // Set the fill color to white
+  ctx.fill(); // Fill the circle with white
+  ctx.restore();
+
+  // Draw Circular Profile Image
   ctx.save();
   ctx.beginPath();
   ctx.arc(x + radius, y + radius, radius, 0, Math.PI * 2);
@@ -73,7 +83,6 @@ const generateShareableCard = async (data: IProfileWithFavorites) => {
 
   // Add User Name Below Image
   const nameY = y + overlaySize + 40; // Adjusted for spacing
-  // ctx.strokeText(data.FirstName, canvas.width / 2, nameY);
   ctx.fillText(data.FirstName, canvas.width / 2, nameY);
 
   if (data.BusinessTypeName || data.BusinessName) {

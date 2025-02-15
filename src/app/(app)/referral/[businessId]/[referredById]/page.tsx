@@ -26,7 +26,7 @@ export async function generateMetadata({ params, searchParams }: { params: Param
     description: 'Join and refer!',
     openGraph: {
       title: n || 'Referral',
-      description: btN && bN ? `${btN} • ${bN}` : 'Referral program',
+      description: btN && bN ? `${btN} • ${bN}`.replaceAll('/', '') : 'Referral program',
       url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/referral/${businessId}/${referredById}?n=${n}&btN=${btN}&bN=${bN}`,
       siteName: 'Refered',
       images: [
