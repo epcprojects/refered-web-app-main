@@ -12,11 +12,11 @@ type Params = {
 };
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { businessId, referredById, n: title, h: headline } = params;
+  const { businessId, referredById, n, h } = params;
   const imageUrl = `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_URL}/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/Public%2Freferd_${businessId}.webp?alt=media`;
 
-  const sanitizedTitle = title ? decodeURIComponent(title) : 'Referral Link';
-  const sanitizedHeadline = headline ? decodeURIComponent(headline) : 'Join using this exclusive referral link!';
+  const sanitizedTitle = n ?? 'Referral Link';
+  const sanitizedHeadline = h ?? 'Join using this exclusive referral link!';
 
   return {
     title: 'Refer`d',
