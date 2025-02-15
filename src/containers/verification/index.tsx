@@ -39,14 +39,13 @@ const OtpVerificationIndex: React.FC<IProps> = () => {
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   const type = useMemo(() => searchParams.get('type') as 'signin' | 'signup' | 'resetPassword', [searchParams]);
-  const phone = useMemo(() => searchParams.get('phone') || '', [searchParams]);
+  const phone = useMemo(() => '+' + searchParams.get('phone') || '', [searchParams]);
 
   const handleInitializeRecaptcha = () => {
     if (!window.recaptchaVerifier) window.recaptchaVerifier = new RecaptchaVerifier(firebase.auth, 'recaptcha-container', { size: 'invisible', callback: () => {} });
   };
 
   const handleSendVerificationCode = async () => {
-    console.log('🚀 ~ phone:', phone);
     handleInitializeRecaptcha();
     const response = await asyncGuard(() => (type === 'resetPassword' ? SendForgotPasswordOTP({ PhoneNo: `${phone.trim()}` }) : SendOTP({ PhoneNo: `${phone.trim()}` })));
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
