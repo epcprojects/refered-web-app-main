@@ -16,7 +16,7 @@ const HomeIndex: React.FC<IProps> = ({}) => {
   return (
     <div className="flex flex-col">
       <ProfileHeader data={globalStore.currentUserProfile as IProfileWithFavorites} />
-      <ProfileBody data={globalStore.currentUserProfile as IProfileWithFavorites} />
+      <ProfileBody data={globalStore.currentUserProfile as IProfileWithFavorites} loggedInUser={globalStore.currentUser} />
     </div>
   );
 };
