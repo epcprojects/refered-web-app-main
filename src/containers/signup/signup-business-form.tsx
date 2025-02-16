@@ -125,7 +125,7 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
           <FieldInput form={form} name="firstName" placeholder="First Name" />
           <FieldInput form={form} name="lastName" placeholder="Last Name" />
         </div>
-        <FieldInput form={form} name="phoneNumber" mask="(999) 999-9999" placeholder="Phone Number" />
+        <FieldInput form={form} name="phoneNumber" mask={Mask.USA} placeholder="Phone Number" />
         <div className="grid w-full grid-cols-2 gap-2.5">
           <FieldSelectDropdown
             form={form}

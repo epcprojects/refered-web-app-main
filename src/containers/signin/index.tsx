@@ -34,7 +34,6 @@ const SigninIndex: React.FC<IProps> = () => {
   const form = useForm<signinFormSchemaType>({ resolver: zodResolver(signinFormSchema) });
 
   const onSubmit = async (values: signinFormSchemaType) => {
-    console.log('🚀 ~ onSubmit ~ values:', values.phoneNumber);
     globalStore?.setIsTemporarySignin(true);
     const response = await asyncGuard(() => Signin({ PhoneNo: values.phoneNumber || '', password: values.password }));
     globalStore?.setIsTemporarySignin(false);
@@ -54,7 +53,7 @@ const SigninIndex: React.FC<IProps> = () => {
   return (
     <AuthCardLayout title="Sign in to Continue" coverImageSrc="/images/auth-cover-01.jpg">
       <Form form={form} onSubmit={onSubmit} className="grid w-full gap-2.5">
-        <FieldInput form={form} name="phoneNumber" mask="(999) 999-9999" placeholder="Phone Number" />
+        <FieldInput form={form} name="phoneNumber" mask={Mask.USA} placeholder="Phone Number" />
         <FieldPasswordInput form={form} name="password" placeholder="Password" />
         <FieldLink form={form} href={AppPages.FORGOT_PASSWORD} label="Forgot Password?" classes={{ container: 'w-max ml-auto mt-1' }} />
         <FieldButton form={form} type="submit" classes={{ container: 'w-full mt-2.5' }} label="Sign in" variant="secondary" />

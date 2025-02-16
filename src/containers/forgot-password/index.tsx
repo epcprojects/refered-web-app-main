@@ -2,7 +2,7 @@
 
 import { Form } from '@/components/form';
 import FieldButton from '@/components/form/field-button';
-import FieldPhoneNumberNew from '@/components/form/field-phone-number-new';
+import FieldInput from '@/components/form/field-input';
 import AuthCardLayout from '@/components/layout/auth-card-layout';
 import Link from '@/components/ui/link';
 import { AppPages } from '@/constants/app-pages.constants';
@@ -14,7 +14,6 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { LuChevronLeft } from 'react-icons/lu';
-import { formatPhoneNumber } from 'react-phone-number-input';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -22,11 +21,7 @@ interface IProps {}
 
 export type forgotPasswordFormSchemaType = z.infer<typeof forgotPasswordFormSchema>;
 export const forgotPasswordFormSchema = z.object({
-  phoneNumber: z
-    .string({ required_error: ZOD.ERROR.REQUIRED() })
-    .min(1, { message: ZOD.ERROR.REQUIRED() })
-    .nullable()
-    .refine((val) => val !== '' && val !== null && val !== undefined && !!formatPhoneNumber(val), { message: ZOD.ERROR.REQUIRED() }),
+  phoneNumber: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(10, { message: ZOD.ERROR.REQUIRED() }),
 });
 
 const ForgotPasswordIndex: React.FC<IProps> = () => {
@@ -43,7 +38,7 @@ const ForgotPasswordIndex: React.FC<IProps> = () => {
   return (
     <AuthCardLayout title="Forgot your Password" coverImageSrc="/images/auth-cover-02.jpg">
       <Form form={form} onSubmit={onSubmit} className="grid w-full gap-2.5">
-        <FieldPhoneNumberNew form={form} name="phoneNumber" placeholder="Phone Number" />
+        <FieldInput form={form} name="phoneNumber" mask={Mask.USA} placeholder="Phone Number" />
         <FieldButton form={form} type="submit" classes={{ container: 'w-full' }} label="Submit" variant="secondary" />
       </Form>
       <Link href={AppPages.SIGNIN} label="Back to Login" classes={{ container: 'group mt-2 text-sm gap-0.5' }} leftElement={<LuChevronLeft className="transition-all group-hover:-translate-x-1" />} />
