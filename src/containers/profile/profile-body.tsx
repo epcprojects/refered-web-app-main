@@ -27,7 +27,7 @@ const ProfileBody: React.FC<IProps> = ({ data, loggedInUser }) => {
       {isBusinessProfile && (
         <>
           <ProfileCompanyInfo data={data} />
-          {loggedInUser?.uid !== data.id && <ProfileCompanySecondRow data={data} classes="mb-4" />}
+          {loggedInUser?.email !== data.email && <ProfileCompanySecondRow data={data} classes="mb-4" />}
         </>
       )}
       <Tabs defaultValue={tabs[0].value} className="w-full">
