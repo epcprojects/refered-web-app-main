@@ -5,8 +5,9 @@ import { collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Ti
 import { firebase } from '.';
 import { IFavorite } from './favorite';
 import { IGroupType } from './group-types';
+import { GetMutualFavouritesForProfile } from './referral';
 
-export type IProfileWithFavorites = IProfile & { isFavorite: boolean };
+export type IProfileWithFavorites = IProfile & { isFavorite: boolean; mutualFavourites?: IFavorite[] };
 export interface IProfile {
   id: string;
   uid?: string;
@@ -164,7 +165,16 @@ export const GetProfileById = async (body: GetProfileById_Body): GetProfileById_
 
   const groupDataResponse = await asyncGuard(() => getDoc(doc(firebase.firestore, firebase.collections.groupTypes, profileResponseData.GroupId || '')));
 
-  const profileData = { ...profileResponseData, isFavorite: !!allFavorites.find((fav) => fav.UserId === profileResponseData.UserId), groupData: groupDataResponse.result === null ? undefined : { ...groupDataResponse.result.data(), id: groupDataResponse.result.id } } as IProfileWithFavorites;
+  // Fetching mutual favourites for other profiles.
+  const { result: mutualFavourites } = await asyncGuard(() =>
+    GetMutualFavouritesForProfile({
+      profileUserId: profileResponseData.UserId,
+      userId: body.loggedInUserId,
+      lastItemId: undefined,
+    }),
+  );
+
+  const profileData = { ...profileResponseData, isFavorite: !!allFavorites.find((fav) => fav.UserId === profileResponseData.UserId), groupData: groupDataResponse.result === null ? undefined : { ...groupDataResponse.result.data(), id: groupDataResponse.result.id }, mutualFavourites } as IProfileWithFavorites;
   return profileData;
 };
 

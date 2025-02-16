@@ -89,6 +89,8 @@ export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body
 export type GetProfileReferralsByUserFavourites_Body = { profileUserId: string; userId: string; lastItemId: string | undefined };
 export type GetProfileReferralsByUserFavourites_Response = Promise<IReferral[]>;
 export const GetMutualFavouritesForProfile = async (body: GetProfileReferralsByUserFavourites_Body): Promise<IFavorite[]> => {
+  if (body.profileUserId === body.userId) return [];
+
   // My favourites List
   const { result: userFavourites, error: userFavouritesError } = await asyncGuard(() =>
     GetAllFavoritesByUserId({

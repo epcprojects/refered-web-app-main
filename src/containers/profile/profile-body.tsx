@@ -6,6 +6,7 @@ import React, { useMemo } from 'react';
 import ProfileCompanyInfo from './profile-company-info';
 import ProfileFavoritesList from './profile-favorites-list';
 import ProfileReferralsList from './profile-referrals-list';
+import ProfileCompanySecondRow from './profile-second-row';
 
 interface IProps {
   data: IProfileWithFavorites;
@@ -21,7 +22,12 @@ const ProfileBody: React.FC<IProps> = ({ data }) => {
 
   return (
     <div className="p-4">
-      {isBusinessProfile ? <ProfileCompanyInfo data={data} /> : null}
+      {isBusinessProfile && (
+        <>
+          <ProfileCompanyInfo data={data} />
+          <ProfileCompanySecondRow data={data} classes="mb-4" />
+        </>
+      )}
       <Tabs defaultValue={tabs[0].value} className="w-full">
         <TabsList className="grid h-10 w-full grid-cols-2">
           {tabs.map((item) => (

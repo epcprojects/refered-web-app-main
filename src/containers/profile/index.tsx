@@ -5,7 +5,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { GetProfileById, IProfileWithFavorites } from '@/firebase/profile';
 import { useAppStore } from '@/hooks/use-app-store';
 import { asyncGuard } from '@/utils/lodash.utils';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import ProfileBody from './profile-body';
@@ -15,7 +15,6 @@ interface IProps {}
 
 const ProfileIndex: React.FC<IProps> = () => {
   const globalStore = useAppStore('Global');
-  const router = useRouter();
   const params = useParams<{ id: string }>();
 
   const [data, setData] = useState<IProfileWithFavorites | null>(null);

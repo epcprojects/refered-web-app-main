@@ -71,7 +71,6 @@ const SignupPersonalForm: React.FC<IProps> = ({ handleGoBack }) => {
   const passwordWatch = form.watch('password');
 
   const onSubmit = async (values: signupPersonalFormSchemaType) => {
-    console.log('🚀 ~ onSubmit ~ values:', values);
     if (!!selectedProfilePic === false) {
       toast.error('Profile picture is required!');
       return;

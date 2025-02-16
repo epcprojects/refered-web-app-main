@@ -76,15 +76,18 @@ const ProfileReferralsList: React.FC<IProps> = ({ profileData }) => {
 export default ProfileReferralsList;
 
 interface IMutualFavourites extends IProps {
+  mutualFavourites?: IFavorite[];
   businessOrProfileId: string;
   shade?: 'dark' | 'light';
 }
 
-export const MutualFavourites: React.FC<IMutualFavourites> = ({ businessOrProfileId, profileData, shade = 'light' }) => {
-  const [data, setData] = useState<IFavorite[]>([]);
-  const [isFetchingData, setIsFetchingData] = useState(true);
+export const MutualFavourites: React.FC<IMutualFavourites> = ({ mutualFavourites, businessOrProfileId, profileData, shade = 'light' }) => {
+  const [data, setData] = useState<IFavorite[]>(mutualFavourites ?? []);
+  const [isFetchingData, setIsFetchingData] = useState(false);
 
   const handleFetchMutualFavourites = async () => {
+    if (mutualFavourites?.length) return;
+
     setIsFetchingData(true);
     const response = await asyncGuard(() => GetMutualFavouritesForProfile({ userId: profileData?.uid || '', profileUserId: businessOrProfileId, lastItemId: undefined }));
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
@@ -109,23 +112,23 @@ export const MutualFavourites: React.FC<IMutualFavourites> = ({ businessOrProfil
       ) : (
         <React.Fragment>
           <div className="flex items-center justify-center gap-1">
-            <RiShareForwardFill className="text-info" />
+            <RiShareForwardFill className="text-info" color={shade === 'dark' ? 'black' : ''} />
             <span className={`text-xs ${shade === 'light' ? 'text-muted-foreground' : ''}`}>Referred by</span>
           </div>
 
           {data.slice(0, 3).map((value) => (
-            <ReferralUserChip id={value.ProfileId || ''} src={value?.ImageUrl || ''} name={value?.FirstName || ''} />
+            <ReferralUserChip shade="dark" id={value.ProfileId || ''} src={value?.ImageUrl || ''} name={value?.FirstName || ''} />
           ))}
 
-          {data.length > 3 && <ProfileListDialog data={data} count={data.length - 3} />}
+          {data.length > 3 && <ProfileListDialog shade="dark" data={data} count={data.length - 3} />}
         </React.Fragment>
       )}
     </div>
   );
 };
 
-export const ReferralUserChip: React.FC<{ id: string; src?: string; name: string }> = ({ id, src, name }) => (
-  <NextLink href={`${AppPages.PROFILE}/${id}`} className="flex cursor-pointer items-center gap-1 rounded-full border-1 border-border p-[3px] transition-all hover:bg-slate-100">
+export const ReferralUserChip: React.FC<{ id: string; src?: string; name: string; shade?: 'dark' | 'light' }> = ({ id, src, name, shade = 'light' }) => (
+  <NextLink href={`${AppPages.PROFILE}/${id}`} className={`flex cursor-pointer items-center gap-1 rounded-full border-1 border-border ${shade === 'dark' ? 'border-black border-opacity-15' : ''} p-[3px] transition-all hover:bg-slate-100`}>
     <Avatar src={src} alt="Profile Picture" fallback={initials('Mohsin').slice(0, 1)} className="!h-4 !w-4" fallbackClassName="!text-[9px]" />
     <span className="mr-0.5 w-max max-w-16 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] 2xs:max-w-10 xs:max-w-18">{name}</span>
   </NextLink>

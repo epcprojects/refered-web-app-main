@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { REFERRAL_FEE_TOOLTIP } from '@/constants/tooltips.constants';
+import { Tooltip } from '@/constants/tooltips.constants';
 import { IProfileWithFavorites } from '@/firebase/profile';
 import Image from 'next/image';
 import React, { useState } from 'react';
@@ -14,14 +14,23 @@ const ProfileCompanyInfo: React.FC<IProps> = ({ data }) => (
   <div className="flex flex-col gap-1">
     <h3 className="text-lg font-medium">Company Info</h3>
     <p className="break-words text-sm font-normal leading-5">{data.About}</p>
-    <div className="mb-4 mt-2 flex flex-row items-center gap-2">
-      <Image src="/images/logo.png" alt="Logo" width={22} height={22} />
-      <p className="text-sm">${data.ReferralAmount || 0} Referral</p>
-      {/* <InfoDialog /> */}
+    <div className="flex gap-7">
+      <div className="mb-4 mt-2 flex flex-row items-center gap-1">
+        <Image src="/images/logo.png" alt="Logo" width={22} height={22} className="mr-1" />
+        <p className="text-sm">${data.ReferralAmount || 0} Referral</p>
 
-      <Button tooltip={REFERRAL_FEE_TOOLTIP} variant={'link/info'}>
-        <RiInformationLine className="text-muted-foreground" size={18} />
-      </Button>
+        <Button tooltip={Tooltip.REFERRAL_FEE_TOOLTIP} variant={'link/info'}>
+          <RiInformationLine className="text-muted-foreground" size={18} />
+        </Button>
+      </div>
+      <div className="mb-4 mt-2 flex flex-row items-center gap-1">
+        <Image src="/images/referral-discount-icon.svg" alt="Logo" width={22} height={22} className="mr-1" />
+        <p className="text-sm">New Customer Discount {data.DiscountPercent || 0}%</p>
+
+        <Button tooltip={Tooltip.REFERRAL_DISCOUNT_TOOLTIP} variant={'link/info'}>
+          <RiInformationLine className="text-muted-foreground" size={18} />
+        </Button>
+      </div>
     </div>
   </div>
 );

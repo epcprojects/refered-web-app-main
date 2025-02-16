@@ -144,7 +144,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
           ))}
 
           {/* Select Payment */}
-          {!isBusinessProfile && (
+          {globalStore?.currentUser?.uid === data?.UserId && (
             <NextLink href={AppPages.EDIT_PROFILE + '?q=payment'} className="mt-3 rounded-full p-1 pl-0 transition-all duration-300 hover:bg-foreground/5 hover:pl-1">
               <button className="flex flex-row items-center gap-2 text-sm font-medium">
                 <span>
@@ -156,7 +156,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
           )}
 
           {/* Referred by */}
-          {globalStore?.currentUser && data && globalStore?.currentUser?.uid !== data?.UserId && <MutualFavourites shade="dark" businessOrProfileId={data.UserId} profileData={globalStore.currentUser as unknown as IProfile} />}
+          {globalStore?.currentUser && data && globalStore?.currentUser?.uid !== data?.UserId && <MutualFavourites shade="dark" mutualFavourites={data.mutualFavourites} businessOrProfileId={data.UserId} profileData={globalStore.currentUser as unknown as IProfile} />}
         </div>
       </div>
     </div>
