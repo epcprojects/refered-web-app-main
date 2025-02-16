@@ -2,6 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { IProfileWithFavorites } from '@/firebase/profile';
+import { User } from 'firebase/auth';
 import React, { useMemo } from 'react';
 import ProfileCompanyInfo from './profile-company-info';
 import ProfileFavoritesList from './profile-favorites-list';
@@ -10,6 +11,7 @@ import ProfileCompanySecondRow from './profile-second-row';
 
 interface IProps {
   data: IProfileWithFavorites;
+  loggedInUser?: User | null;
 }
 
 const tabs = [
@@ -17,7 +19,7 @@ const tabs = [
   { label: 'Favorites', value: 'favorites', component: ProfileFavoritesList },
 ];
 
-const ProfileBody: React.FC<IProps> = ({ data }) => {
+const ProfileBody: React.FC<IProps> = ({ data, loggedInUser }) => {
   const isBusinessProfile = useMemo(() => Boolean(data.UserType === 'Business'), [data]);
 
   return (
@@ -25,7 +27,7 @@ const ProfileBody: React.FC<IProps> = ({ data }) => {
       {isBusinessProfile && (
         <>
           <ProfileCompanyInfo data={data} />
-          <ProfileCompanySecondRow data={data} classes="mb-4" />
+          {loggedInUser?.uid !== data.UserId && <ProfileCompanySecondRow data={data} classes="mb-4" />}
         </>
       )}
       <Tabs defaultValue={tabs[0].value} className="w-full">

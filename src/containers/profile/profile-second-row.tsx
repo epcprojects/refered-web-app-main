@@ -18,7 +18,7 @@ interface IProps {
   classes?: string;
 }
 
-//TODO: Refactor this to remove redundant code (Similar here => profile-header).
+//TODO: Refactor this to remove redundant code (Similar here => profile-headere).
 const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
   const globalStore = useAppStore('Global');
   const [_, copy] = useCopyToClipboard();

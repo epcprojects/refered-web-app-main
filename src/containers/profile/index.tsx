@@ -38,7 +38,7 @@ const ProfileIndex: React.FC<IProps> = () => {
   return (
     <div className="flex flex-col">
       <ProfileHeader data={data} />
-      <ProfileBody data={data} />
+      <ProfileBody data={data} loggedInUser={globalStore?.currentUser} />
     </div>
   );
 };
