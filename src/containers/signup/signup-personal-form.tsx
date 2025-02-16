@@ -11,6 +11,7 @@ import UpdateProfileAvatar from '@/components/ui/update-profile-avatar';
 import { AppPages } from '@/constants/app-pages.constants';
 import { AppRegex } from '@/constants/app-regex.constants';
 import { StateKeys, USA_CITY_AND_STATES } from '@/constants/countries.constants';
+import { Mask } from '@/constants/global.constants';
 import { handleDeformatPhoneNumberForAPI, Signout, SignupPersonal } from '@/firebase/auth';
 import { useAppStore } from '@/hooks/use-app-store';
 import { cn } from '@/utils/cn.utils';

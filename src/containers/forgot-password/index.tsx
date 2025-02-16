@@ -6,6 +6,7 @@ import FieldInput from '@/components/form/field-input';
 import AuthCardLayout from '@/components/layout/auth-card-layout';
 import Link from '@/components/ui/link';
 import { AppPages } from '@/constants/app-pages.constants';
+import { Mask } from '@/constants/global.constants';
 import { ForgotPassword, handleDeformatPhoneNumberForAPI } from '@/firebase/auth';
 import { asyncGuard } from '@/utils/lodash.utils';
 import { ZOD } from '@/utils/zod.utils';

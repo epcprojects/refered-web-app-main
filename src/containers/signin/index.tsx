@@ -8,6 +8,7 @@ import FieldPasswordInput from '@/components/form/field-password-input';
 import AuthCardLayout from '@/components/layout/auth-card-layout';
 import Link from '@/components/ui/link';
 import { AppPages } from '@/constants/app-pages.constants';
+import { Mask } from '@/constants/global.constants';
 import { handleDeformatPhoneNumberForAPI, Signin, Signout } from '@/firebase/auth';
 import { useAppStore } from '@/hooks/use-app-store';
 import { asyncGuard } from '@/utils/lodash.utils';
