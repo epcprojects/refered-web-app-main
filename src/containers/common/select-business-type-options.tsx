@@ -33,6 +33,7 @@ export const businessOptionsSchema = z.object({
 
 const SelectBusinessTypeOptions: React.FC<IProps> = ({ handleSelectOption, selectedOption, handleGoBack, notForAuthPage }) => {
   const [isFetching, setIsFetching] = useState(false);
+  const [other, setOther] = useState(false);
   const [allOptions, setAllOptions] = useState<IBusinessType[]>([]);
   const [filteredOptions, setFilteredOptions] = useState<IBusinessType[]>([]);
   const [debouncedSearchTerm, setSearchTerm] = useDebounceValue('', 500);
@@ -95,22 +96,31 @@ const SelectBusinessTypeOptions: React.FC<IProps> = ({ handleSelectOption, selec
           )}
 
           {/* Other */}
-          <Form form={form} onSubmit={onSubmit} className="grid w-full gap-2.5">
-            <div className="relative border-solid">
-              <FieldInput form={form} name="category" placeholder="Enter Category" className="w-[calc(100%-60px)] border-gray-300" containerClassName="h-[50px] bg-transparent border-gray-300" />
-              <FieldButton
-                form={form}
-                type="submit"
-                label="Add"
-                variant="secondary"
-                style={{
-                  position: 'absolute',
-                  top: 7,
-                  right: 7,
-                }}
-              />
+          <div key={'other_business_opt'} className="group flex w-full cursor-pointer flex-row gap-1 rounded-md bg-background px-3 py-2.5" onClick={() => setOther(!other)}>
+            <div className="flex flex-1 flex-col gap-0">
+              <h3 className="text-sm font-semibold">Other</h3>
             </div>
-          </Form>
+            <RiCheckboxCircleFill size={20} className={cn('my-auto flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-20', other && '!opacity-100')} />
+          </div>
+
+          {other && (
+            <Form form={form} onSubmit={onSubmit} className="grid w-full gap-2.5">
+              <div className="relative border-solid">
+                <FieldInput form={form} name="category" placeholder="Enter Category" className="w-[calc(100%-60px)] border-gray-300" containerClassName="h-[50px] bg-transparent border-gray-300" />
+                <FieldButton
+                  form={form}
+                  type="submit"
+                  label="Add"
+                  variant="secondary"
+                  style={{
+                    position: 'absolute',
+                    top: 7,
+                    right: 7,
+                  }}
+                />
+              </div>
+            </Form>
+          )}
         </>
       )}
     </AuthCardLayout>
