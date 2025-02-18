@@ -12,13 +12,14 @@ import Image from 'next/image';
 import React, { useMemo } from 'react';
 import { toast } from 'sonner';
 import { useCopyToClipboard } from 'usehooks-ts';
+import ProfileListDialog from './profile-list-dialog';
 
 interface IProps {
   data: IProfileWithFavorites;
   classes?: string;
 }
 
-//TODO: Refactor this to remove redundant code (Similar here => profile-headere).
+//TODO: Refactor this to remove redundant code (Similar here => profile-header).
 const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
   const globalStore = useAppStore('Global');
   const [_, copy] = useCopyToClipboard();
@@ -65,7 +66,7 @@ const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
   return (
     <div className={`flex gap-2 ${classes}`}>
       <Button type="button" classes={{ container: 'w-full' }} label="Refer to Friend" variant="secondary" onClick={() => handleShareProfile()} leftElement={<Image src="/images/msg-ico.svg" alt="Message icon" width={24} height={24} />} />
-      <Button type="button" classes={{ container: 'w-full' }} label={'Connect with ' + data.FirstName || 'User'} variant="secondary" onClick={() => {}} leftElement={<Avatar src={data.ImageUrl} className="h-[24px] w-[24px] border-1 border-white bg-white" alt="Profile Picture" fallback={initials([data.FirstName, data.LastName].join(' ').trim()).slice(0, 2)} />} />
+      <ProfileListDialog data={data.mutualFavourites} triggerClass="w-full" trigger={<Button type="button" classes={{ container: 'w-full' }} label={'Connect with ' + data.FirstName || 'User'} variant="secondary" leftElement={<Avatar src={data.ImageUrl} className="h-[24px] w-[24px] border-1 border-white bg-white" alt="Profile Picture" fallback={initials([data.FirstName, data.LastName].join(' ').trim()).slice(0, 2)} />} />} />
     </div>
   );
 };

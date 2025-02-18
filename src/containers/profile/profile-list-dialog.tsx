@@ -8,19 +8,22 @@ import NextLink from 'next/link';
 import { RiNewsLine } from 'react-icons/ri';
 
 interface IProps {
-  count: number;
+  count?: number;
   data?: IFavorite[];
   shade?: 'dark' | 'light';
+  trigger?: React.ReactNode;
+  triggerClass?: string;
 }
 
-const ProfileListDialog: React.FC<IProps> = ({ count, data, shade = 'light' }) => (
+const ProfileListDialog: React.FC<IProps> = ({ count = 0, triggerClass = '', data, shade = 'light', trigger }) => (
   <Dialog>
-    <DialogTrigger onClick={(e) => e.stopPropagation()} className="text-start">
-      {count > 0 && (
-        <div className={`flex cursor-pointer items-center gap-1 rounded-full border-1 border-border ${shade === 'dark' ? 'border-black border-opacity-15' : ''} p-[3px] transition-all hover:bg-slate-100`}>
-          <span className="mr-0.5 w-max max-w-16 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] 2xs:max-w-10 xs:max-w-18">+ {count}</span>
-        </div>
-      )}
+    <DialogTrigger onClick={(e) => e.stopPropagation()} className={triggerClass + ' text-start'}>
+      {trigger ??
+        (count > 0 && (
+          <div className={`flex cursor-pointer items-center gap-1 rounded-full border-1 border-border ${shade === 'dark' ? 'border-black border-opacity-15' : ''} p-[3px] transition-all hover:bg-slate-100`}>
+            <span className="mr-0.5 w-max max-w-16 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] 2xs:max-w-10 xs:max-w-18">+ {count}</span>
+          </div>
+        ))}
     </DialogTrigger>
     <DialogContent style={{ background: '#FFFFFF' }}>
       <DialogTitle>Refer'd by</DialogTitle>
