@@ -103,7 +103,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   const getCompanyInfoConfig = () => [
     { icon: <RiClipboardLine size={15} />, title: data.BusinessName },
     { icon: <RiNewsLine size={15} />, title: data.BusinessTypeName },
-    data.City && data.State ? { icon: <RiMapPin2Line size={15} />, title: `${data.City} , ${data.State}` } : {},
+    data.City && data.State ? { icon: <RiMapPin2Line size={15} />, title: `${data.City}, ${data.State}` } : {},
     // { icon: <RiPhoneFill size={15} />, title: handleDeformatPhoneNumberForAPI(data.PhoneNo) },
   ];
 
