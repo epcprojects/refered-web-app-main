@@ -3,7 +3,6 @@
 import Avatar from '@/components/ui/avatar';
 import { Spinner } from '@/components/ui/spinner';
 import { AppPages } from '@/constants/app-pages.constants';
-import { handleDeformatPhoneNumberForAPI } from '@/firebase/auth';
 import { ToggleMarkFavorite } from '@/firebase/favorite';
 import { IProfile, IProfileWithFavorites } from '@/firebase/profile';
 import { uploadBlobToFirebase } from '@/firebase/upload';
@@ -13,7 +12,7 @@ import { asyncGuard, firebaseErrorMsg, initials } from '@/utils/lodash.utils';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
-import { RiAddLine, RiArrowLeftSLine, RiClipboardLine, RiHeart2Fill, RiHeart2Line, RiMapPin2Fill, RiNewsLine, RiPencilFill, RiPhoneFill, RiShareBoxLine } from 'react-icons/ri';
+import { RiAddLine, RiArrowLeftSLine, RiClipboardLine, RiEditBoxLine, RiHeart2Fill, RiHeart2Line, RiMapPin2Line, RiNewsLine, RiPencilFill, RiShareBoxLine } from 'react-icons/ri';
 import { toast } from 'sonner';
 import { useCopyToClipboard } from 'usehooks-ts';
 import { MutualFavourites } from './profile-referrals-list';
@@ -35,6 +34,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   const isBusinessProfile = useMemo(() => data.UserType === 'Business', [data]);
   const isMyProfile = useMemo(() => Boolean(globalStore?.currentUserProfile?.UserId === data.UserId), [data, globalStore]);
   const referralUrl = useMemo(() => `${process.env.NEXT_PUBLIC_FRONTEND_URL}${isBusinessProfile ? `${AppPages.REFERRAL}/${data.UserId}/${globalStore?.currentUserProfile?.UserId}` : `${AppPages.PROFILE}/${data.UserId}`}`, [data, isBusinessProfile, globalStore]);
+  const hasPaymentIdAdded = useMemo(() => Boolean(data.paypalId || data.cashAppId || data.venmoId), [data]);
 
   const handleGoBack = () => {
     if (document.referrer) router.back();
@@ -96,15 +96,15 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   ]
 
   const getPersonalInfoConfig = () => [
-    { icon: <RiMapPin2Fill size={15} />, title: data.groupData?.name || 'Region Not Specified' },
-    { icon: <RiPhoneFill size={15} />, title: handleDeformatPhoneNumberForAPI(data.PhoneNo) },
+    { icon: <RiMapPin2Line size={15} />, title: data.groupData?.name || 'Region Not Specified' },
+    // { icon: <RiPhoneFill size={15} />, title: handleDeformatPhoneNumberForAPI(data.PhoneNo) },
   ];
 
   const getCompanyInfoConfig = () => [
     { icon: <RiClipboardLine size={15} />, title: data.BusinessName },
     { icon: <RiNewsLine size={15} />, title: data.BusinessTypeName },
-    { icon: <RiMapPin2Fill size={15} />, title: data.groupData?.name || 'Region Not Specified' },
-    { icon: <RiPhoneFill size={15} />, title: handleDeformatPhoneNumberForAPI(data.PhoneNo) },
+    data.City && data.State ? { icon: <RiMapPin2Line size={15} />, title: `${data.City} , ${data.State}` } : {},
+    // { icon: <RiPhoneFill size={15} />, title: handleDeformatPhoneNumberForAPI(data.PhoneNo) },
   ];
 
   return (
@@ -134,7 +134,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
       </div>
       <div className="flex flex-row gap-3">
         <Avatar src={data.ImageUrl} alt={[data.FirstName, data.LastName].join(' ').trim()} fallback={initials([data.FirstName, data.LastName].join(' ').trim()).slice(0, 2)} className="!h-14 !w-14" />
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col justify-center gap-1">
           {!isProfileDetailsPage ? <h5 className="text-base font-medium">{[data.FirstName, data.LastName].join(' ').trim()}</h5> : null}
           {(isBusinessProfile ? getCompanyInfoConfig() : getPersonalInfoConfig()).map((item, index) => (
             <div key={index} className="flex flex-row items-center gap-2 text-sm font-normal">
@@ -147,10 +147,8 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
           {globalStore?.currentUser?.uid === data?.UserId && (
             <NextLink href={AppPages.EDIT_PROFILE + '?q=payment'} className="mt-3 rounded-full p-1 pl-0 transition-all duration-300 hover:bg-foreground/5 hover:pl-1">
               <button className="flex flex-row items-center gap-2 text-sm font-medium">
-                <span>
-                  <RiAddLine size={17} />
-                </span>
-                <span>Select Venmo, Paypal, CashApp</span>
+                <span>{hasPaymentIdAdded ? <RiEditBoxLine size={17} /> : <RiAddLine size={17} />}</span>
+                <span>{hasPaymentIdAdded ? 'Edit payment method' : 'Select Venmo, Paypal, CashApp'}</span>
               </button>
             </NextLink>
           )}

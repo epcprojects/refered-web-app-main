@@ -126,11 +126,11 @@ const SearchIndex: React.FC<IProps> = () => {
                       <div className="flex w-full max-w-full flex-1 flex-col overflow-hidden">
                         <h3 className="my-auto w-[97%] overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{group.seeMore === 'businesses' ? item.BusinessName?.trim() : [item.FirstName, item.LastName].join(' ').trim()}</h3>
                         <div className="mt-1.5">
-                          {item.groupData?.name && (
+                          {item.City && item.State && (
                             <div className="mb-1 flex gap-1 text-muted-foreground">
                               <RiMapPin2Line size={15} />
                               <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                                <span>{item.groupData?.name || 'No Region'}</span>
+                                <span>{item.City + ' - ' + item.State}</span>
                               </p>
                             </div>
                           )}

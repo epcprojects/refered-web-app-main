@@ -128,7 +128,7 @@ export const MutualFavourites: React.FC<IMutualFavourites> = ({ mutualFavourites
 };
 
 export const ReferralUserChip: React.FC<{ id: string; src?: string; name: string; shade?: 'dark' | 'light' }> = ({ id, src, name, shade = 'light' }) => (
-  <NextLink href={`${AppPages.PROFILE}/${id}`} className={`flex cursor-pointer items-center gap-1 rounded-full border-1 border-border ${shade === 'dark' ? 'border-black border-opacity-15' : ''} p-[3px] transition-all hover:bg-slate-100`}>
+  <NextLink href={`${AppPages.PROFILE}/${id}`} className={`flex cursor-pointer items-center gap-1 rounded-full border-1 ${shade === 'dark' ? 'border-black border-opacity-15' : 'border-border'} p-[3px] transition-all hover:bg-slate-100`}>
     <Avatar src={src} alt="Profile Picture" fallback={initials('Mohsin').slice(0, 1)} className="!h-4 !w-4" fallbackClassName="!text-[9px]" />
     <span className="mr-0.5 w-max max-w-16 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] 2xs:max-w-10 xs:max-w-18">{name}</span>
   </NextLink>

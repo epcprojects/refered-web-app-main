@@ -35,9 +35,9 @@ const profilePaymentInfoFormSchema = z.object({
 const ProfileEditFormPaymentInfo: React.FC<IProps> = ({ handleGoBack, data, handleGetFormData }) => {
   const router = useRouter();
   const globalStore = useAppStore('Global');
-  const [checked, setChecked] = useState<CheckedState>(false);
+  const form = useForm<profilePaymentInfoFormSchemaType>({ resolver: zodResolver(profilePaymentInfoFormSchema), defaultValues: { type: data.default ?? 'cashApp', cashAppId: data.cashAppId, paypalId: data.paypalId, venmoId: data.venmoId } });
 
-  const form = useForm<profilePaymentInfoFormSchemaType>({ resolver: zodResolver(profilePaymentInfoFormSchema), defaultValues: { type: 'cashApp', cashAppId: data.cashAppId, paypalId: data.paypalId, venmoId: data.venmoId } });
+  const [checked, setChecked] = useState<CheckedState>(form.getValues('type') === data?.default);
 
   const typeWatch = form.watch('type');
 
@@ -82,9 +82,9 @@ const ProfileEditFormPaymentInfo: React.FC<IProps> = ({ handleGoBack, data, hand
             </button>
           ))}
         </div>
-        {typeWatch === 'cashApp' ? <FieldInput form={form} name="cashAppId" placeholder={startCase(typeWatch + 'ID')} /> : null}
-        {typeWatch === 'paypal' ? <FieldInput form={form} name="paypalId" placeholder={startCase(typeWatch + 'ID')} /> : null}
-        {typeWatch === 'venmo' ? <FieldInput form={form} name="venmoId" placeholder={startCase(typeWatch + 'ID')} /> : null}
+        {typeWatch === 'cashApp' ? <FieldInput form={form} name="cashAppId" placeholder={startCase(typeWatch + 'ID')} required /> : null}
+        {typeWatch === 'paypal' ? <FieldInput form={form} name="paypalId" placeholder={startCase(typeWatch + 'ID')} required /> : null}
+        {typeWatch === 'venmo' ? <FieldInput form={form} name="venmoId" placeholder={startCase(typeWatch + 'ID')} required /> : null}
         <FieldCheckbox form={form} labelConfig={{ value: 'Mark it default' }} checked={checked} onCheckedChange={setChecked} name="markDefault" />
         <FieldButton form={form} type="submit" classes={{ container: 'w-full mt-2.5' }} label="Submit" variant="secondary" />
       </Form>
