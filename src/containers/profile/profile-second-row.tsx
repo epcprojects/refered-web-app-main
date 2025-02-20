@@ -4,7 +4,7 @@ import Avatar from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { AppPages } from '@/constants/app-pages.constants';
 import { IProfileWithFavorites } from '@/firebase/profile';
-import { uploadBlobToFirebase } from '@/firebase/upload';
+import { uploadOGImageToFirebase } from '@/firebase/upload';
 import { useAppStore } from '@/hooks/use-app-store';
 import { file } from '@/utils/file.utils';
 import { asyncGuard, firebaseErrorMsg, initials } from '@/utils/lodash.utils';
@@ -55,7 +55,7 @@ const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
 
     canvas.toBlob(async (blob) => {
       if (!blob) return;
-      const { result: imageUrl, error } = await asyncGuard(() => uploadBlobToFirebase({ blob: blob, userId, ext: 'webp', type: 'public' }));
+      const { result: imageUrl, error } = await asyncGuard(() => uploadOGImageToFirebase({ blob: blob, userId, ext: 'webp', type: 'public' }));
 
       if (error || !imageUrl) throw new Error(firebaseErrorMsg(error));
 

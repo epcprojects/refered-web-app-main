@@ -1,11 +1,12 @@
 import { handleCheckIfUserExists, handleDeleteInCompleteUser } from '@/actions/firebase-admin';
 import { firebase } from '@/firebase';
 import { globalStore } from '@/stores/app-global-store';
+import { file } from '@/utils/file.utils';
 import { asyncGuard, firebaseErrorMsg, generateTokensForSentence } from '@/utils/lodash.utils';
 import { ConfirmationResult, createUserWithEmailAndPassword, deleteUser, EmailAuthProvider, linkWithPhoneNumber, signInWithCredential, signInWithPhoneNumber, signOut, updatePassword, User } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { GetProfileData, IProfile, MarkProfileAsVerified } from './profile';
-import { UploadFile } from './upload';
+import { UploadFile, uploadOGImageToFirebase } from './upload';
 
 // +1 Added for USA format
 export const handleDeformatPhoneNumberForAPI = (phoneNo: string) => (phoneNo === undefined ? '' : `+1${phoneNo.replace(/[^0-9]/g, '')}`);
@@ -27,6 +28,19 @@ export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>
     try {
       const uploadedUrl = await UploadFile({ file: body.profileImageFile, type: 'avatar' });
       imageUrl = uploadedUrl;
+
+      const canvas = await file.generateShareableCard({
+        src: uploadedUrl,
+        title: (body.FirstName + ' ' + body.LastName).trim(),
+        headline: `${body.BusinessTypeName ?? body.City} • ${body.BusinessName ?? body.State}`,
+      });
+
+      if (canvas) {
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          await asyncGuard(() => uploadOGImageToFirebase({ blob: blob, userId: signedUpUser.uid, ext: 'webp', type: 'public' }));
+        }, 'image/webp');
+      }
     } catch (error) {
       console.error('Error uploading DP:', error);
       await deleteUser(signedUpUser);
@@ -81,6 +95,18 @@ export const SignupPersonal = async (body: Omit<SignupPersonal_Body, 'UserType'>
     try {
       const uploadedUrl = await UploadFile({ file: body.profileImageFile, type: 'avatar' });
       imageUrl = uploadedUrl;
+
+      const canvas = await file.generateShareableCard({
+        src: uploadedUrl,
+        title: (body.FirstName + ' ' + body.LastName).trim(),
+      });
+
+      if (canvas) {
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          await asyncGuard(() => uploadOGImageToFirebase({ blob: blob, userId: signedUpUser.uid, ext: 'webp', type: 'public' }));
+        }, 'image/webp');
+      }
     } catch (error) {
       console.error('Error uploading DP:', error);
       await deleteUser(signedUpUser);

@@ -1,6 +1,5 @@
 import { asyncGuard, firebaseErrorMsg } from '@/utils/lodash.utils';
 import { generateUUID } from '@/utils/misc.utils';
-import { FirebaseError } from 'firebase/app';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { firebase } from '.';
 
@@ -21,23 +20,20 @@ export const UploadFile = async (body: UploadFile_Body): UploadFile_Response => 
 };
 
 export type UploadBlob_Body = { userId: string; blob: Blob; type: keyof typeof StorageFolders; ext: 'webp' };
-export const uploadBlobToFirebase = async (body: UploadBlob_Body) => {
+
+export const uploadOGImageToFirebase = async (body: UploadBlob_Body) => {
   const { userId, blob, type, ext } = body;
-  const imagePath = `${StorageFolders[type]}/referd_${userId}.${ext}`;
+  const imagePath = `${StorageFolders[type]}/og_image_${userId}.${ext}`;
   const imageRef = ref(firebase.storage, imagePath);
 
   try {
-    // Check if the image already exists
-    await getDownloadURL(imageRef);
-    return await getDownloadURL(imageRef);
-  } catch (error) {
-    if (error instanceof FirebaseError && (error.code === 'storage/object-not-found' || error.code === '404')) {
-      // Upload new image
-      const response = await asyncGuard(() => uploadBytes(imageRef, blob));
-      if (response.error !== null || response.result === null) throw new Error(firebaseErrorMsg(response.error));
+    // Upload new image (this will replace any existing file)
+    const response = await asyncGuard(() => uploadBytes(imageRef, blob));
+    if (response.error !== null || response.result === null) throw new Error(firebaseErrorMsg(response.error));
 
-      return await getDownloadURL(response.result.ref);
-    }
-    throw error;
+    // Return the download URL of the uploaded image
+    return await getDownloadURL(response.result.ref);
+  } catch (error) {
+    throw error; // Rethrow any errors that occur during upload
   }
 };

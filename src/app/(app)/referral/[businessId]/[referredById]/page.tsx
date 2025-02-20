@@ -19,7 +19,7 @@ export async function generateMetadata({ params, searchParams }: { params: Param
   const { businessId, referredById } = params;
   const { n = '', btN = '', bN = '' } = searchParams; // Default to empty string if undefined
 
-  const imageUrl = `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_URL}/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/Public%2Freferd_${businessId}.webp?alt=media`;
+  const imageUrl = `${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_URL}/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/Public%2Fog_image_${businessId}.webp?alt=media`;
 
   return {
     title: 'Refer`d',

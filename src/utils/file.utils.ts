@@ -1,5 +1,3 @@
-import { IProfileWithFavorites } from '@/firebase/profile';
-
 const ConvertMBstoBytes = (MBs: number) => MBs * (1024 * 1024);
 const allowedImageFormats = ['png', 'jpg', 'gif', 'webp'];
 
@@ -22,21 +20,25 @@ const loadImage = (src: string): Promise<HTMLImageElement> => {
 };
 
 // Generate the profile image with background
-const generateShareableCard = async (data: IProfileWithFavorites) => {
+interface IImageOG {
+  src: string;
+  title?: string;
+  headline?: string;
+}
+const generateShareableCard = async ({ src, headline = '', title = '' }: IImageOG) => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
   const backgroundSrc = '/images/bg-refered.png'; // Background Image
-  const profileSrc = data.ImageUrl; // User's Profile Picture
   const overlaySize = 256;
 
-  if (!profileSrc) return null;
+  if (!src) return null;
 
   const background = new Image();
   background.src = backgroundSrc;
 
-  const profile = await loadImage(profileSrc);
+  const profile = await loadImage(src);
 
   canvas.width = background.width;
   canvas.height = background.height;
@@ -81,14 +83,17 @@ const generateShareableCard = async (data: IProfileWithFavorites) => {
   ctx.strokeStyle = 'black';
   ctx.lineWidth = 4;
 
-  // Add User Name Below Image
   const nameY = y + overlaySize + 40; // Adjusted for spacing
-  ctx.fillText(data.FirstName, canvas.width / 2, nameY);
 
-  if (data.BusinessTypeName || data.BusinessName) {
+  // Add title Below Image
+  if (title) {
+    ctx.fillText(title, canvas.width / 2, nameY);
+  }
+
+  if (headline) {
     ctx.font = '18px Arial'; // Smaller font size for subtitle
-    const titleY = nameY + 35; // Slightly below the name
-    ctx.fillText(data.BusinessTypeName + ' • ' + data.BusinessName, canvas.width / 2, titleY);
+    const titleY = nameY + 35; // Slightly below the name  •
+    ctx.fillText(headline, canvas.width / 2, titleY);
   }
   return canvas;
 };

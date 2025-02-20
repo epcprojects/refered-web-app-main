@@ -5,10 +5,8 @@ import { Spinner } from '@/components/ui/spinner';
 import { AppPages } from '@/constants/app-pages.constants';
 import { ToggleMarkFavorite } from '@/firebase/favorite';
 import { IProfile, IProfileWithFavorites } from '@/firebase/profile';
-import { uploadBlobToFirebase } from '@/firebase/upload';
 import { useAppStore } from '@/hooks/use-app-store';
-import { file } from '@/utils/file.utils';
-import { asyncGuard, firebaseErrorMsg, initials } from '@/utils/lodash.utils';
+import { asyncGuard, initials } from '@/utils/lodash.utils';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
@@ -42,7 +40,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   };
 
   const shareReferralLink = async (referralUrl: string) => {
-    if (navigator.share) {
+    if (typeof window !== 'undefined' && navigator.share) {
       const response = await asyncGuard(() => navigator.share({ title: 'Referral Link', text: 'Share this referral link!', url: referralUrl }));
       if (!response.error) {
         const copied = await asyncGuard(() => copy(referralUrl));
@@ -55,25 +53,12 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   };
 
   const handleShareProfile = async () => {
-    if (typeof window === 'undefined') return;
-
     if (isMyProfile) {
       await shareReferralLink(referralUrl);
       return;
     }
 
-    const userId = data.UserId;
-    const canvas = await file.generateShareableCard(data);
-    if (!canvas) return;
-
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-      const { result: imageUrl, error } = await asyncGuard(() => uploadBlobToFirebase({ blob: blob, userId, ext: 'webp', type: 'public' }));
-
-      if (error || !imageUrl) throw new Error(firebaseErrorMsg(error));
-
-      await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
-    }, 'image/webp');
+    await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
   };
 
   const handleToggleFavorite = async () => {
@@ -96,7 +81,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   ]
 
   const getPersonalInfoConfig = () => [
-    { icon: <RiMapPin2Line size={15} />, title: data.groupData?.name || 'Region Not Specified' },
+    data.City && data.State ? { icon: <RiMapPin2Line size={15} />, title: `${data.City}, ${data.State}` } : {},
     // { icon: <RiPhoneFill size={15} />, title: handleDeformatPhoneNumberForAPI(data.PhoneNo) },
   ];
 
@@ -145,7 +130,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
 
           {/* Select Payment */}
           {globalStore?.currentUser?.uid === data?.UserId && (
-            <NextLink href={AppPages.EDIT_PROFILE + '?q=payment'} className="mt-3 rounded-full p-1 pl-0 transition-all duration-300 hover:bg-foreground/5 hover:pl-1">
+            <NextLink href={AppPages.EDIT_PROFILE + '?q=payment'} className="rounded-full p-1 pl-0 transition-all duration-300 hover:bg-foreground/5 hover:pl-1">
               <button className="flex flex-row items-center gap-2 text-sm font-medium">
                 <span>{hasPaymentIdAdded ? <RiEditBoxLine size={17} /> : <RiAddLine size={17} />}</span>
                 <span>{hasPaymentIdAdded ? 'Edit payment method' : 'Select Venmo, Paypal, CashApp'}</span>
