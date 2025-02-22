@@ -5,8 +5,9 @@ import { AppPages } from '@/constants/app-pages.constants';
 import { AppRegex } from '@/constants/app-regex.constants';
 import { handleDeformatPhoneNumberForAPI } from '@/firebase/auth';
 import { IProfileWithFavorites, UpdateBusinessUserProfile, UpdatePersonalUserProfile } from '@/firebase/profile';
-import { UploadFile } from '@/firebase/upload';
+import { UploadFile, uploadOGImageToFirebase } from '@/firebase/upload';
 import { useAppStore } from '@/hooks/use-app-store';
+import { file } from '@/utils/file.utils';
 import { asyncGuard } from '@/utils/lodash.utils';
 import { ZOD } from '@/utils/zod.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -132,7 +133,7 @@ const ProfileEditForm: React.FC<IProps> = ({ data }) => {
       return;
     }
 
-    const { firstName, lastName, email, groupId, groupName, description, businessTypeId, businessTypeName, businessName, discountPercent, referralAmount, zip } = values;
+    const { firstName, lastName, email, groupId, groupName, description, businessTypeId, businessTypeName, businessName, discountPercent, referralAmount, zip, cities, states } = values;
     let uploadedProfilePicUrl = data.ImageUrl || '';
 
     if (isBusinessForm && Number(referralAmount) < 5) {
@@ -142,7 +143,22 @@ const ProfileEditForm: React.FC<IProps> = ({ data }) => {
 
     if (selectedProfilePic !== null) {
       const uploadImageResponse = await asyncGuard(() => UploadFile({ type: 'avatar', file: selectedProfilePic }));
-      if (uploadImageResponse.result !== null) uploadedProfilePicUrl = uploadImageResponse.result;
+      if (uploadImageResponse.result !== null) {
+        uploadedProfilePicUrl = uploadImageResponse.result;
+
+        const canvas = await file.generateShareableCard({
+          src: uploadedProfilePicUrl,
+          title: (firstName + ' ' + lastName).trim(),
+          headline: `${businessTypeName ?? cities} • ${businessName ?? states}`,
+        });
+
+        if (canvas) {
+          canvas.toBlob(async (blob) => {
+            if (!blob) return;
+            await asyncGuard(() => uploadOGImageToFirebase({ blob: blob, userId: data.UserId, ext: 'webp', type: 'public' }));
+          }, 'image/webp');
+        }
+      }
     }
 
     if (isBusinessForm) {

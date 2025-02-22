@@ -3,13 +3,12 @@
 import Avatar from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { AppPages } from '@/constants/app-pages.constants';
+import { IFavorite } from '@/firebase/favorite';
 import { IProfileWithFavorites } from '@/firebase/profile';
-import { uploadOGImageToFirebase } from '@/firebase/upload';
-import { useAppStore } from '@/hooks/use-app-store';
-import { file } from '@/utils/file.utils';
-import { asyncGuard, firebaseErrorMsg, initials } from '@/utils/lodash.utils';
+import { asyncGuard, initials } from '@/utils/lodash.utils';
+import { useCreateReferral } from '@/utils/use-hooks.utils';
 import Image from 'next/image';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { useCopyToClipboard } from 'usehooks-ts';
 import ProfileListDialog from './profile-list-dialog';
@@ -21,12 +20,14 @@ interface IProps {
 
 //TODO: Refactor this to remove redundant code (Similar here => profile-header).
 const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
-  const globalStore = useAppStore('Global');
+  const { handleCreateReferral, globalStore, isCreatingReferral } = useCreateReferral();
   const [_, copy] = useCopyToClipboard();
 
+  const connectButtonRef = useRef<HTMLButtonElement>(null);
+  const authUserId = globalStore?.currentUserProfile?.UserId || '';
   const isBusinessProfile = useMemo(() => data.UserType === 'Business', [data]);
-  const isMyProfile = useMemo(() => Boolean(globalStore?.currentUserProfile?.UserId === data.UserId), [data, globalStore]);
-  const referralUrl = useMemo(() => `${process.env.NEXT_PUBLIC_FRONTEND_URL}${isBusinessProfile ? `${AppPages.REFERRAL}/${data.UserId}/${globalStore?.currentUserProfile?.UserId}` : `${AppPages.PROFILE}/${data.UserId}`}`, [data, isBusinessProfile, globalStore]);
+  const isMyProfile = useMemo(() => Boolean(authUserId === data.UserId), [data, globalStore]);
+  const referralUrl = useMemo(() => `${process.env.NEXT_PUBLIC_FRONTEND_URL}${isBusinessProfile ? `${AppPages.REFERRAL}/${data.UserId}/${authUserId}` : `${AppPages.PROFILE}/${data.UserId}`}`, [data, isBusinessProfile, globalStore]);
 
   const shareReferralLink = async (referralUrl: string) => {
     if (navigator.share) {
@@ -41,32 +42,43 @@ const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
     }
   };
 
-  const handleShareProfile = async () => {
-    if (typeof window === 'undefined') return;
+  const onUserClickFromList = async (user: IFavorite) => {
+    const { ProfileId: referredById } = user || {}; //Using `ProfileId` here as `UserId` is inconsistent and showing the `BusinessId`
+    const businessId = data.UserId;
 
+    await handleCreateReferral(businessId, referredById);
+  };
+
+  const iReferBusinessToMyself = async () => {
+    if (data.mutualFavourites?.length) return;
+
+    const businessId = data.UserId;
+    await handleCreateReferral(businessId, authUserId, true);
+  };
+
+  const handleShareProfile = async () => {
     if (isMyProfile) {
       await shareReferralLink(referralUrl);
       return;
     }
 
-    const userId = data.UserId;
-    const canvas = await file.generateShareableCard(data);
-    if (!canvas) return;
+    await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
+  };
 
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-      const { result: imageUrl, error } = await asyncGuard(() => uploadOGImageToFirebase({ blob: blob, userId, ext: 'webp', type: 'public' }));
+  const Elements = {
+    Refer: { left: <Image src="/images/msg-ico.svg" alt="Message icon" width={24} height={24} /> },
+    Connect: { left: <Avatar src={data.ImageUrl} className="h-[24px] w-[24px] border-1 border-white bg-white" alt="Profile Picture" fallback={initials([data.FirstName, data.LastName].join(' ').trim()).slice(0, 2)} /> },
+  };
 
-      if (error || !imageUrl) throw new Error(firebaseErrorMsg(error));
-
-      await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
-    }, 'image/webp');
+  const Buttons = {
+    Refer: <Button type="button" classes={{ container: 'w-full' }} label="Refer to Friend" variant="secondary" onClick={() => handleShareProfile()} leftElement={Elements.Refer.left} />,
+    Connect: <Button ref={connectButtonRef} type="button" isLoading={isCreatingReferral} classes={{ container: 'w-full' }} label={'Connect with ' + data.FirstName || 'User'} variant="secondary" onClick={iReferBusinessToMyself} leftElement={Elements.Connect.left} />,
   };
 
   return (
     <div className={`flex gap-2 ${classes}`}>
-      <Button type="button" classes={{ container: 'w-full' }} label="Refer to Friend" variant="secondary" onClick={() => handleShareProfile()} leftElement={<Image src="/images/msg-ico.svg" alt="Message icon" width={24} height={24} />} />
-      <ProfileListDialog data={data.mutualFavourites} triggerClass="w-full" trigger={<Button type="button" classes={{ container: 'w-full' }} label={'Connect with ' + data.FirstName || 'User'} variant="secondary" leftElement={<Avatar src={data.ImageUrl} className="h-[24px] w-[24px] border-1 border-white bg-white" alt="Profile Picture" fallback={initials([data.FirstName, data.LastName].join(' ').trim()).slice(0, 2)} />} />} />
+      {Buttons.Refer}
+      <ProfileListDialog data={data.mutualFavourites} triggerClass="w-full" trigger={Buttons.Connect} showDialog={true} onUserClick={onUserClickFromList} dialogLoading={isCreatingReferral} />
     </div>
   );
 };

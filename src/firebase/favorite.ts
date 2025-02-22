@@ -3,7 +3,7 @@ import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, Ti
 import { firebase } from '.';
 import { IProfile } from './profile';
 
-export interface IFavorite extends Pick<IProfile, 'BusinessId' | 'BusinessName' | 'BusinessTypeName' | 'FirstName' | 'LastName' | 'ImageUrl' | 'UserId' | 'UserType' | 'email'> {
+export interface IFavorite extends Pick<IProfile, 'City' | 'State' | 'BusinessId' | 'BusinessName' | 'BusinessTypeName' | 'FirstName' | 'LastName' | 'ImageUrl' | 'UserId' | 'UserType' | 'email'> {
   id: string;
   ProfileId: string;
   favoritedAt: Timestamp;

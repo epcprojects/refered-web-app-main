@@ -3,61 +3,21 @@
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { AppPages } from '@/constants/app-pages.constants';
-import { CreateReferral } from '@/firebase/referral';
-import { useAppStore } from '@/hooks/use-app-store';
-import { asyncGuard } from '@/utils/lodash.utils';
-import { Timestamp } from 'firebase/firestore';
+import { useCreateReferral } from '@/utils/use-hooks.utils';
 import Image from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { useParams } from 'next/navigation';
+import React, { useEffect } from 'react';
 
 interface IProps {}
 
 const ReferralIndex: React.FC<IProps> = () => {
-  const router = useRouter();
-  const globalStore = useAppStore('Global');
+  const { router, handleCreateReferral, globalStore, isCreatingReferral, error } = useCreateReferral();
   const params = useParams<{ businessId: string; referredById: string }>();
 
-  const [isCreatingReferral, setIsCreatingReferral] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const handleGoToProfile = () => router.replace(AppPages.HOME);
-  const handleCreateReferral = async () => {
-    if (globalStore === null || globalStore.currentUser === null || globalStore.currentUserProfile === null) return;
-
-    const currentUser = globalStore.currentUser;
-    const currentUserProfile = globalStore.currentUserProfile;
-
-    if (params.businessId === currentUser.uid) {
-      setError('You cannot redeem your own referral!');
-      return;
-    }
-
-    if (params.referredById === currentUser.uid) {
-      setError('You cannot redeem your own referral!');
-      return;
-    }
-
-    setIsCreatingReferral(true);
-    const response = await asyncGuard(() => CreateReferral({ referredToUserId: currentUser.uid, referredByUserId: params.referredById, referredBusinessUserId: params.businessId, datetime: Timestamp.now(), isRedeemed: '0', referredToUserProfileData: currentUserProfile }));
-    if (response.error !== null || response.result === null) {
-      toast.error(response.error?.toString() || 'Something went wrong!');
-      setError('Referral link is either invalid or broken!');
-      setIsCreatingReferral(false);
-    } else {
-      if (response.result.isSuccess === false) {
-        setError('Referral is already open with this business!');
-        setIsCreatingReferral(false);
-      } else {
-        toast.success('Referral created successfully!');
-        router.replace(AppPages.HOME);
-      }
-    }
-  };
 
   useEffect(() => {
-    handleCreateReferral();
+    handleCreateReferral(params.businessId, params.referredById);
   }, [globalStore?.currentUser]);
 
   return (
