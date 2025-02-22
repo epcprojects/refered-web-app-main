@@ -26,7 +26,7 @@ const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
   const connectButtonRef = useRef<HTMLButtonElement>(null);
   const authUserId = globalStore?.currentUserProfile?.UserId || '';
   const isBusinessProfile = useMemo(() => data.UserType === 'Business', [data]);
-  const isMyProfile = useMemo(() => Boolean(authUserId === data.UserId), [data, globalStore]);
+  // const isMyProfile = useMemo(() => Boolean(authUserId === data.UserId), [data, globalStore]);
   const referralUrl = useMemo(() => `${process.env.NEXT_PUBLIC_FRONTEND_URL}${isBusinessProfile ? `${AppPages.REFERRAL}/${data.UserId}/${authUserId}` : `${AppPages.PROFILE}/${data.UserId}`}`, [data, isBusinessProfile, globalStore]);
 
   const shareReferralLink = async (referralUrl: string) => {
@@ -57,11 +57,6 @@ const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
   };
 
   const handleShareProfile = async () => {
-    if (isMyProfile) {
-      await shareReferralLink(referralUrl);
-      return;
-    }
-
     await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
   };
 
