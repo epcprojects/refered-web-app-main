@@ -86,7 +86,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ variant, size
 
   if (!tooltip) return comp;
   return (
-    <Tooltip>
+    <Tooltip disableHoverableContent>
       <TooltipTrigger asChild>{comp}</TooltipTrigger>
       <TooltipContent className="Tooltip">{tooltip}</TooltipContent>
     </Tooltip>

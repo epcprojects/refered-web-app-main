@@ -66,8 +66,8 @@ const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
   };
 
   const Buttons = {
-    Refer: <Button type="button" classes={{ container: 'w-full' }} label="Refer to Friend" variant="secondary" onClick={() => handleShareProfile()} leftElement={Elements.Refer.left} />,
-    Connect: <Button ref={connectButtonRef} type="button" isLoading={isCreatingReferral} classes={{ container: 'w-full' }} label={'Connect with ' + data.FirstName || 'User'} variant="secondary" onClick={iReferBusinessToMyself} leftElement={Elements.Connect.left} />,
+    Refer: <Button type="button" classes={{ container: 'w-full', label: 'not-sr-only' }} label="Refer to Friend" variant="secondary" onClick={() => handleShareProfile()} leftElement={Elements.Refer.left} />,
+    Connect: <Button ref={connectButtonRef} type="button" isLoading={isCreatingReferral} classes={{ container: 'w-full', label: 'not-sr-only' }} label={'Connect with ' + data.FirstName || 'User'} variant="secondary" onClick={iReferBusinessToMyself} leftElement={Elements.Connect.left} />,
   };
 
   return (
