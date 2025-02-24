@@ -1,12 +1,11 @@
 'use client';
 
-import FieldSelectDropdown from '@/components/form/field-dropdown';
 import FieldInput from '@/components/form/field-input';
 import FieldSelectButton from '@/components/form/field-select-button';
 import FieldTextarea from '@/components/form/field-textarea';
-import { StateKeys, USA_CITY_AND_STATES } from '@/constants/countries.constants';
+import StateCitySelect from '@/components/form/state-city-select';
 import Image from 'next/image';
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { RiLock2Fill } from 'react-icons/ri';
 import { businessProfileFormSchemaType } from './profile-edit-form';
@@ -14,26 +13,12 @@ import { businessProfileFormSchemaType } from './profile-edit-form';
 interface IProps {
   form: UseFormReturn<businessProfileFormSchemaType>;
   handleToggleOpenBusinessTypeOptions: () => void;
-  handleToggleOpenGroupOptions: () => void;
   selectedProfilePic: File | null;
   isBusinessForm: boolean;
 }
 
-const ProfileEditFormBody: React.FC<IProps> = ({ form, isBusinessForm, handleToggleOpenBusinessTypeOptions, handleToggleOpenGroupOptions }) => {
+const ProfileEditFormBody: React.FC<IProps> = ({ form, isBusinessForm, handleToggleOpenBusinessTypeOptions }) => {
   const referralAmountWatch = form.watch('referralAmount');
-
-  const USA_STATES = Object.keys(USA_CITY_AND_STATES).map((val) => ({ label: val, value: val }));
-
-  const [DEFAULT_SELECTED_STATE, SET_DEFAULT_SELECTED_STATE] = useState<StateKeys>('California');
-
-  const USE_CITIES_OF_SELECTED_STATE = useCallback(() => {
-    return USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE].map((val) => ({ label: val, value: val }));
-  }, [DEFAULT_SELECTED_STATE]);
-
-  useEffect(() => {
-    form.setValue('states', DEFAULT_SELECTED_STATE);
-    form.setValue('cities', USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE][0]);
-  }, []);
 
   return (
     <div className="grid w-full gap-2.5 p-4">
@@ -48,20 +33,7 @@ const ProfileEditFormBody: React.FC<IProps> = ({ form, isBusinessForm, handleTog
         <FieldInput form={form} name="lastName" placeholder="Last Name" />
       </div>
       <FieldInput form={form} name="phoneNumber" placeholder="Phone Number" disabled rightElement={<RiLock2Fill size={18} />} containerClassName="opacity-100" />
-      <div className="grid w-full grid-cols-2 gap-2.5">
-        <FieldSelectDropdown
-          form={form}
-          options={USA_STATES}
-          defaultValue={form.getValues('states') ?? DEFAULT_SELECTED_STATE}
-          onChange={(value) => {
-            SET_DEFAULT_SELECTED_STATE(value as StateKeys);
-          }}
-          placeholder="State"
-          name="states"
-        />
-        <FieldSelectDropdown form={form} options={USE_CITIES_OF_SELECTED_STATE()} defaultValue={USE_CITIES_OF_SELECTED_STATE()[0].value} placeholder="City" name="cities" />
-      </div>
-      <FieldSelectButton form={form} name="groupName" placeholder="Select from Group" className="mb-2" onClick={handleToggleOpenGroupOptions} />
+      <StateCitySelect form={form} />
       {!isBusinessForm ? null : (
         <div className="grid w-full grid-cols-2 gap-4">
           <FieldInput form={form} type="number" name="zip" placeholder="Zip Code" />

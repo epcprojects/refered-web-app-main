@@ -2,15 +2,14 @@
 
 import { Form } from '@/components/form';
 import FieldButton from '@/components/form/field-button';
-import FieldSelectDropdown from '@/components/form/field-dropdown';
 import FieldInput from '@/components/form/field-input';
 import FieldPasswordInput from '@/components/form/field-password-input';
+import StateCitySelect from '@/components/form/state-city-select';
 import AuthCardLayout from '@/components/layout/auth-card-layout';
 import Link from '@/components/ui/link';
 import UpdateProfileAvatar from '@/components/ui/update-profile-avatar';
 import { AppPages } from '@/constants/app-pages.constants';
 import { AppRegex } from '@/constants/app-regex.constants';
-import { StateKeys, USA_CITY_AND_STATES } from '@/constants/countries.constants';
 import { Mask } from '@/constants/global.constants';
 import { handleDeformatPhoneNumberForAPI, Signout, SignupPersonal } from '@/firebase/auth';
 import { useAppStore } from '@/hooks/use-app-store';
@@ -19,7 +18,7 @@ import { asyncGuard } from '@/utils/lodash.utils';
 import { ZOD } from '@/utils/zod.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiCheckboxCircleLine } from 'react-icons/ri';
 import { toast } from 'sonner';
@@ -57,13 +56,6 @@ export const signupPersonalFormSchema = z.object({
 const SignupPersonalForm: React.FC<IProps> = ({ handleGoBack }) => {
   const router = useRouter();
   const globalStore = useAppStore('Global');
-  const USA_STATES = Object.keys(USA_CITY_AND_STATES).map((val) => ({ label: val, value: val }));
-
-  const [DEFAULT_SELECTED_STATE, SET_DEFAULT_SELECTED_STATE] = useState<StateKeys>('California');
-
-  const USE_CITIES_OF_SELECTED_STATE = useCallback(() => {
-    return USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE].map((val) => ({ label: val, value: val }));
-  }, [DEFAULT_SELECTED_STATE]);
 
   const form = useForm<signupPersonalFormSchemaType>({ resolver: zodResolver(signupPersonalFormSchema) });
   const [selectedProfilePic, setSelectedProfilePic] = useState<File | null>(null);
@@ -89,9 +81,6 @@ const SignupPersonalForm: React.FC<IProps> = ({ handleGoBack }) => {
 
   useEffect(() => {
     if (!!passwordWatch) form.trigger('password');
-
-    form.setValue('states', DEFAULT_SELECTED_STATE);
-    form.setValue('cities', USA_CITY_AND_STATES[DEFAULT_SELECTED_STATE][0]);
   }, [passwordWatch]);
 
   return (
@@ -103,19 +92,8 @@ const SignupPersonalForm: React.FC<IProps> = ({ handleGoBack }) => {
           <FieldInput form={form} name="lastName" placeholder="Last Name" />
         </div>
         <FieldInput form={form} name="phoneNumber" mask={Mask.USA} placeholder="Phone Number" />
-        <div className="grid w-full grid-cols-2 gap-2.5">
-          <FieldSelectDropdown
-            form={form}
-            options={USA_STATES}
-            defaultValue={DEFAULT_SELECTED_STATE}
-            onChange={(value) => {
-              SET_DEFAULT_SELECTED_STATE(value as StateKeys);
-            }}
-            placeholder="State"
-            name="states"
-          />
-          <FieldSelectDropdown form={form} options={USE_CITIES_OF_SELECTED_STATE()} defaultValue={USE_CITIES_OF_SELECTED_STATE()[0].value} placeholder="City" name="cities" />
-        </div>
+        <StateCitySelect form={form} />
+
         {/* <FieldPhoneNumberNew form={form} name="phoneNumber" placeholder="Phone Number" /> */}
         <FieldInput form={form} name="email" placeholder="Email Address" />
         {/* <div className="mb-1">

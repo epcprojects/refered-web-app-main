@@ -178,7 +178,7 @@ export const GetProfileById = async (body: GetProfileById_Body): GetProfileById_
   return profileData;
 };
 
-export type UpdatePersonalUserProfile_Body = Pick<IProfile, 'id' | 'FirstName' | 'LastName' | 'userEmail' | 'ImageUrl' | 'GroupId'>;
+export type UpdatePersonalUserProfile_Body = Pick<IProfile, 'id' | 'FirstName' | 'LastName' | 'userEmail' | 'City' | 'State' | 'ImageUrl' | 'GroupId'>;
 export type UpdatePersonalUserProfile_Response = Promise<IProfile>;
 export const UpdatePersonalUserProfile = async ({ id, ...body }: UpdatePersonalUserProfile_Body): UpdatePersonalUserProfile_Response => {
   const querySnapshot = await getDocs(getProfileByUserIdQuery(id));
@@ -188,7 +188,7 @@ export const UpdatePersonalUserProfile = async ({ id, ...body }: UpdatePersonalU
   return { ...querySnapshot.docs[0].data(), id: querySnapshot.docs[0].id, ...body } as IProfile;
 };
 
-export type UpdateBusinessUserProfile_Body = Pick<IProfile, 'id' | 'FirstName' | 'LastName' | 'userEmail' | 'ImageUrl' | 'BusinessId' | 'BusinessTypeName' | 'BusinessName' | 'GroupId' | 'About' | 'ReferralAmount' | 'DiscountPercent' | 'ZipCode'>;
+export type UpdateBusinessUserProfile_Body = Pick<IProfile, 'id' | 'FirstName' | 'LastName' | 'userEmail' | 'ImageUrl' | 'BusinessId' | 'BusinessTypeName' | 'BusinessName' | 'City' | 'State' | 'GroupId' | 'About' | 'ReferralAmount' | 'DiscountPercent' | 'ZipCode'>;
 export type UpdateBusinessUserProfile_Response = Promise<IProfile>;
 export const UpdateBusinessUserProfile = async ({ id, ...body }: UpdateBusinessUserProfile_Body): UpdateBusinessUserProfile_Response => {
   const querySnapshot = await getDocs(getProfileByUserIdQuery(id));

@@ -17,7 +17,6 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import SelectBusinessTypeOptions from '../common/select-business-type-options';
-import SelectGroupOptions from '../common/select-group-options';
 import ProfileEditFormBody from './profile-edit-form-body';
 import ProfileEditFormHeader from './profile-edit-form-header';
 import ProfileEditFormPaymentInfo from './profile-edit-form-payment-info';
@@ -48,8 +47,6 @@ export const businessProfileFormSchema = z.object({
   phoneNumber: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
   states: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
   cities: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
-  groupName: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(1, { message: ZOD.ERROR.REQUIRED() }).trim(),
-  groupId: z.string({ required_error: ZOD.ERROR.REQUIRED() }).min(1, { message: ZOD.ERROR.REQUIRED() }).trim(),
   zip: z.coerce
     .string({ required_error: ZOD.ERROR.REQUIRED() })
     .min(1, { message: ZOD.ERROR.REQUIRED() })
@@ -83,8 +80,7 @@ const businessProfileFormDefaultValues = (data: IProps['data']): businessProfile
   phoneNumber: handleDeformatPhoneNumberForAPI(data.PhoneNo) || '',
   cities: data.City || '',
   states: data.State || '',
-  groupName: data.groupData?.name || '',
-  groupId: data.groupData?.id || '',
+
   zip: data.UserType === 'Normal' ? '0' : data.ZipCode || '',
   discountPercent: data.UserType === 'Normal' ? '0' : data.DiscountPercent || '',
   description: data.UserType === 'Normal' ? '0' : data.About || '',
@@ -101,13 +97,10 @@ const ProfileEditForm: React.FC<IProps> = ({ data }) => {
 
   const businessTypeNameWatch = form.watch('businessTypeName');
   const businessTypeIdWatch = form.watch('businessTypeId');
-  const groupNameWatch = form.watch('groupName');
-  const groupIdWatch = form.watch('groupId');
 
   const isBusinessForm = useMemo(() => Boolean(data.UserType === 'Business'), [data]);
 
   const [openedBusinessTypeOptions, setOpenedBusinessTypeOptions] = useState(false);
-  const [openedGroupOptions, setOpenedGroupOptions] = useState(false);
   const [canProceed, setCanProceed] = useState(false);
   const [selectedProfilePic, setSelectedProfilePic] = useState<File | null>(null);
 
@@ -119,21 +112,13 @@ const ProfileEditForm: React.FC<IProps> = ({ data }) => {
     if (form.formState.errors['businessTypeName']) form.trigger('businessTypeName');
   };
 
-  const handleToggleOpenGroupOptions = () => setOpenedGroupOptions((prev) => !prev);
-  const handleSelectGroup = (data: { label: string; value: string }) => {
-    form.setValue('groupName', data.label);
-    form.setValue('groupId', data.value);
-    handleToggleOpenGroupOptions();
-    if (form.formState.errors['groupName']) form.trigger('groupName');
-  };
-
   const onSubmit = async (values: businessProfileFormSchemaType) => {
     if (!!selectedProfilePic === false && !!data.ImageUrl === false) {
       toast.error('Profile picture is required!');
       return;
     }
 
-    const { firstName, lastName, email, groupId, groupName, description, businessTypeId, businessTypeName, businessName, discountPercent, referralAmount, zip, cities, states } = values;
+    const { firstName, lastName, email, description, businessTypeId, businessTypeName, businessName, discountPercent, referralAmount, zip, cities, states } = values;
     let uploadedProfilePicUrl = data.ImageUrl || '';
 
     if (isBusinessForm && Number(referralAmount) < 5) {
@@ -162,18 +147,18 @@ const ProfileEditForm: React.FC<IProps> = ({ data }) => {
     }
 
     if (isBusinessForm) {
-      const response = await asyncGuard(() => UpdateBusinessUserProfile({ id: data.UserId, ImageUrl: uploadedProfilePicUrl, FirstName: firstName, LastName: lastName, userEmail: email, About: description, BusinessId: businessTypeId, BusinessTypeName: businessTypeName, BusinessName: businessName, GroupId: groupId, ReferralAmount: referralAmount, ZipCode: zip, DiscountPercent: discountPercent }));
+      const response = await asyncGuard(() => UpdateBusinessUserProfile({ id: data.UserId, ImageUrl: uploadedProfilePicUrl, FirstName: firstName, LastName: lastName, userEmail: email, City: cities, State: states, About: description, BusinessId: businessTypeId, BusinessTypeName: businessTypeName, BusinessName: businessName, ReferralAmount: referralAmount, ZipCode: zip, DiscountPercent: discountPercent }));
       if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
       else {
-        if (globalStore?.currentUser) globalStore.setCurrentUserProfile({ profile: { ...response.result, groupData: { id: groupId, name: groupName } } });
+        if (globalStore?.currentUser) globalStore.setCurrentUserProfile({ profile: { ...response.result } });
         toast.success('Profile updated successfully!');
         setCanProceed(true);
       }
     } else {
-      const response = await asyncGuard(() => UpdatePersonalUserProfile({ id: data.UserId, FirstName: firstName, LastName: lastName, userEmail: email, ImageUrl: uploadedProfilePicUrl, GroupId: groupId }));
+      const response = await asyncGuard(() => UpdatePersonalUserProfile({ id: data.UserId, FirstName: firstName, LastName: lastName, userEmail: email, City: cities, State: states, ImageUrl: uploadedProfilePicUrl }));
       if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
       else {
-        if (globalStore?.currentUser) globalStore.setCurrentUserProfile({ profile: { ...response.result, groupData: { id: groupId, name: groupName } } });
+        if (globalStore?.currentUser) globalStore.setCurrentUserProfile({ profile: { ...response.result } });
         toast.success('Profile updated successfully!');
         setCanProceed(true);
       }
@@ -198,7 +183,6 @@ const ProfileEditForm: React.FC<IProps> = ({ data }) => {
   }, []);
 
   if (openedBusinessTypeOptions) return <SelectBusinessTypeOptions handleGoBack={handleToggleOpenBusinessTypeOptions} selectedOption={!!businessTypeIdWatch === false ? null : { label: businessTypeNameWatch, value: businessTypeIdWatch }} handleSelectOption={handleSelectBusinessType} notForAuthPage />;
-  else if (openedGroupOptions) return <SelectGroupOptions handleGoBack={handleToggleOpenGroupOptions} selectedOption={!!groupIdWatch === false ? null : { label: groupNameWatch, value: groupIdWatch }} handleSelectOption={handleSelectGroup} notForAuthPage />;
   else if (canProceed)
     return (
       <ProfileEditFormPaymentInfo
@@ -216,7 +200,7 @@ const ProfileEditForm: React.FC<IProps> = ({ data }) => {
   return (
     <Form form={form} onSubmit={onSubmit} className="flex flex-col gap-14">
       <ProfileEditFormHeader isSubmitting={form.formState.isSubmitting} handleGoBack={handleGoBackHome} profileName={[data.FirstName, data.LastName].join(' ').trim()} profilePicUrl={data.ImageUrl} setSelectedProfilePic={setSelectedProfilePic} />
-      <ProfileEditFormBody form={form} handleToggleOpenBusinessTypeOptions={handleToggleOpenBusinessTypeOptions} handleToggleOpenGroupOptions={handleToggleOpenGroupOptions} selectedProfilePic={selectedProfilePic} isBusinessForm={isBusinessForm} />
+      <ProfileEditFormBody form={form} handleToggleOpenBusinessTypeOptions={handleToggleOpenBusinessTypeOptions} selectedProfilePic={selectedProfilePic} isBusinessForm={isBusinessForm} />
     </Form>
   );
 };
