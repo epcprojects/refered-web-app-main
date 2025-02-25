@@ -85,9 +85,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ variant, size
   }
 
   if (!tooltip) return comp;
+
+  const [open, setOpen] = React.useState(false);
+
   return (
-    <Tooltip disableHoverableContent>
-      <TooltipTrigger asChild>{comp}</TooltipTrigger>
+    <Tooltip open={open} delayDuration={0} onOpenChange={setOpen}>
+      <TooltipTrigger asChild onClick={() => setOpen(true)}>
+        {comp}
+      </TooltipTrigger>
       <TooltipContent className="Tooltip">{tooltip}</TooltipContent>
     </Tooltip>
   );
