@@ -171,7 +171,7 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
         <NextLink href={`${AppPages.PROFILE}/${type === 'business' ? data.referredToUserId : data.referredBusinessUserId}`} className="cursor-pointer">
           <Avatar src={type === 'business' ? data.referredToUser?.ImageUrl : data.referredBusinessUser?.ImageUrl} alt={[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()} fallback={initials([data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()).slice(0, 2)} />
         </NextLink>
-        <div>
+        <div className="w-full">
           <div className="flex flex-row gap-3">
             <div className="flex w-full max-w-full flex-1 flex-col overflow-hidden">
               <NextLink href={`${AppPages.PROFILE}/${type === 'business' ? data.referredToUserId : data.referredBusinessUserId}`} className="cursor-pointer">
