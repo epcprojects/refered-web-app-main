@@ -171,31 +171,68 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
         <NextLink href={`${AppPages.PROFILE}/${type === 'business' ? data.referredToUserId : data.referredBusinessUserId}`} className="cursor-pointer">
           <Avatar src={type === 'business' ? data.referredToUser?.ImageUrl : data.referredBusinessUser?.ImageUrl} alt={[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()} fallback={initials([data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()).slice(0, 2)} />
         </NextLink>
-        <div className="flex w-full max-w-full flex-1 flex-col overflow-hidden">
-          <NextLink href={`${AppPages.PROFILE}/${type === 'business' ? data.referredToUserId : data.referredBusinessUserId}`} className="cursor-pointer">
-            <h3 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{(data.referredBusinessUser?.BusinessName || 'New Referral').trim()}</h3>
-          </NextLink>
-          <p className="space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-            {data.referredBusinessUser?.City && data.referredBusinessUser.State && (
-              <div className="mb-1 mt-[5px] flex gap-1 text-muted-foreground">
-                <RiMapPin2Line size={15} />
-                <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                  <span>{data.referredBusinessUser.City + ', ' + data.referredBusinessUser.State || 'No Region'}</span>
-                </p>
-              </div>
-            )}
+        <div>
+          <div className="flex flex-row gap-3">
+            <div className="flex w-full max-w-full flex-1 flex-col overflow-hidden">
+              <NextLink href={`${AppPages.PROFILE}/${type === 'business' ? data.referredToUserId : data.referredBusinessUserId}`} className="cursor-pointer">
+                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{(data.referredBusinessUser?.BusinessName || 'New Referral').trim()}</h3>
+              </NextLink>
+              <p className="space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                {data.referredBusinessUser?.City && data.referredBusinessUser.State && (
+                  <div className="mb-1 mt-[5px] flex gap-1 text-muted-foreground">
+                    <RiMapPin2Line size={15} />
+                    <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                      <span>{data.referredBusinessUser.City + ', ' + data.referredBusinessUser.State || 'No Region'}</span>
+                    </p>
+                  </div>
+                )}
 
-            {(data.referredBusinessUser?.BusinessTypeName || data.referredBusinessUser?.FirstName || data.referredBusinessUser?.LastName) && (
-              <div className="!ml-0 flex gap-1 text-muted-foreground">
-                <RiNewsLine size={15} />
-                <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                  <span>{data.referredBusinessUser?.BusinessTypeName}</span>
-                  <span className="mt-1">•</span>
-                  <span>{[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()}</span>
-                </p>
+                {(data.referredBusinessUser?.BusinessTypeName || data.referredBusinessUser?.FirstName || data.referredBusinessUser?.LastName) && (
+                  <div className="!ml-0 flex gap-1 text-muted-foreground">
+                    <RiNewsLine size={15} />
+                    <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                      <span>{data.referredBusinessUser?.BusinessTypeName}</span>
+                      <span className="mt-1">•</span>
+                      <span>{[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()}</span>
+                    </p>
+                  </div>
+                )}
+              </p>
+            </div>
+            <div className="flex flex-shrink-0 flex-col items-end gap-0.5">
+              <p className="text-xs text-muted-foreground">{date.format(date.fromUnixTime(data.datetime.seconds), 'dd MMM yyyy')}</p>
+              <div className="flex flex-row gap-1">
+                {hasRedeemed || (type === 'to' && myType === 'to') ? (
+                  <Button variant="secondary" size="sm" classes={{ container: 'disabled:bg-foreground/5 disabled:text-foreground rounded-full p-[5px] px-2.5 h-max' }} disabled={hasRedeemed || isRedeeming || isInitiatingChat} onClick={() => setIsRedeemPopupOpened(true)}>
+                    {isRedeeming ? <Spinner color="secondary" size="sm" /> : hasRedeemed ? 'Redeemed' : 'Redeem'}
+                  </Button>
+                ) : null}
+                {type === 'to' && myType === 'to' ? (
+                  <Link href={`tel:${handleDeformatPhoneNumberForAPI(data.referredBusinessUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
+                    <RiPhoneFill />
+                  </Link>
+                ) : null}
+                {type === 'business' && myType === 'business' ? (
+                  <Link href={`tel:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
+                    <RiPhoneFill />
+                  </Link>
+                ) : null}
+                {Boolean(isMobileBrowser() && type === 'business' && myType === 'business') ? (
+                  <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
+                    <RiMessage3Line />
+                  </Link>
+                ) : Boolean(isMobileBrowser() && type === 'to' && myType === 'to') ? (
+                  <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredBusinessUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
+                    <RiMessage3Line />
+                  </Link>
+                ) : Boolean((type === 'business' && myType === 'business') || (type === 'to' && myType === 'to')) ? (
+                  <Button variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} onClick={handleIntitiateChat} disabled={isRedeeming || isInitiatingChat}>
+                    {isInitiatingChat ? <Spinner color="secondary" size="sm" /> : <RiMessage3Line />}
+                  </Button>
+                ) : null}
               </div>
-            )}
-          </p>
+            </div>
+          </div>
           {type === 'business' ? (
             <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
               <ReferralUserChip id={data.referredByUser?.UserId || ''} className="rounded-sm" src={data.referredByUser?.ImageUrl} name={[data.referredByUser?.FirstName].join(' ').trim()} />
@@ -213,39 +250,6 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
               <ReferralUserChip id={type === 'by' ? data.referredToUser?.UserId || '' : data.referredByUser?.UserId || ''} className="rounded-sm" src={type === 'by' ? data.referredToUser?.ImageUrl : data.referredByUser?.ImageUrl} name={[type === 'by' ? [data.referredToUser?.FirstName].join(' ').trim() : data.referredByUser?.FirstName].join(' ').trim()} />
             </div>
           )}
-        </div>
-        <div className="flex flex-shrink-0 flex-col items-end gap-0.5">
-          <p className="text-xs text-muted-foreground">{date.format(date.fromUnixTime(data.datetime.seconds), 'dd MMM yyyy')}</p>
-          <div className="flex flex-row gap-1">
-            {hasRedeemed || (type === 'to' && myType === 'to') ? (
-              <Button variant="secondary" size="sm" classes={{ container: 'disabled:bg-foreground/5 disabled:text-foreground rounded-full p-[5px] px-2.5 h-max' }} disabled={hasRedeemed || isRedeeming || isInitiatingChat} onClick={() => setIsRedeemPopupOpened(true)}>
-                {isRedeeming ? <Spinner color="secondary" size="sm" /> : hasRedeemed ? 'Redeemed' : 'Redeem'}
-              </Button>
-            ) : null}
-            {type === 'to' && myType === 'to' ? (
-              <Link href={`tel:${handleDeformatPhoneNumberForAPI(data.referredBusinessUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
-                <RiPhoneFill />
-              </Link>
-            ) : null}
-            {type === 'business' && myType === 'business' ? (
-              <Link href={`tel:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
-                <RiPhoneFill />
-              </Link>
-            ) : null}
-            {Boolean(isMobileBrowser() && type === 'business' && myType === 'business') ? (
-              <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
-                <RiMessage3Line />
-              </Link>
-            ) : Boolean(isMobileBrowser() && type === 'to' && myType === 'to') ? (
-              <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredBusinessUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
-                <RiMessage3Line />
-              </Link>
-            ) : Boolean((type === 'business' && myType === 'business') || (type === 'to' && myType === 'to')) ? (
-              <Button variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} onClick={handleIntitiateChat} disabled={isRedeeming || isInitiatingChat}>
-                {isInitiatingChat ? <Spinner color="secondary" size="sm" /> : <RiMessage3Line />}
-              </Button>
-            ) : null}
-          </div>
         </div>
       </div>
     </>
