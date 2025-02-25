@@ -139,6 +139,7 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
   const globalStore = useAppStore('Global');
 
   const type = useMemo<'to' | 'by' | 'business'>(() => (profileData.UserId === data.referredByUserId ? 'by' : profileData.UserId === data.referredToUserId ? 'to' : 'business'), [data]);
+  const userReferral = useMemo(() => (type === 'business' ? data.referredToUser : data.referredBusinessUser), [type]);
   const myType = useMemo<'to' | 'by' | 'business' | null>(() => (globalStore?.currentUser?.uid === data.referredByUserId ? 'by' : globalStore?.currentUser?.uid === data.referredToUserId ? 'to' : globalStore?.currentUser?.uid === data.referredBusinessUserId ? 'business' : null), [globalStore, data]);
 
   const [isInitiatingChat, setIsInitiatingChat] = useState(false);
@@ -168,32 +169,32 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
     <>
       <RedeemConfirmationDialog isOpen={isRedeemPopupOpened} onClose={() => setIsRedeemPopupOpened(false)} data={data} isRedeeming={isRedeeming} hasRedeemed={hasRedeemed} setHasRedeemed={setHasRedeemed} setIsRedeeming={setIsRedeeming} />
       <div className="flex flex-row gap-3 py-2">
-        <NextLink href={`${AppPages.PROFILE}/${type === 'business' ? data.referredToUserId : data.referredBusinessUserId}`} className="cursor-pointer">
+        <NextLink href={`${AppPages.PROFILE}/${userReferral?.UserId}`} className="cursor-pointer">
           <Avatar src={type === 'business' ? data.referredToUser?.ImageUrl : data.referredBusinessUser?.ImageUrl} alt={[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()} fallback={initials([data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()).slice(0, 2)} />
         </NextLink>
         <div className="w-full">
           <div className="flex flex-row gap-3">
             <div className="flex w-full max-w-full flex-1 flex-col overflow-hidden">
-              <NextLink href={`${AppPages.PROFILE}/${type === 'business' ? data.referredToUserId : data.referredBusinessUserId}`} className="cursor-pointer">
-                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{(data.referredBusinessUser?.BusinessName || 'New Referral').trim()}</h3>
+              <NextLink href={`${AppPages.PROFILE}/${userReferral?.UserId}`} className="cursor-pointer">
+                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{(userReferral?.BusinessName || userReferral?.FirstName || 'New Referral').trim()}</h3>
               </NextLink>
               <p className="space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                {data.referredBusinessUser?.City && data.referredBusinessUser.State && (
+                {userReferral?.City && userReferral?.State && (
                   <div className="mb-1 mt-[5px] flex gap-1 text-muted-foreground">
                     <RiMapPin2Line size={15} />
                     <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                      <span>{data.referredBusinessUser.City + ', ' + data.referredBusinessUser.State || 'No Region'}</span>
+                      <span>{userReferral.City + ', ' + userReferral.State}</span>
                     </p>
                   </div>
                 )}
 
-                {(data.referredBusinessUser?.BusinessTypeName || data.referredBusinessUser?.FirstName || data.referredBusinessUser?.LastName) && (
+                {(userReferral?.BusinessTypeName || userReferral?.FirstName || userReferral?.LastName) && (
                   <div className="!ml-0 flex gap-1 text-muted-foreground">
                     <RiNewsLine size={15} />
                     <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                      <span>{data.referredBusinessUser?.BusinessTypeName}</span>
+                      <span>{userReferral?.BusinessTypeName}</span>
                       <span className="mt-1">•</span>
-                      <span>{[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()}</span>
+                      <span>{[userReferral?.FirstName, userReferral?.LastName].join(' ').trim()}</span>
                     </p>
                   </div>
                 )}
