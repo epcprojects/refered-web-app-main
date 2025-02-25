@@ -127,9 +127,9 @@ export const MutualFavourites: React.FC<IMutualFavourites> = ({ mutualFavourites
   );
 };
 
-export const ReferralUserChip: React.FC<{ id: string; src?: string; name: string; shade?: 'dark' | 'light' }> = ({ id, src, name, shade = 'light' }) => (
-  <NextLink href={`${AppPages.PROFILE}/${id}`} className={`flex cursor-pointer items-center gap-1 rounded-full border-1 ${shade === 'dark' ? 'border-black border-opacity-15' : 'border-border'} p-[3px] transition-all hover:bg-slate-100`}>
-    <Avatar src={src} alt="Profile Picture" fallback={initials('Mohsin').slice(0, 1)} className="!h-4 !w-4" fallbackClassName="!text-[9px]" />
+export const ReferralUserChip: React.FC<{ id: string; src?: string; name: string; shade?: 'dark' | 'light'; className?: string; showAvatar?: boolean }> = ({ id, src, name, shade = 'light', showAvatar = true, className = 'rounded-full' }) => (
+  <NextLink href={`${AppPages.PROFILE}/${id}`} className={`flex cursor-pointer items-center gap-1 border-1 ${shade === 'dark' ? 'border-black border-opacity-15' : 'border-border'} p-[3px] transition-all hover:bg-slate-100 ${className}`}>
+    {showAvatar === true && <Avatar src={src} alt="Profile Picture" fallback={initials('Mohsin').slice(0, 1)} className="!h-4 !w-4" fallbackClassName="!text-[9px]" />}
     <span className="mr-0.5 w-max max-w-16 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] 2xs:max-w-10 xs:max-w-18">{name}</span>
   </NextLink>
 );
@@ -173,40 +173,36 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
         </NextLink>
         <div className="flex w-full max-w-full flex-1 flex-col overflow-hidden">
           <NextLink href={`${AppPages.PROFILE}/${type === 'business' ? data.referredToUserId : data.referredBusinessUserId}`} className="cursor-pointer">
-            <h3 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{type === 'business' ? 'New Referral' : (data.referredBusinessUser?.BusinessName || '').trim()}</h3>
+            <h3 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{(data.referredBusinessUser?.BusinessName || 'New Referral').trim()}</h3>
           </NextLink>
           <p className="space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-            {type === 'business' ? (
-              'Referral made by'
-            ) : (
-              <>
-                {data.referredBusinessUser?.groupData?.name && (
-                  <div className="mb-1 mt-[5px] flex gap-1 text-muted-foreground">
-                    <RiMapPin2Line size={15} />
-                    <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                      <span>{data.referredBusinessUser?.groupData?.name || 'No Region'}</span>
-                    </p>
-                  </div>
-                )}
+            {data.referredBusinessUser?.City && data.referredBusinessUser.State && (
+              <div className="mb-1 mt-[5px] flex gap-1 text-muted-foreground">
+                <RiMapPin2Line size={15} />
+                <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                  <span>{data.referredBusinessUser.City + ', ' + data.referredBusinessUser.State || 'No Region'}</span>
+                </p>
+              </div>
+            )}
 
-                {(data.referredBusinessUser?.BusinessTypeName || data.referredBusinessUser?.FirstName || data.referredBusinessUser?.LastName) && (
-                  <div className="!ml-0 flex gap-1 text-muted-foreground">
-                    <RiNewsLine size={15} />
-                    <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                      <span>{data.referredBusinessUser?.BusinessTypeName}</span>
-                      <span className="mt-1">•</span>
-                      <span>{[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()}</span>
-                    </p>
-                  </div>
-                )}
-              </>
+            {(data.referredBusinessUser?.BusinessTypeName || data.referredBusinessUser?.FirstName || data.referredBusinessUser?.LastName) && (
+              <div className="!ml-0 flex gap-1 text-muted-foreground">
+                <RiNewsLine size={15} />
+                <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                  <span>{data.referredBusinessUser?.BusinessTypeName}</span>
+                  <span className="mt-1">•</span>
+                  <span>{[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()}</span>
+                </p>
+              </div>
             )}
           </p>
           {type === 'business' ? (
             <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
-              <ReferralUserChip id={data.referredByUser?.UserId || ''} src={data.referredByUser?.ImageUrl} name={[data.referredByUser?.FirstName].join(' ').trim()} />
+              <ReferralUserChip id={data.referredByUser?.UserId || ''} className="rounded-sm" src={data.referredByUser?.ImageUrl} name={[data.referredByUser?.FirstName].join(' ').trim()} />
+              <span className="text-xs text-muted-foreground">refer'd</span>
+              <ReferralUserChip id={data.referredBusinessUser?.UserId || ''} showAvatar={false} className="rounded-sm" src={data.referredBusinessUser?.ImageUrl} name={[data.referredBusinessUser?.BusinessName].join(' ').trim()} />
               <span className="text-xs text-muted-foreground">to</span>
-              <ReferralUserChip id={data.referredToUser?.UserId || ''} src={data.referredToUser?.ImageUrl} name={[data.referredToUser?.FirstName].join(' ').trim()} />
+              <ReferralUserChip id={data.referredToUser?.UserId || ''} className="rounded-sm" src={data.referredToUser?.ImageUrl} name={[data.referredToUser?.FirstName].join(' ').trim()} />
             </div>
           ) : (
             <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
@@ -214,7 +210,7 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
                 <RiShareForwardFill className="text-info" />
                 <span className="text-xs text-muted-foreground">Referred {type === 'to' ? 'by' : 'to'}</span>
               </div>
-              <ReferralUserChip id={type === 'by' ? data.referredToUser?.UserId || '' : data.referredByUser?.UserId || ''} src={type === 'by' ? data.referredToUser?.ImageUrl : data.referredByUser?.ImageUrl} name={[type === 'by' ? [data.referredToUser?.FirstName].join(' ').trim() : data.referredByUser?.FirstName].join(' ').trim()} />
+              <ReferralUserChip id={type === 'by' ? data.referredToUser?.UserId || '' : data.referredByUser?.UserId || ''} className="rounded-sm" src={type === 'by' ? data.referredToUser?.ImageUrl : data.referredByUser?.ImageUrl} name={[type === 'by' ? [data.referredToUser?.FirstName].join(' ').trim() : data.referredByUser?.FirstName].join(' ').trim()} />
             </div>
           )}
         </div>
