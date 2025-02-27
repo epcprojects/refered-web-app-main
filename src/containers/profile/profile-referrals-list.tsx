@@ -204,53 +204,51 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
               <p className="text-xs text-muted-foreground">{date.format(date.fromUnixTime(data.datetime.seconds), 'dd MMM yyyy')}</p>
               <div className="flex flex-row gap-1">
                 {hasRedeemed || (type === 'to' && myType === 'to') ? (
-                  <Button variant="secondary" size="sm" classes={{ container: 'disabled:bg-foreground/5 disabled:text-foreground rounded-full p-[5px] px-2.5 h-max' }} disabled={hasRedeemed || isRedeeming || isInitiatingChat} onClick={() => setIsRedeemPopupOpened(true)}>
+                  <Button variant="secondary" size="sm" classes={{ container: 'disabled:bg-foreground/5 disabled:text-foreground rounded-md p-[5px] px-2.5 h-max' }} disabled={hasRedeemed || isRedeeming || isInitiatingChat} onClick={() => setIsRedeemPopupOpened(true)}>
                     {isRedeeming ? <Spinner color="secondary" size="sm" /> : hasRedeemed ? 'Redeemed' : 'Redeem'}
                   </Button>
                 ) : null}
                 {type === 'to' && myType === 'to' ? (
-                  <Link href={`tel:${handleDeformatPhoneNumberForAPI(data.referredBusinessUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
+                  <Link href={`tel:${handleDeformatPhoneNumberForAPI(data.referredBusinessUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-md p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
                     <RiPhoneFill />
                   </Link>
                 ) : null}
                 {type === 'business' && myType === 'business' ? (
-                  <Link href={`tel:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
+                  <Link href={`tel:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-md p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
                     <RiPhoneFill />
                   </Link>
                 ) : null}
                 {Boolean(isMobileBrowser() && type === 'business' && myType === 'business') ? (
-                  <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
+                  <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-md p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
                     <RiMessage3Line />
                   </Link>
                 ) : Boolean(isMobileBrowser() && type === 'to' && myType === 'to') ? (
-                  <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredBusinessUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
+                  <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredBusinessUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-md p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
                     <RiMessage3Line />
                   </Link>
                 ) : Boolean((type === 'business' && myType === 'business') || (type === 'to' && myType === 'to')) ? (
-                  <Button variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-full p-[5px] aspect-square h-max' }} onClick={handleIntitiateChat} disabled={isRedeeming || isInitiatingChat}>
+                  <Button variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-md p-[5px] aspect-square h-max' }} onClick={handleIntitiateChat} disabled={isRedeeming || isInitiatingChat}>
                     {isInitiatingChat ? <Spinner color="secondary" size="sm" /> : <RiMessage3Line />}
                   </Button>
                 ) : null}
               </div>
             </div>
           </div>
-          {type === 'business' ? (
-            <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
-              <ReferralUserChip id={data.referredByUser?.UserId || ''} className="rounded-sm" src={data.referredByUser?.ImageUrl} name={[data.referredByUser?.FirstName].join(' ').trim()} />
-              <span className="text-xs text-muted-foreground">refer'd</span>
-              <ReferralUserChip id={data.referredBusinessUser?.UserId || ''} showAvatar={false} className="rounded-sm" src={data.referredBusinessUser?.ImageUrl} name={[data.referredBusinessUser?.BusinessName].join(' ').trim()} />
-              <span className="text-xs text-muted-foreground">to</span>
-              <ReferralUserChip id={data.referredToUser?.UserId || ''} className="rounded-sm" src={data.referredToUser?.ImageUrl} name={[data.referredToUser?.FirstName].join(' ').trim()} />
-            </div>
-          ) : (
-            <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
-              <div className="flex items-center justify-center gap-1">
-                <RiShareForwardFill className="text-info" />
-                <span className="text-xs text-muted-foreground">Referred {type === 'to' ? 'by' : 'to'}</span>
-              </div>
-              <ReferralUserChip id={type === 'by' ? data.referredToUser?.UserId || '' : data.referredByUser?.UserId || ''} className="rounded-sm" src={type === 'by' ? data.referredToUser?.ImageUrl : data.referredByUser?.ImageUrl} name={[type === 'by' ? [data.referredToUser?.FirstName].join(' ').trim() : data.referredByUser?.FirstName].join(' ').trim()} />
-            </div>
-          )}
+          {/* {type === 'business' ? ( */}
+          <div className="mt-3 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
+            <ReferralUserChip id={data.referredByUser?.UserId || ''} className="rounded-sm" src={data.referredByUser?.ImageUrl} name={[data.referredByUser?.FirstName].join(' ').trim()} />
+            <span className="text-xs text-muted-foreground">refer'd to</span>
+            <ReferralUserChip id={data.referredToUser?.UserId || ''} className="rounded-sm" src={data.referredToUser?.ImageUrl} name={[data.referredToUser?.FirstName].join(' ').trim()} />
+          </div>
+          {/* // ) : (
+          //   <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
+          //     <div className="flex items-center justify-center gap-1">
+          //       <RiShareForwardFill className="text-info" />
+          //       <span className="text-xs text-muted-foreground">Referred {type === 'to' ? 'by' : 'to'}</span>
+          //     </div>
+          //     <ReferralUserChip id={type === 'by' ? data.referredToUser?.UserId || '' : data.referredByUser?.UserId || ''} className="rounded-sm" src={type === 'by' ? data.referredToUser?.ImageUrl : data.referredByUser?.ImageUrl} name={[type === 'by' ? [data.referredToUser?.FirstName].join(' ').trim() : data.referredByUser?.FirstName].join(' ').trim()} />
+          //   </div>
+          // )} */}
         </div>
       </div>
     </>

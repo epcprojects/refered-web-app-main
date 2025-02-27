@@ -57,7 +57,10 @@ export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body
   if (allProfilesResponse.error !== null || allProfilesResponse.result === null) throw new Error('Something went wrong!');
 
   const allProfiles = (allProfilesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id })) as IProfile[]) || [];
-  const allReferrals = ([...allReferralsResponse.result[0].docs, ...allReferralsResponse.result[1].docs, ...allReferralsResponse.result[2].docs].map((item) => ({ ...item.data(), id: item.id })) as IReferral[]) || [];
+  // const allReferrals = ([...allReferralsResponse.result[0].docs, ...allReferralsResponse.result[1].docs, ...allReferralsResponse.result[2].docs].map((item) => ({ ...item.data(), id: item.id })) as IReferral[]) || [];
+  const allReferrals =
+    [...allReferralsResponse.result[0].docs, ...allReferralsResponse.result[1].docs, ...allReferralsResponse.result[2].docs].map((item) => ({ ...item.data(), id: item.id }) as IReferral).sort((a, b) => (b.datetime.seconds || 0) - (a.datetime.seconds || 0)) || // Ensure sorting after merging
+    [];
 
   // Fetch group data for each profile
   const fetchGroupData = async (profile?: IProfile) => {
