@@ -60,7 +60,8 @@ const SelectBusinessTypeOptions: React.FC<IProps> = ({ handleSelectOption, selec
     const response = await asyncGuard(() => GetAllBusinessTypes());
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
-      const sortedList = sortBusinessAlphabetically(response.result);
+      const finalList = selectedOption ? response.result.concat([{ id: selectedOption.value, name: selectedOption.label, description: '' }]) : response.result;
+      const sortedList = sortBusinessAlphabetically(finalList);
       setAllOptions(sortedList);
       setFilteredOptions(sortedList);
     }

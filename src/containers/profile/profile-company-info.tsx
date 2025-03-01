@@ -4,7 +4,7 @@ import { Tooltip } from '@/constants/tooltips.constants';
 import { IProfileWithFavorites } from '@/firebase/profile';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import { RiInformationFill, RiInformationLine } from 'react-icons/ri';
+import { RiInformationLine } from 'react-icons/ri';
 
 interface IProps {
   data: IProfileWithFavorites;
@@ -19,17 +19,13 @@ const ProfileCompanyInfo: React.FC<IProps> = ({ data }) => (
         <Image src="/images/logo.png" alt="Logo" width={22} height={22} className="mr-1" />
         <p className="text-sm">Referral ${data.ReferralAmount || 0} </p>
 
-        <Button tooltip={Tooltip.REFERRAL_FEE_TOOLTIP} variant={'link/info'}>
-          <RiInformationLine className="text-muted-foreground" size={18} />
-        </Button>
+        <InfoDialog description={Tooltip.REFERRAL_FEE_TOOLTIP} />
       </div>
       <div className="flex flex-row items-center gap-1">
         <Image src="/images/referral-discount-icon.svg" alt="Logo" width={22} height={22} className="mr-1" />
         <p className="text-sm">New Customer Discount {data.DiscountPercent || 0}%</p>
 
-        <Button tooltip={Tooltip.REFERRAL_DISCOUNT_TOOLTIP} variant={'link/info'}>
-          <RiInformationLine className="text-muted-foreground" size={18} />
-        </Button>
+        <InfoDialog description={Tooltip.REFERRAL_DISCOUNT_TOOLTIP} />
       </div>
     </div>
   </div>
@@ -37,23 +33,29 @@ const ProfileCompanyInfo: React.FC<IProps> = ({ data }) => (
 
 export default ProfileCompanyInfo;
 
-const InfoDialog: React.FC = () => {
+interface IInfoDialog {
+  description?: string;
+  tagline?: string;
+}
+const InfoDialog = ({ description = 'Nothing to show.', tagline = '' }: IInfoDialog) => {
   const [isOpen, setIsOpen] = useState(false);
   const handleClose = () => setIsOpen(false);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger>
-        <RiInformationFill size={18} />
+        <RiInformationLine className="text-muted-foreground" size={18} />
       </DialogTrigger>
       <DialogContent className="flex max-w-[90%] flex-col items-center justify-center p-4 md:w-[28rem]">
         <Image src="/images/logo.png" alt="Refered Logo" width={60} height={60} />
         <div className="mb-2 flex w-full flex-col items-center justify-center gap-4">
-          <p className="mt-1 text-center">Refer'd respects the real estate license laws and this platform does not support real estate agents paying referral fees. Instead we promote the use of customers leads that turn into buying or seller clients under the respective brokers.</p>
-          <div className="mx-auto mb-1 flex w-max flex-row items-center gap-1.5">
-            <Image src="/images/info-icon.svg" alt="required icon" width={18} height={18} />
-            <p className="text-xs text-muted-foreground">Processing fees are not included</p>
-          </div>
+          <p className="mt-1 text-center">{description}</p>
+          {tagline.length > 0 && (
+            <div className="mx-auto mb-1 flex w-max flex-row items-center gap-1.5">
+              <Image src="/images/info-icon.svg" alt="required icon" width={18} height={18} />
+              <p className="text-xs text-muted-foreground">{tagline}</p>
+            </div>
+          )}
         </div>
         <div className="flex w-full flex-row gap-4">
           <Button variant="secondary" size="lg" onClick={handleClose} classes={{ container: 'flex-1' }}>

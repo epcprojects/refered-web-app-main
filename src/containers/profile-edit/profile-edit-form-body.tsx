@@ -36,7 +36,7 @@ const ProfileEditFormBody: React.FC<IProps> = ({ form, isBusinessForm, handleTog
       <StateCitySelect form={form} />
       {!isBusinessForm ? null : (
         <div className="grid w-full grid-cols-2 gap-4">
-          <FieldInput form={form} type="number" name="zip" placeholder="Zip Code" min={5} max={10} />
+          <FieldInput form={form} type="number" name="zip" placeholder="Zip Code" min={5} maxLength={10} />
           <FieldInput form={form} type="number" name="discountPercent" placeholder="Discount %" />
         </div>
       )}
