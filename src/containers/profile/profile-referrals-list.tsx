@@ -135,12 +135,15 @@ export const ReferralUserChip: React.FC<{ id: string; src?: string; name: string
 );
 
 const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> = ({ profileData, data, isRedeemed }) => {
+  console.log('🚀 ~ data:', data);
   const router = useRouter();
   const globalStore = useAppStore('Global');
 
   const type = useMemo<'to' | 'by' | 'business'>(() => (profileData.UserId === data.referredByUserId ? 'by' : profileData.UserId === data.referredToUserId ? 'to' : 'business'), [data]);
   const userReferral = useMemo(() => (type === 'business' ? data.referredToUser : data.referredBusinessUser), [type]);
+  console.log('🚀 ~ type:', type);
   const myType = useMemo<'to' | 'by' | 'business' | null>(() => (globalStore?.currentUser?.uid === data.referredByUserId ? 'by' : globalStore?.currentUser?.uid === data.referredToUserId ? 'to' : globalStore?.currentUser?.uid === data.referredBusinessUserId ? 'business' : null), [globalStore, data]);
+  console.log('🚀 ~ myType:', myType);
 
   const [isInitiatingChat, setIsInitiatingChat] = useState(false);
   const [isRedeemPopupOpened, setIsRedeemPopupOpened] = useState(false);
@@ -213,20 +216,20 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
                     <RiPhoneFill />
                   </Link>
                 ) : null}
-                {type === 'business' && myType === 'business' ? (
+                {(type === 'business' && myType === 'business') || (type === 'by' && myType === 'by') ? (
                   <Link href={`tel:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-md p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
                     <RiPhoneFill />
                   </Link>
                 ) : null}
-                {Boolean(isMobileBrowser() && type === 'business' && myType === 'business') ? (
+                {Boolean(isMobileBrowser() && ((type === 'business' && myType === 'business') || (type === 'by' && myType === 'by'))) ? (
                   <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredToUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-md p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
                     <RiMessage3Line />
                   </Link>
-                ) : Boolean(isMobileBrowser() && type === 'to' && myType === 'to') ? (
+                ) : Boolean(isMobileBrowser() && ((type === 'to' && myType === 'to') || (type === 'by' && myType === 'by'))) ? (
                   <Link href={`sms:${handleDeformatPhoneNumberForAPI(data.referredBusinessUser?.PhoneNo || '')}`} variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-md p-[5px] aspect-square h-max' }} disabled={isRedeeming || isInitiatingChat}>
                     <RiMessage3Line />
                   </Link>
-                ) : Boolean((type === 'business' && myType === 'business') || (type === 'to' && myType === 'to')) ? (
+                ) : Boolean((type === 'business' && myType === 'business') || (type === 'to' && myType === 'to') || (type === 'by' && myType === 'by')) ? (
                   <Button variant="background" size="sm" classes={{ container: 'bg-foreground/5 rounded-md p-[5px] aspect-square h-max' }} onClick={handleIntitiateChat} disabled={isRedeeming || isInitiatingChat}>
                     {isInitiatingChat ? <Spinner color="secondary" size="sm" /> : <RiMessage3Line />}
                   </Button>
