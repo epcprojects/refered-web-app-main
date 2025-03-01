@@ -6,6 +6,7 @@ import FieldButton from '@/components/form/field-button';
 import FieldInput from '@/components/form/field-input';
 import AuthCardLayout from '@/components/layout/auth-card-layout';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 import { GetAllBusinessTypes, IBusinessType } from '@/firebase/business-types';
 import { cn } from '@/utils/cn.utils';
@@ -36,9 +37,11 @@ const SelectBusinessTypeOptions: React.FC<IProps> = ({ handleSelectOption, selec
   const [other, setOther] = useState(false);
   const [allOptions, setAllOptions] = useState<IBusinessType[]>([]);
   const [filteredOptions, setFilteredOptions] = useState<IBusinessType[]>([]);
+  const [otherOptions, setOtherOptions] = useState<IBusinessType[]>([]);
   const [debouncedSearchTerm, setSearchTerm] = useDebounceValue('', 500);
 
   const form = useForm<businessOptionsSchemaType>({ resolver: zodResolver(businessOptionsSchema) });
+  const sortBusinessAlphabetically = (list: IBusinessType[]) => list.sort((a, b) => a.name.localeCompare(b.name));
 
   const onSubmit = async (values: businessOptionsSchemaType) => {
     if (!values.category) return;
@@ -49,7 +52,7 @@ const SelectBusinessTypeOptions: React.FC<IProps> = ({ handleSelectOption, selec
       description: '',
     };
 
-    setFilteredOptions((prev) => [...prev, userAddedBusiness]);
+    setOtherOptions((prev) => sortBusinessAlphabetically([...prev, userAddedBusiness]));
   };
 
   const handleFetchData = async () => {
@@ -57,15 +60,17 @@ const SelectBusinessTypeOptions: React.FC<IProps> = ({ handleSelectOption, selec
     const response = await asyncGuard(() => GetAllBusinessTypes());
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
-      setAllOptions(response.result);
-      setFilteredOptions(response.result);
+      const sortedList = sortBusinessAlphabetically(response.result);
+      setAllOptions(sortedList);
+      setFilteredOptions(sortedList);
     }
     setIsFetching(false);
   };
 
   useEffect(() => {
-    const filtered = allOptions.filter((item) => item.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
-    setFilteredOptions(filtered);
+    const combinedList = [...allOptions, ...otherOptions];
+    const filtered = combinedList.filter((item) => item.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
+    setFilteredOptions(sortBusinessAlphabetically(filtered));
   }, [debouncedSearchTerm]);
 
   useEffect(() => {
@@ -92,34 +97,51 @@ const SelectBusinessTypeOptions: React.FC<IProps> = ({ handleSelectOption, selec
                   <RiCheckboxCircleFill size={20} className={cn('my-auto flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-20', item.id === selectedOption?.value && '!opacity-100')} />
                 </div>
               ))}
+
+              {/* Other buttons and options options */}
+              {!debouncedSearchTerm ? (
+                <>
+                  {otherOptions.length > 0 && <Separator className="opacity-50" />}
+
+                  {otherOptions.map((item) => (
+                    <div key={item.id} className="group flex w-full cursor-pointer flex-row gap-1 rounded-md bg-background px-3 py-2.5" onClick={() => handleSelectOption({ label: item.name, value: item.id })}>
+                      <div className="flex flex-1 flex-col gap-0">
+                        <h3 className="text-sm font-semibold">{item.name}</h3>
+                        <p className="text-xs">{item.description}</p>
+                      </div>
+                      <RiCheckboxCircleFill size={20} className={cn('my-auto flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-20', item.id === selectedOption?.value && '!opacity-100')} />
+                    </div>
+                  ))}
+
+                  {/* Other */}
+                  <div key={'other_business_opt'} className="group flex w-full cursor-pointer flex-row gap-1 rounded-md bg-background px-3 py-2.5" onClick={() => setOther(!other)}>
+                    <div className="flex flex-1 flex-col gap-0">
+                      <h3 className="text-sm font-semibold">Other</h3>
+                    </div>
+                    <RiCheckboxCircleFill size={20} className={cn('my-auto flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-20', other && '!opacity-100')} />
+                  </div>
+
+                  {other && (
+                    <Form form={form} onSubmit={onSubmit} className="grid w-full gap-2.5">
+                      <div className="relative border-solid">
+                        <FieldInput form={form} name="category" placeholder="Enter Category" className="w-[calc(100%-60px)] border-gray-300" containerClassName="h-[50px] bg-transparent border-gray-300" />
+                        <FieldButton
+                          form={form}
+                          type="submit"
+                          label="Add"
+                          variant="secondary"
+                          style={{
+                            position: 'absolute',
+                            top: 7,
+                            right: 7,
+                          }}
+                        />
+                      </div>
+                    </Form>
+                  )}
+                </>
+              ) : null}
             </>
-          )}
-
-          {/* Other */}
-          <div key={'other_business_opt'} className="group flex w-full cursor-pointer flex-row gap-1 rounded-md bg-background px-3 py-2.5" onClick={() => setOther(!other)}>
-            <div className="flex flex-1 flex-col gap-0">
-              <h3 className="text-sm font-semibold">Other</h3>
-            </div>
-            <RiCheckboxCircleFill size={20} className={cn('my-auto flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-20', other && '!opacity-100')} />
-          </div>
-
-          {other && (
-            <Form form={form} onSubmit={onSubmit} className="grid w-full gap-2.5">
-              <div className="relative border-solid">
-                <FieldInput form={form} name="category" placeholder="Enter Category" className="w-[calc(100%-60px)] border-gray-300" containerClassName="h-[50px] bg-transparent border-gray-300" />
-                <FieldButton
-                  form={form}
-                  type="submit"
-                  label="Add"
-                  variant="secondary"
-                  style={{
-                    position: 'absolute',
-                    top: 7,
-                    right: 7,
-                  }}
-                />
-              </div>
-            </Form>
           )}
         </>
       )}
