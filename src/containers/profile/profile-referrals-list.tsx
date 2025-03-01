@@ -135,15 +135,12 @@ export const ReferralUserChip: React.FC<{ id: string; src?: string; name: string
 );
 
 const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> = ({ profileData, data, isRedeemed }) => {
-  console.log('🚀 ~ data:', data);
   const router = useRouter();
   const globalStore = useAppStore('Global');
 
   const type = useMemo<'to' | 'by' | 'business'>(() => (profileData.UserId === data.referredByUserId ? 'by' : profileData.UserId === data.referredToUserId ? 'to' : 'business'), [data]);
   const userReferral = useMemo(() => (type === 'business' ? data.referredToUser : data.referredBusinessUser), [type]);
-  console.log('🚀 ~ type:', type);
   const myType = useMemo<'to' | 'by' | 'business' | null>(() => (globalStore?.currentUser?.uid === data.referredByUserId ? 'by' : globalStore?.currentUser?.uid === data.referredToUserId ? 'to' : globalStore?.currentUser?.uid === data.referredBusinessUserId ? 'business' : null), [globalStore, data]);
-  console.log('🚀 ~ myType:', myType);
 
   const [isInitiatingChat, setIsInitiatingChat] = useState(false);
   const [isRedeemPopupOpened, setIsRedeemPopupOpened] = useState(false);
