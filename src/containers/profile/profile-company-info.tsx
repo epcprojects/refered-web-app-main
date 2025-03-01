@@ -14,8 +14,8 @@ const ProfileCompanyInfo: React.FC<IProps> = ({ data }) => (
   <div className="flex flex-col gap-1">
     <h3 className="text-lg font-medium">Company Info</h3>
     <p className="break-words text-sm font-normal leading-5">{data.About}</p>
-    <div className="flex gap-7">
-      <div className="mb-4 mt-2 flex flex-row items-center gap-1">
+    <div className="mb-5 mt-3 flex flex-wrap gap-x-7 gap-y-4">
+      <div className="flex flex-row items-center gap-1">
         <Image src="/images/logo.png" alt="Logo" width={22} height={22} className="mr-1" />
         <p className="text-sm">Referral ${data.ReferralAmount || 0} </p>
 
@@ -23,7 +23,7 @@ const ProfileCompanyInfo: React.FC<IProps> = ({ data }) => (
           <RiInformationLine className="text-muted-foreground" size={18} />
         </Button>
       </div>
-      <div className="mb-4 mt-2 flex flex-row items-center gap-1">
+      <div className="flex flex-row items-center gap-1">
         <Image src="/images/referral-discount-icon.svg" alt="Logo" width={22} height={22} className="mr-1" />
         <p className="text-sm">New Customer Discount {data.DiscountPercent || 0}%</p>
 
