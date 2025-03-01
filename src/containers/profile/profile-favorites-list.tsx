@@ -12,7 +12,7 @@ import { asyncGuard, initials, unionBy } from '@/utils/lodash.utils';
 import { useEventListener } from '@/utils/use-hooks.utils';
 import NextLink from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { RiHeart2Fill } from 'react-icons/ri';
+import { RiHeart2Fill, RiMapPin2Line, RiNewsLine } from 'react-icons/ri';
 import { toast } from 'sonner';
 
 interface IProps {
@@ -57,13 +57,24 @@ const ProfileFavoritesList: React.FC<IProps> = ({ profileData }) => {
             <Avatar src={item.ImageUrl} alt="Profile Picture" fallback={initials([item.FirstName, item.LastName].join(' ').trim()).slice(0, 2)} />
             <div className="flex max-w-full flex-1 flex-col overflow-hidden">
               <h3 className="my-auto w-[97%] overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{item.UserType === 'Business' ? item.BusinessName?.trim() : [item.FirstName, item.LastName].join(' ').trim()}</h3>
-              {item.UserType === 'Business' ? (
-                <p className="w-[97%] items-center gap-1 space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                  <span>{item.BusinessTypeName}</span>
-                  <span className="mt-0.5">•</span>
-                  <span>{[item.FirstName, item.LastName].join(' ').trim()}</span>
-                </p>
-              ) : null}
+              {item?.City && item?.State && (
+                <div className="mb-1 mt-[5px] flex gap-1 text-muted-foreground">
+                  <RiMapPin2Line size={15} />
+                  <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                    <span>{item.City + ', ' + item.State}</span>
+                  </p>
+                </div>
+              )}
+              {item.UserType === 'Business' && (item?.BusinessTypeName || item?.FirstName || item?.LastName) && (
+                <div className="!ml-0 flex gap-1 text-muted-foreground">
+                  <RiNewsLine size={15} />
+                  <p className="my-auto w-[97%] space-x-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
+                    <span>{item?.BusinessTypeName}</span>
+                    <span className="mt-1">•</span>
+                    <span>{[item?.FirstName, item?.LastName].join(' ').trim()}</span>
+                  </p>
+                </div>
+              )}
             </div>
             <div className="flex flex-shrink-0 flex-col items-end gap-0.5">
               <div className="rounded-full p-1">
