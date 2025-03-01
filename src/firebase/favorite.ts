@@ -34,7 +34,7 @@ export const GetAllWhoFavouriteThisUser = async (body: GetAllFavoritesByUserId_B
   if (profileResponse.error !== null || profileResponse.result === null) throw new Error(firebaseErrorMsg(profileResponse.error));
   const allProfiles = profileResponse.result.docs.map((item) => ({ ...item.data(), id: item.id })) as IProfile[];
 
-  const resultCompiled = (response.result.docs.map((item) => ({ ...(allProfiles.find((profile) => profile.UserId === item.data().ProfileId) || {}), ...item.data(), id: item.id })) as IFavorite[]) || [];
+  const resultCompiled = (response.result.docs.map((item) => ({ ...(allProfiles.find((profile) => profile.UserId === item.data().ProfileId) || {}), id: item.id })) as IFavorite[]) || [];
   return resultCompiled;
 };
 
