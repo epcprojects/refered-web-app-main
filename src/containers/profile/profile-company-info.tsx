@@ -17,7 +17,7 @@ const ProfileCompanyInfo: React.FC<IProps> = ({ data }) => (
     <div className="flex gap-7">
       <div className="mb-4 mt-2 flex flex-row items-center gap-1">
         <Image src="/images/logo.png" alt="Logo" width={22} height={22} className="mr-1" />
-        <p className="text-sm">${data.ReferralAmount || 0} Referral</p>
+        <p className="text-sm">Referral ${data.ReferralAmount || 0} </p>
 
         <Button tooltip={Tooltip.REFERRAL_FEE_TOOLTIP} variant={'link/info'}>
           <RiInformationLine className="text-muted-foreground" size={18} />
