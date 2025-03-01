@@ -10,18 +10,31 @@ import { firebase } from '@/firebase';
 import { GetProfilesForSearch, IProfile, IProfileWithFavorites } from '@/firebase/profile';
 import { useAppStore } from '@/hooks/use-app-store';
 import { asyncGuard, debounce, initials, unionBy } from '@/utils/lodash.utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 import NextLink from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { RiHeart2Fill, RiMapPin2Line, RiNewsLine } from 'react-icons/ri';
 import { toast } from 'sonner';
 import { useEventListener } from 'usehooks-ts';
+import { z } from 'zod';
 import { MutualFavourites } from '../profile/profile-referrals-list';
-import SearchHeader from './search-header';
+import { SearchHeader } from './search-header';
 
 interface IProps {}
 
+export type filterFormSchemaType = z.infer<typeof filterFormSchema>;
+export const filterFormSchema = z.object({
+  states: z.string().optional(),
+  cities: z.string().optional(),
+});
+
 const SearchIndex: React.FC<IProps> = () => {
   const globalStore = useAppStore('Global');
+
+  const form = useForm<filterFormSchemaType>({ resolver: zodResolver(filterFormSchema) });
+  const city = form.watch('cities');
+  const state = form.watch('states');
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isAllFetched, setIsAllFetched] = useState(false);
@@ -47,7 +60,7 @@ const SearchIndex: React.FC<IProps> = () => {
     setIsFetchingData(true);
     setIsFetchingCompleted(false);
     const currentUser = globalStore.currentUser;
-    const response = await asyncGuard(() => GetProfilesForSearch({ loggedInUserId: currentUser.uid, lastItemId: isNewQuery || targetShowMore === null || isGoingBack ? undefined : targetShowMore === 'businesses' ? (data.businesses.length <= 0 ? undefined : data.businesses[data.businesses.length - 1].id) : data.users.length <= 0 ? undefined : data.users[data.users.length - 1].id, searchTerm: query, targetType: targetShowMore === null ? undefined : targetShowMore === 'businesses' ? 'Business' : 'Normal' }));
+    const response = await asyncGuard(() => GetProfilesForSearch({ loggedInUserId: currentUser.uid, lastItemId: isNewQuery || targetShowMore === null || isGoingBack ? undefined : targetShowMore === 'businesses' ? (data.businesses.length <= 0 ? undefined : data.businesses[data.businesses.length - 1].id) : data.users.length <= 0 ? undefined : data.users[data.users.length - 1].id, searchTerm: query, ...(city ? { city } : {}), ...(state ? { state } : {}), targetType: targetShowMore === null ? undefined : targetShowMore === 'businesses' ? 'Business' : 'Normal' }));
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
       if (targetShowMore === null || isGoingBack) {
@@ -80,7 +93,7 @@ const SearchIndex: React.FC<IProps> = () => {
 
   useEffect(() => {
     handleQueryData(searchTerm);
-  }, [searchTerm]);
+  }, [searchTerm, city, state]);
 
   useEffect(() => {
     setBusinessesData(data.businesses);
@@ -89,7 +102,7 @@ const SearchIndex: React.FC<IProps> = () => {
 
   useEffect(() => {
     handleFetchData();
-  }, [globalStore]);
+  }, [globalStore?.currentUser]);
 
   useEventListener('scroll', () => {
     if (isAllFetched || isFetchingData || showMore === null) return;
@@ -105,12 +118,16 @@ const SearchIndex: React.FC<IProps> = () => {
     }, 500);
   }, [isFetchingData]);
 
+  const handleToggleSearchFilter = () => {
+    globalStore?.setIsSearchFilter(!globalStore.isSearchFilter);
+  };
+
   return (
-    <AppPageLayout className="flex flex-col gap-4 px-2" customHeader={<SearchHeader showBackButton={showMore !== null} searchTerm={searchTerm} handleGoBack={() => handleSetShowMore(null)} setSearchTerm={setSearchTerm} />}>
+    <AppPageLayout className="flex flex-col gap-4 px-2" customHeaderClasses={'h-max'} customHeader={<SearchHeader form={form} setShowSearchFilter={handleToggleSearchFilter} showSearchFilter={globalStore?.isSearchFilter} showBackButton={showMore !== null} searchTerm={searchTerm} handleGoBack={() => handleSetShowMore(null)} setSearchTerm={setSearchTerm} />}>
       {(!isFetchingData && isFetchingCompleted && showMore === null && businessesData.length <= 0 && usersData.length <= 0) || (!isFetchingData && isFetchingCompleted && showMore === 'businesses' && businessesData.length <= 0) || (!isFetchingData && isFetchingCompleted && showMore === 'users' && usersData.length <= 0) ? (
         <EmptyList type="noDataFound" />
       ) : !isFetchingData && isFetchingCompleted ? (
-        <>
+        <div className={globalStore?.isSearchFilter ? 'mt-12' : ''}>
           {[
             { title: 'Business', seeMore: 'businesses' as const, data: businessesData, hide: showMore === 'users' },
             { title: 'Users', seeMore: 'users' as const, data: usersData, hide: showMore === 'businesses' },
@@ -158,7 +175,7 @@ const SearchIndex: React.FC<IProps> = () => {
             );
           })}
           {!isFetchingCompleted ? <Spinner container="fullWidth" color="secondary" size="md" /> : null}
-        </>
+        </div>
       ) : (
         <Spinner container="fullWidth" color="secondary" size="md" />
       )}

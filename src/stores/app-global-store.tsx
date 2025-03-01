@@ -7,6 +7,7 @@ type GlobalState = {
   isTemporarySignin: boolean;
   isResetPasswordSignin: boolean;
   isVerifiedRecently: boolean;
+  isSearchFilter: boolean;
   emailAuthCredential: EmailAuthCredential | null;
   currentUser: User | null;
   currentUserProfile: IProfile | null;
@@ -20,6 +21,7 @@ type GlobalActions = {
   setCurrentUserProfile: (data: { profile: GlobalState['currentUserProfile'] }) => void;
   setIsTemporarySignin: (val: boolean) => void;
   setIsResetPasswordSignin: (val: boolean) => void;
+  setIsSearchFilter: (val: boolean) => void;
   setConfirmationResult: (val: ConfirmationResult | null) => void;
   resetIsVerifiedRecently: () => void;
   resetNotificationsCount: () => void;
@@ -37,6 +39,7 @@ export const globalStore = create<GlobalStore>()(
       isTemporarySignin: false,
       isResetPasswordSignin: false,
       isVerifiedRecently: false,
+      isSearchFilter: false,
       emailAuthCredential: null,
       currentUser: null,
       currentUserProfile: null,
@@ -47,6 +50,7 @@ export const globalStore = create<GlobalStore>()(
       setCurrentUserProfile: (data: { profile: GlobalState['currentUserProfile'] }) => set({ currentUserProfile: data.profile }),
       setIsTemporarySignin: (val: boolean) => set({ isTemporarySignin: val }),
       setIsResetPasswordSignin: (val: boolean) => set({ isResetPasswordSignin: val }),
+      setIsSearchFilter: (val: boolean) => set({ isSearchFilter: val }),
       resetIsVerifiedRecently: () => set({ isVerifiedRecently: false }),
       resetNotificationsCount: () => set({ notificationsCount: 0 }),
       updateNotificationsCount: (val: number) => set({ notificationsCount: val }),

@@ -8,6 +8,7 @@ interface ICommonProps {
   className?: string;
   isLoading?: boolean;
   sectionLoader?: boolean;
+  customHeaderClasses?: string;
 }
 
 interface IHeaderProps {
@@ -24,11 +25,11 @@ interface ICustomHeaderProps {
 
 type IProps = (IHeaderProps | ICustomHeaderProps) & ICommonProps;
 
-const AppPageLayout: React.FC<IProps> = ({ children, title, countBadge, className, customHeader, isLoading, sectionLoader }) => {
+const AppPageLayout: React.FC<IProps> = ({ children, customHeaderClasses = 'h-[3.5rem] md:h-[4.65rem]', title, countBadge, className, customHeader, isLoading, sectionLoader }) => {
   if (sectionLoader) return <Spinner container="fullWidth" color="secondary" size="md" />;
   return (
     <div>
-      <div className="fixed top-0 z-40 h-[3.5rem] w-full md:top-header md:h-[4.65rem] md:max-w-[40rem] lg:w-[calc(100%-33.1rem)] lg:max-w-[31.9rem]">
+      <div className={'fixed top-0 z-40 w-full md:top-header md:max-w-[40rem] lg:w-[calc(100%-33.1rem)] lg:max-w-[31.9rem] ' + customHeaderClasses}>
         <div className="h-full w-full bg-card px-4 py-3">
           {!!customHeader ? (
             <>{customHeader}</>

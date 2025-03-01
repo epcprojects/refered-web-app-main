@@ -28,7 +28,7 @@ const Select: React.FC<SelectProps> = ({ containerClassName, error, leftElement,
       </RadixSelect.Trigger>
 
       <RadixSelect.Portal>
-        <RadixSelect.Content className="w-full overflow-hidden rounded-md border border-gray-200 bg-white text-sm shadow-md">
+        <RadixSelect.Content className="z-[1000] w-full overflow-hidden rounded-md border border-gray-200 bg-white text-sm shadow-md">
           <RadixSelect.Viewport>
             {options.map((option) => (
               <RadixSelect.Item key={option.value} value={option.value} className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-100 data-[state=checked]:bg-gray-200">

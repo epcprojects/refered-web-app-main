@@ -94,18 +94,48 @@ export const GetAllProfiles = async (body: GetAllProfiles_Body): GetAllProfiles_
 };
 
 //TODO: Refactor this to include Referrals by favourites.
-export type GetProfilesForSearch_Body = { loggedInUserId: string; searchTerm: string; targetType?: IProfile['UserType']; lastItemId: string | undefined };
-export type GetProfilesForSearch_Response = Promise<{ users: IProfileWithFavorites[]; businesses: IProfileWithFavorites[] }>;
+export type GetProfilesForSearch_Body = {
+  loggedInUserId: string;
+
+  targetType?: IProfile['UserType'];
+  lastItemId?: string;
+} & ISearchFilters;
+
+type ISearchFilters = {
+  searchTerm?: string;
+  state?: string;
+  city?: string;
+};
+
+export type GetProfilesForSearch_Response = Promise<{
+  users: IProfileWithFavorites[];
+  businesses: IProfileWithFavorites[];
+}>;
+
 export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): GetProfilesForSearch_Response => {
   const favoritesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.favorites), where('ProfileId', '==', body.loggedInUserId))));
-  if (favoritesResponse.error !== null || favoritesResponse.result === null) throw new Error(firebaseErrorMsg(favoritesResponse.error));
+
+  if (favoritesResponse.error !== null || favoritesResponse.result === null) {
+    throw new Error(firebaseErrorMsg(favoritesResponse.error));
+  }
+
   const allFavorites = favoritesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id })) as IFavorite[];
 
-  const fetchProfiles = async (userType: string, searchTerm?: string, lastItemId?: string) => {
+  const fetchProfiles = async (userType: string) => {
     const constraints: any = [where('Verified', '==', '1'), where('UserType', '==', userType), orderBy('FirstName', 'asc')];
-    if (searchTerm) constraints.push(where('Keywords', 'array-contains', searchTerm.toLowerCase()));
-    if (lastItemId) {
-      const lastItemDocSnap = await getDoc(doc(firebase.firestore, firebase.collections.profile, lastItemId));
+
+    if (body.searchTerm && body.searchTerm.trim() !== '') {
+      constraints.push(where('Keywords', 'array-contains', body.searchTerm.toLowerCase()));
+    }
+    if (body.state) {
+      constraints.push(where('State', '==', body.state));
+    }
+    if (body.city) {
+      constraints.push(where('City', '==', body.city));
+    }
+
+    if (body.lastItemId && typeof body.lastItemId === 'string') {
+      const lastItemDocSnap = await getDoc(doc(firebase.firestore, firebase.collections.profile, body.lastItemId));
       if (lastItemDocSnap.exists()) {
         constraints.push(startAfter(lastItemDocSnap));
       }
@@ -114,9 +144,11 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
     const profileResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.profile), ...constraints, limit(firebase.pagination.pageSize))));
 
     if (profileResponse.result === null) return [];
+
     return Promise.all(
       profileResponse.result.docs.map(async (item) => {
         const groupDataResult = await asyncGuard(() => getDoc(doc(firebase.firestore, firebase.collections.groupTypes, item.data().GroupId || '')));
+
         return {
           ...item.data(),
           id: item.id,
@@ -127,29 +159,14 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
     ) as Promise<IProfileWithFavorites[]>;
   };
 
-  if (!body.searchTerm && body.targetType === undefined) {
+  if (!body.targetType) {
     return {
       users: await fetchProfiles('Normal'),
       businesses: await fetchProfiles('Business'),
     };
   }
 
-  if (body.searchTerm && body.targetType === undefined) {
-    return {
-      users: await fetchProfiles('Normal', body.searchTerm),
-      businesses: await fetchProfiles('Business', body.searchTerm),
-    };
-  }
-
-  if (!body.searchTerm && body.targetType !== undefined) {
-    return body.targetType === 'Normal' ? { users: await fetchProfiles(body.targetType, undefined, body.lastItemId), businesses: [] } : { users: [], businesses: await fetchProfiles(body.targetType, undefined, body.lastItemId) };
-  }
-
-  if (body.searchTerm && body.targetType !== undefined) {
-    return body.targetType === 'Normal' ? { users: await fetchProfiles(body.targetType, body.searchTerm, body.lastItemId), businesses: [] } : { users: [], businesses: await fetchProfiles(body.targetType, body.searchTerm, body.lastItemId) };
-  }
-
-  return { users: [], businesses: [] };
+  return body.targetType === 'Normal' ? { users: await fetchProfiles('Normal'), businesses: [] } : { users: [], businesses: await fetchProfiles('Business') };
 };
 
 export type GetProfileById_Body = { id: string; loggedInUserId: string };

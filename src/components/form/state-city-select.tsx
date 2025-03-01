@@ -29,8 +29,8 @@ const StateCitySelect: React.FC<IProps> = ({ form }) => {
 
   return (
     <div className="grid w-full grid-cols-2 gap-2.5">
-      <FieldSelectDropdown form={form} options={states} onChange={(value) => form.setValue('states', value)} value={selectedState} placeholder="State" name="states" />
-      <FieldSelectDropdown form={form} options={cities} onChange={(value) => form.setValue('cities', value)} value={selectedCity} placeholder="City" name="cities" />
+      <FieldSelectDropdown form={form} options={states} onChange={(value) => form.setValue('states', value)} value={selectedState} placeholder="State" name="states" containerClassName="border-grey bg-white" />
+      <FieldSelectDropdown form={form} options={cities} onChange={(value) => form.setValue('cities', value)} value={selectedCity} placeholder="City" name="cities" containerClassName="border-grey bg-white" />
     </div>
   );
 };
