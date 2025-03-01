@@ -117,7 +117,7 @@ export const MutualFavourites: React.FC<IMutualFavourites> = ({ mutualFavourites
           </div>
 
           {data.slice(0, 3).map((value) => (
-            <ReferralUserChip shade="dark" id={value.ProfileId || ''} src={value?.ImageUrl || ''} name={value?.FirstName || ''} />
+            <ReferralUserChip shade="dark" id={value.UserId || ''} src={value?.ImageUrl || ''} name={value?.FirstName || ''} />
           ))}
 
           {data.length > 3 && <ProfileListDialog shade="dark" data={data} count={data.length - 3} />}
