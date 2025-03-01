@@ -125,7 +125,6 @@ export const GetMutualFavouritesForProfile = async (body: GetProfileReferralsByU
     }
   }
 
-  console.log('🚀 ~ GetMutualFavouritesForProfile ~ favouritesCompiled:', favouritesCompiled);
   return favouritesCompiled;
 };
 
