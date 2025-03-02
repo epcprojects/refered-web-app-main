@@ -43,7 +43,7 @@ const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
   };
 
   const onUserClickFromList = async (user: IFavorite) => {
-    const { ProfileId: referredById } = user || {}; //Using `ProfileId` here as `UserId` is inconsistent and showing the `BusinessId`
+    const { UserId: referredById } = user || {}; //Using `ProfileId` here as `UserId` is inconsistent and showing the `BusinessId`
     const businessId = data.UserId;
 
     await handleCreateReferral(businessId, referredById);
