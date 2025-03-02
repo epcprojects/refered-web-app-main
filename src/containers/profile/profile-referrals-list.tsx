@@ -140,7 +140,6 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
   const globalStore = useAppStore('Global');
 
   const type = useMemo<'to' | 'by' | 'business'>(() => (profileData.UserId === data.referredByUserId ? 'by' : profileData.UserId === data.referredToUserId ? 'to' : 'business'), [data]);
-  const userReferral = useMemo(() => (type === 'business' ? data.referredToUser : data.referredBusinessUser), [type]);
   const myType = useMemo<'to' | 'by' | 'business' | null>(() => (globalStore?.currentUser?.uid === data.referredByUserId ? 'by' : globalStore?.currentUser?.uid === data.referredToUserId ? 'to' : globalStore?.currentUser?.uid === data.referredBusinessUserId ? 'business' : null), [globalStore, data]);
   const showRefferal = useMemo(() => data.referredByUserId === data.referredToUserId && data.referredToUserId === globalStore?.currentUser?.uid, [globalStore, data]);
 
@@ -171,28 +170,28 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
     <>
       <RedeemConfirmationDialog isOpen={isRedeemPopupOpened} onClose={() => setIsRedeemPopupOpened(false)} data={data} isRedeeming={isRedeeming} hasRedeemed={hasRedeemed} setHasRedeemed={setHasRedeemed} setIsRedeeming={setIsRedeeming} />
       <div className="flex flex-row gap-3 py-2">
-        <NextLink href={`${AppPages.PROFILE}/${userReferral?.UserId}`} className="cursor-pointer">
-          <Avatar src={type === 'business' ? data.referredToUser?.ImageUrl : data.referredBusinessUser?.ImageUrl} alt={[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()} fallback={initials([data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()).slice(0, 2)} />
+        <NextLink href={`${AppPages.PROFILE}/${data.referredBusinessUser?.UserId}`} className="cursor-pointer">
+          <Avatar src={data.referredBusinessUser?.ImageUrl} alt={[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()} fallback={initials([data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()).slice(0, 2)} />
         </NextLink>
         <div className="w-full overflow-hidden">
           <div className="flex flex-row gap-1">
             <div className="flex w-full max-w-full flex-1 flex-col overflow-hidden">
-              <NextLink href={`${AppPages.PROFILE}/${userReferral?.UserId}`} className="cursor-pointer">
-                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{(userReferral?.BusinessName || userReferral?.FirstName || 'New Referral').trim()}</h3>
+              <NextLink href={`${AppPages.PROFILE}/${data.referredBusinessUser?.UserId}`} className="cursor-pointer">
+                <h3 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal">{(data.referredBusinessUser?.BusinessName || data.referredBusinessUser?.FirstName || 'New Referral').trim()}</h3>
               </NextLink>
-              {userReferral?.City && userReferral?.State && (
+              {data.referredBusinessUser?.City && data.referredBusinessUser?.State && (
                 <div className="mb-1 mt-[5px] flex gap-1 text-muted-foreground">
                   <RiMapPin2Line size={15} />
-                  <p className="my-auto w-[97%] overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">{userReferral.City + ', ' + userReferral.State}</p>
+                  <p className="my-auto w-[97%] overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">{data.referredBusinessUser.City + ', ' + data.referredBusinessUser.State}</p>
                 </div>
               )}
-              {(userReferral?.BusinessTypeName || userReferral?.FirstName || userReferral?.LastName) && (
+              {(data.referredBusinessUser?.BusinessTypeName || data.referredBusinessUser?.FirstName || data.referredBusinessUser?.LastName) && (
                 <div className="!ml-0 flex gap-1 text-muted-foreground">
                   <RiNewsLine size={15} />
                   <p className="my-auto w-[97%] overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal text-muted-foreground">
-                    <span>{userReferral?.BusinessTypeName}</span>
+                    <span>{data.referredBusinessUser?.BusinessTypeName}</span>
                     <span className="mt-1"> • </span>
-                    <span>{[userReferral?.FirstName, userReferral?.LastName].join(' ').trim()}</span>
+                    <span>{[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()}</span>
                   </p>
                 </div>
               )}
