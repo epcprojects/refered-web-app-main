@@ -14,7 +14,7 @@ import { useAppStore } from '@/hooks/use-app-store';
 import { asyncGuard } from '@/utils/lodash.utils';
 import { ZOD } from '@/utils/zod.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -30,7 +30,6 @@ export const signinFormSchema = z.object({
 
 const SigninIndex: React.FC<IProps> = () => {
   const router = useRouter();
-  const query = useSearchParams();
 
   const globalStore = useAppStore('Global');
 
@@ -54,8 +53,8 @@ const SigninIndex: React.FC<IProps> = () => {
   };
 
   React.useEffect(() => {
-    if (query.get('password-reset') === 'success') toast.success('Password updated successfully!');
-  }, [query]);
+    if (localStorage.getItem('password_reset') === 'success') toast.success('Password updated successfully!');
+  }, []);
 
   return (
     <AuthCardLayout title="Sign in to Continue" coverImageSrc="/images/auth-cover-01.jpg">

@@ -52,11 +52,13 @@ const ResetPasswordIndex: React.FC<IProps> = () => {
 
     const currentUser = globalStore.currentUser;
     const response = await asyncGuard(() => ResetPassword({ user: currentUser, password: values.password }));
+
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
+      localStorage.setItem('password_reset', 'success');
       await Signout();
       globalStore?.setIsResetPasswordSignin(false);
-      router.push(AppPages.SIGNIN + '?password_reset=success');
+      router.push(AppPages.SIGNIN);
     }
   };
 
