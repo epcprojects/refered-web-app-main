@@ -142,6 +142,7 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
   const type = useMemo<'to' | 'by' | 'business'>(() => (profileData.UserId === data.referredByUserId ? 'by' : profileData.UserId === data.referredToUserId ? 'to' : 'business'), [data]);
   const userReferral = useMemo(() => (type === 'business' ? data.referredToUser : data.referredBusinessUser), [type]);
   const myType = useMemo<'to' | 'by' | 'business' | null>(() => (globalStore?.currentUser?.uid === data.referredByUserId ? 'by' : globalStore?.currentUser?.uid === data.referredToUserId ? 'to' : globalStore?.currentUser?.uid === data.referredBusinessUserId ? 'business' : null), [globalStore, data]);
+  const showRefferal = useMemo(() => data.referredByUserId === data.referredToUserId && data.referredToUserId === globalStore?.currentUser?.uid, [globalStore, data]);
 
   const [isInitiatingChat, setIsInitiatingChat] = useState(false);
   const [isRedeemPopupOpened, setIsRedeemPopupOpened] = useState(false);
@@ -199,7 +200,7 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
             <div className="flex flex-shrink-0 flex-col items-end gap-0.5">
               <p className="text-xs text-muted-foreground">{date.format(date.fromUnixTime(data.datetime.seconds), 'dd MMM yyyy')}</p>
               <div className="flex flex-row flex-wrap gap-1">
-                {hasRedeemed || (type === 'to' && myType === 'to') || (type === 'by' && myType === 'by') ? (
+                {hasRedeemed || (type === 'to' && myType === 'to') || showRefferal ? (
                   <Button variant="secondary" size="sm" classes={{ container: 'disabled:bg-foreground/5 disabled:text-foreground rounded-md p-[5px] px-2.5 h-max' }} disabled={hasRedeemed || isRedeeming || isInitiatingChat} onClick={() => setIsRedeemPopupOpened(true)}>
                     {isRedeeming ? <Spinner color="secondary" size="sm" /> : hasRedeemed ? 'Redeemed' : 'Redeem'}
                   </Button>
