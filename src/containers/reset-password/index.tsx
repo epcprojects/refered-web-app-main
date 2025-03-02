@@ -55,9 +55,8 @@ const ResetPasswordIndex: React.FC<IProps> = () => {
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
       await Signout();
-      toast.success('Password updated successfully!');
       globalStore?.setIsResetPasswordSignin(false);
-      router.push(AppPages.SIGNIN);
+      router.push(AppPages.SIGNIN + '?password_reset=success');
     }
   };
 
