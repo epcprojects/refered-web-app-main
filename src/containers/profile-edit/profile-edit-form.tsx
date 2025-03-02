@@ -49,8 +49,6 @@ export const businessProfileFormSchema = z.object({
   cities: z.string({ required_error: ZOD.ERROR.REQUIRED() }),
   zip: z.coerce
     .string({ required_error: ZOD.ERROR.REQUIRED() })
-    .min(1, { message: ZOD.ERROR.REQUIRED() })
-    .min(5, { message: ZOD.ERROR.MIN_LENGTH_NUMBER(5) })
     .max(10, { message: ZOD.ERROR.MAX_LENGTH_NUMBER(10) })
     .refine((val) => val !== '', { message: ZOD.ERROR.REQUIRED() })
     .refine((val) => val.match(AppRegex.IS_NUMBER), { message: ZOD.ERROR.NUMERIC() }),

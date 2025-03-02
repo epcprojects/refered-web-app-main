@@ -16,16 +16,13 @@ const StateCitySelect: React.FC<IProps> = ({ form }) => {
     return selectedState && USA_CITY_AND_STATES[selectedState] ? USA_CITY_AND_STATES[selectedState].map((city) => ({ label: city, value: city })) : [];
   }, [selectedState]);
 
-  useEffect(() => {
-    form.setValue('cities', selectedCity);
-  }, [selectedCity]);
-
   //Upon change the state, we're changing cities.
   useEffect(() => {
     if (selectedState && cities.length) {
-      form.setValue('cities', cities[0].value);
+      const cityFound = cities.some((val) => val.value === selectedCity);
+      form.setValue('cities', cityFound ? selectedCity : cities[0].value);
     }
-  }, [selectedState, cities, form]);
+  }, [selectedState, form]);
 
   return (
     <div className="grid w-full grid-cols-2 gap-2.5">
