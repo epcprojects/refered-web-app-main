@@ -141,7 +141,7 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
 
   const type = useMemo<'to' | 'by' | 'business'>(() => (profileData.UserId === data.referredByUserId ? 'by' : profileData.UserId === data.referredToUserId ? 'to' : 'business'), [data]);
   const myType = useMemo<'to' | 'by' | 'business' | null>(() => (globalStore?.currentUser?.uid === data.referredByUserId ? 'by' : globalStore?.currentUser?.uid === data.referredToUserId ? 'to' : globalStore?.currentUser?.uid === data.referredBusinessUserId ? 'business' : null), [globalStore, data]);
-  const showRefferal = useMemo(() => data.referredByUserId === data.referredToUserId && data.referredToUserId === globalStore?.currentUser?.uid, [globalStore, data]);
+  const showRefferal = useMemo(() => data.referredByUserId === data.referredToUserId && data.referredToUserId === profileData.UserId, [globalStore, data]);
 
   const [isInitiatingChat, setIsInitiatingChat] = useState(false);
   const [isRedeemPopupOpened, setIsRedeemPopupOpened] = useState(false);
