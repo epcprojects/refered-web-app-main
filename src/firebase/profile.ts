@@ -1,6 +1,6 @@
 import { profilePaymentInfoFormSchemaType } from '@/containers/profile-edit/profile-edit-form-payment-info';
 import { date } from '@/utils/date.utils';
-import { asyncGuard, firebaseErrorMsg, generateTokensForSentence, unionBy } from '@/utils/lodash.utils';
+import { asyncGuard, firebaseErrorMsg, generateTokensForSentence } from '@/utils/lodash.utils';
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { firebase } from '.';
 import { IFavorite } from './favorite';
@@ -233,15 +233,28 @@ export const UpdateUserFcmToken = async ({ id, ...body }: UpdateUserFcmToken_Bod
   const result = profileResponse.result;
   const resultData = profileResponse.result.data() as IProfile;
 
-  let compiledFcmTokens = [];
-  const hasFCMToken = !!(resultData.FCMToken || []).find((item) => item.browser === body.FCMToken[0].browser && item.platform === body.FCMToken[0].platform);
-  if (hasFCMToken) compiledFcmTokens = (resultData.FCMToken || []).map((item) => (item.browser === body.FCMToken[0].browser && item.platform === body.FCMToken[0].platform ? body.FCMToken[0] : item));
-  else compiledFcmTokens = unionBy(resultData.FCMToken || [], body.FCMToken);
+  // Extract the FCM token details from the body
+  const newFcmToken = body.FCMToken[0];
 
-  // delete expired tokens
+  // Check if the token for the given browser already exists
+  const existingTokenIndex = (resultData.FCMToken || []).findIndex((item) => item.browser === newFcmToken.browser);
+
+  let compiledFcmTokens = [];
+
+  if (existingTokenIndex !== -1) {
+    // If token for the same browser exists, replace it
+    compiledFcmTokens = (resultData.FCMToken || []).map((item, index) => (index === existingTokenIndex ? newFcmToken : item));
+  } else {
+    // If token for the browser doesn't exist, add the new token
+    compiledFcmTokens = [...(resultData.FCMToken || []), newFcmToken];
+  }
+
+  // Delete expired tokens (e.g., older than 15 days)
   compiledFcmTokens = compiledFcmTokens.filter((item) => date.differenceInDays(new Date(), date.fromUnixTime(item.lastUpdated.seconds)) < 15);
 
+  // Update the Firestore document with the new FCM tokens
   const response = await asyncGuard(() => updateDoc(result.ref, { FCMToken: compiledFcmTokens }));
   if (response.error !== null || response.result === null) throw new Error(firebaseErrorMsg(response.error));
+
   return { ...result.data(), id: result.id, ...body } as IProfile;
 };
