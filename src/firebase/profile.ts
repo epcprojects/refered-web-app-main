@@ -245,8 +245,8 @@ export const UpdateUserFcmToken = async ({ id, ...body }: UpdateUserFcmToken_Bod
     // If token for the same browser exists, replace it
     compiledFcmTokens = (resultData.FCMToken || []).map((item, index) => (index === existingTokenIndex ? newFcmToken : item));
   } else {
-    // If token for the browser doesn't exist, add the new token
-    compiledFcmTokens = [...(resultData.FCMToken || []), newFcmToken];
+    // If token for the browser doesn't exist, replace it with original
+    compiledFcmTokens = [newFcmToken];
   }
 
   // Delete expired tokens (e.g., older than 15 days)
