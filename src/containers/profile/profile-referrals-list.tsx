@@ -272,7 +272,7 @@ const RedeemConfirmationDialog: React.FC<{ isOpen: boolean; onClose: () => void;
         <Image src="/images/info-icon.svg" alt="Redeem Confirm" width={60} height={60} className="rotate-180" />
         <div className="flex- mb-2 w-full flex-col items-center justify-center">
           <h3 className="text-center text-xl font-medium">Are you sure you want to redeem?</h3>
-          {!!data.referredBusinessUser && data.referredBusinessUser.DiscountPercent !== undefined ? (
+          {!!data.referredBusinessUser && data.referredBusinessUser.DiscountPercent !== undefined && !data.hasBeenRedeemedBefore ? (
             <p className="mt-1 text-center">
               By clicking <strong>"Redeem"</strong> you will get {data.referredBusinessUser?.DiscountPercent}% discount from <strong>"{[data.referredBusinessUser?.FirstName, data.referredBusinessUser?.LastName].join(' ').trim()}"</strong>
             </p>

@@ -18,6 +18,7 @@ export interface IReferral {
   referredByUser?: IProfile;
   referredToUser?: IProfile;
   referredBusinessUser?: IProfile;
+  hasBeenRedeemedBefore?: boolean;
 }
 
 export type GetAllReferralsByUserId_Body = { userId: string; lastItemId: string | undefined };
@@ -76,12 +77,14 @@ export const GetAllReferralsByUserId = async (body: GetAllReferralsByUserId_Body
       const referredByUser = allProfiles.find((profile) => profile.UserId === item.referredByUserId);
       const referredToUser = allProfiles.find((profile) => profile.UserId === item.referredToUserId);
       const referredBusinessUser = allProfiles.find((profile) => profile.UserId === item.referredBusinessUserId);
+      const hasBeenRedeemedBefore = !!allReferrals.some((referral) => referral.referredBusinessUserId === item.referredBusinessUserId && referral.referredByUserId === item.referredByUserId && referral.isRedeemed === '1');
 
       return {
         ...item,
         referredByUser: { ...referredByUser },
         referredToUser: { ...referredToUser },
         referredBusinessUser: { ...referredBusinessUser, groupData: await fetchGroupData(referredBusinessUser) },
+        hasBeenRedeemedBefore: hasBeenRedeemedBefore,
       };
     }),
   );
