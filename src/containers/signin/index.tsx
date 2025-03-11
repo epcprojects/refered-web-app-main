@@ -53,7 +53,10 @@ const SigninIndex: React.FC<IProps> = () => {
   };
 
   React.useEffect(() => {
-    if (localStorage.getItem('password_reset') === 'success') toast.success('Password updated successfully!');
+    if (localStorage.getItem('password_reset') === 'success') {
+      localStorage.removeItem('password_reset');
+      toast.success('Password updated successfully!');
+    }
   }, []);
 
   return (
