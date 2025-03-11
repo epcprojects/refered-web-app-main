@@ -66,12 +66,12 @@ const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
   };
 
   const Buttons = {
-    Refer: <Button type="button" classes={{ container: 'w-full', label: 'not-sr-only' }} label="Refer to Friend" variant="secondary" onClick={() => handleShareProfile()} leftElement={Elements.Refer.left} />,
-    Connect: <Button ref={connectButtonRef} type="button" isLoading={isCreatingReferral} classes={{ container: 'w-full', label: 'not-sr-only' }} label={'Connect with ' + data.FirstName || 'User'} variant="secondary" onClick={iReferBusinessToMyself} leftElement={Elements.Connect.left} />,
+    Refer: <Button type="button" classes={{ container: 'w-full', label: 'not-sr-only truncate' }} label="Refer to Friend" variant="secondary" onClick={() => handleShareProfile()} leftElement={Elements.Refer.left} />,
+    Connect: <Button ref={connectButtonRef} type="button" isLoading={isCreatingReferral} classes={{ container: 'w-full', label: 'not-sr-only truncate' }} label={'Connect with ' + data.FirstName || 'User'} variant="secondary" onClick={iReferBusinessToMyself} leftElement={Elements.Connect.left} />,
   };
 
   return (
-    <div className={`flex gap-2 ${classes}`}>
+    <div className={`flex gap-2 max-sm:flex-wrap ${classes}`}>
       {Buttons.Refer}
       <ProfileListDialog data={data.mutualFavourites} triggerClass="w-full" trigger={Buttons.Connect} showDialog={true} onUserClick={onUserClickFromList} dialogLoading={isCreatingReferral} />
     </div>
