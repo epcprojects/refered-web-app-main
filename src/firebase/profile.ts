@@ -123,7 +123,7 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
       input: body.loggedInUserId,
       data: {
         type: 'favoritesResponse',
-        error: favoritesResponse.error || '',
+        error: JSON.stringify(favoritesResponse) || '',
       },
       timestamp: timestamp,
     }),
@@ -162,7 +162,7 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
         input: body.loggedInUserId,
         data: {
           type: 'profileResponse',
-          error: profileResponse.error || '',
+          error: JSON.stringify(profileResponse) || '',
         },
         timestamp: timestamp,
       }),
@@ -172,23 +172,12 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
 
     return Promise.all(
       profileResponse.result.docs.map(async (item) => {
-        const groupDataResult = await asyncGuard(() => getDoc(doc(firebase.firestore, firebase.collections.groupTypes, item.data().GroupId || '')));
-
-        await asyncGuard(() =>
-          addDoc(collection(firebase.firestore, firebase.collections.logs), {
-            input: body.loggedInUserId,
-            data: {
-              type: 'groupDataResult',
-              error: groupDataResult.error || '',
-            },
-            timestamp: timestamp,
-          }),
-        );
+        // const groupDataResult = await asyncGuard(() => getDoc(doc(firebase.firestore, firebase.collections.groupTypes, item.data().GroupId || '')));
 
         return {
           ...item.data(),
           id: item.id,
-          groupData: groupDataResult.result?.data() || null,
+          // groupData: groupDataResult.result?.data() || null,
           isFavorite: !!allFavorites.find((fav) => fav.UserId === item.data().UserId),
         };
       }),
