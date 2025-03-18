@@ -118,7 +118,7 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
 
   const timestamp = new Date().toLocaleString();
 
-  const res = await asyncGuard(() =>
+  await asyncGuard(() =>
     addDoc(collection(firebase.firestore, firebase.collections.logs), {
       input: body.loggedInUserId,
       data: {
@@ -128,11 +128,6 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
       timestamp: timestamp,
     }),
   );
-  console.log('🚀 ~ GetProfilesForSearch ~ res:', res);
-
-  if (body.loggedInUserId) {
-    throw new Error(firebaseErrorMsg(favoritesResponse.error));
-  }
 
   if (favoritesResponse.error !== null || favoritesResponse.result === null) {
     throw new Error(firebaseErrorMsg(favoritesResponse.error));
@@ -172,10 +167,6 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
         timestamp: timestamp,
       }),
     );
-
-    if (body.loggedInUserId) {
-      throw new Error(firebaseErrorMsg(favoritesResponse.error));
-    }
 
     if (profileResponse.result === null) return [];
 
