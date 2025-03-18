@@ -35,6 +35,7 @@ enum collections {
   favorites = 'Favorites',
   referrals = 'Refferals',
   groupTypes = 'GroupTypes',
+  logs = 'ApplicationErrors',
 }
 
 export const firebase = { app, firestore, auth, storage, collections, pagination, messaging };
