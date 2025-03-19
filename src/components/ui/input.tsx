@@ -2,7 +2,7 @@ import { cn } from '@/utils/cn.utils';
 import React, { useRef } from 'react';
 import { FieldError } from 'react-hook-form';
 import { RiErrorWarningFill } from 'react-icons/ri';
-import InputMask from 'react-input-mask';
+import { IMaskInput } from 'react-imask';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: FieldError | string;
@@ -10,7 +10,6 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   leftElement?: React.ReactNode;
   rightElement?: React.ReactNode;
   mask?: string;
-  maskChar?: string;
   containerClassName?: string;
 }
 
@@ -19,7 +18,22 @@ const InputStyles = {
   input: 'peer bg-transparent w-full p-0 !m-0 placeholder:opacity-80 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed',
 };
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(({ containerClassName, error, noErrorIcon = false, leftElement, rightElement, type, mask, maskChar, formAction, contentEditable, children, className, ...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({ 
+  containerClassName, 
+  error, 
+  noErrorIcon = false, 
+  leftElement, 
+  rightElement, 
+  type, 
+  mask,
+  formAction, 
+  contentEditable, 
+  children, 
+  className, 
+  onChange, 
+  value, 
+  ...props 
+}, ref) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleRef = (inputElement: HTMLInputElement | null) => {
@@ -31,7 +45,26 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ containerClassNa
   return (
     <div className={cn(InputStyles.base(!!error, !!props.disabled), containerClassName)} onClick={() => inputRef.current?.focus()}>
       {!!leftElement && leftElement}
-      {!!mask ? <InputMask type={type} className={cn(InputStyles.input, className)} mask={mask} maskChar={!!maskChar ? maskChar : null} inputRef={handleRef} {...props} /> : <input type={type} className={cn(InputStyles.input, className)} ref={handleRef} {...{ formAction, contentEditable, children, ...props }} />}
+      {!!mask ? (
+        <IMaskInput
+          type={type}
+          className={cn(InputStyles.input, className)}
+          inputRef={handleRef}
+          mask={mask.replace(/9/g, '0')}
+          value={value?.toString()}
+          onChange={onChange}
+          {...props}
+        />
+      ) : (
+        <input
+          type={type}
+          className={cn(InputStyles.input, className)}
+          ref={handleRef}
+          onChange={onChange}
+          value={value}
+          {...{ formAction, contentEditable, children, ...props }}
+        />
+      )}
       {!!rightElement ? rightElement : !!error && noErrorIcon === false ? <RiErrorWarningFill size={20} className="flex-shrink-0 self-center text-destructive" /> : null}
     </div>
   );
@@ -39,3 +72,4 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ containerClassNa
 
 Input.displayName = 'Input';
 export { Input };
+
