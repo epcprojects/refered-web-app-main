@@ -44,17 +44,38 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({
 
   useEffect(() => {
     if (mask && inputRef.current) {
+      const input = inputRef.current;
+      let observer: MutationObserver | null = null;
+
       const handleAutofill = () => {
-        const input = inputRef.current;
-        if (input && input.matches(':-webkit-autofill')) {
+        if (input && input.value) {
           const event = new Event('input', { bubbles: true });
           input.dispatchEvent(event);
         }
       };
 
-      // Check for autofill after a short delay to allow browser to complete autofill
+      // Create observer to watch for style changes
+      observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            handleAutofill();
+          }
+        });
+      });
+
+      // Start observing
+      observer.observe(input, {
+        attributes: true,
+        attributeFilter: ['style']
+      });
+
+      // Also check after a delay
       const timeoutId = setTimeout(handleAutofill, 100);
-      return () => clearTimeout(timeoutId);
+
+      return () => {
+        if (observer) observer.disconnect();
+        clearTimeout(timeoutId);
+      };
     }
   }, [mask]);
 
