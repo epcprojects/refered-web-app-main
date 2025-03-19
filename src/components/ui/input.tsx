@@ -1,5 +1,5 @@
 import { cn } from '@/utils/cn.utils';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FieldError } from 'react-hook-form';
 import { RiErrorWarningFill } from 'react-icons/ri';
 import { IMaskInput } from 'react-imask';
@@ -41,6 +41,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({
     if (typeof ref === 'function') ref(inputElement);
     else if (ref && typeof ref === 'object') ref.current = inputElement;
   };
+
+  useEffect(() => {
+    if (mask && inputRef.current) {
+      const handleAutofill = () => {
+        const input = inputRef.current;
+        if (input && input.matches(':-webkit-autofill')) {
+          const event = new Event('input', { bubbles: true });
+          input.dispatchEvent(event);
+        }
+      };
+
+      // Check for autofill after a short delay to allow browser to complete autofill
+      const timeoutId = setTimeout(handleAutofill, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [mask]);
 
   return (
     <div className={cn(InputStyles.base(!!error, !!props.disabled), containerClassName)} onClick={() => inputRef.current?.focus()}>
