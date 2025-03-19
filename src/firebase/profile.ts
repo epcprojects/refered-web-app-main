@@ -1,7 +1,7 @@
 import { profilePaymentInfoFormSchemaType } from '@/containers/profile-edit/profile-edit-form-payment-info';
 import { date } from '@/utils/date.utils';
 import { asyncGuard, firebaseErrorMsg, generateTokensForSentence } from '@/utils/lodash.utils';
-import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { firebase } from '.';
 import { IFavorite } from './favorite';
 import { IGroupType } from './group-types';
@@ -113,21 +113,7 @@ export type GetProfilesForSearch_Response = Promise<{
 }>;
 
 export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): GetProfilesForSearch_Response => {
-  console.log('🚀 ~ GetProfilesForSearch ~ body:', body);
   const favoritesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.favorites), where('ProfileId', '==', body.loggedInUserId))));
-
-  const timestamp = new Date().toLocaleString();
-
-  await asyncGuard(() =>
-    addDoc(collection(firebase.firestore, firebase.collections.logs), {
-      input: body.loggedInUserId,
-      data: {
-        type: 'favoritesResponse',
-        error: JSON.stringify(favoritesResponse) || '',
-      },
-      timestamp: timestamp,
-    }),
-  );
 
   if (favoritesResponse.error !== null || favoritesResponse.result === null) {
     throw new Error(firebaseErrorMsg(favoritesResponse.error));
@@ -156,17 +142,6 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
     }
 
     const profileResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.profile), ...constraints, limit(firebase.pagination.pageSize))));
-
-    await asyncGuard(() =>
-      addDoc(collection(firebase.firestore, firebase.collections.logs), {
-        input: body.loggedInUserId,
-        data: {
-          type: 'profileResponse',
-          error: JSON.stringify(profileResponse) || '',
-        },
-        timestamp: timestamp,
-      }),
-    );
 
     if (profileResponse.result === null) return [];
 
