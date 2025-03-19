@@ -1,3 +1,4 @@
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 import RootLayoutIndex from '@/layouts/root-layout';
 import '@/styles/globals.scss';
 import type { Metadata, Viewport } from 'next';
@@ -6,7 +7,11 @@ interface IProps {
   children: React.ReactNode;
 }
 
-const RootLayout: React.FC<IProps> = ({ children }) => <RootLayoutIndex>{children}</RootLayoutIndex>;
+const RootLayout: React.FC<IProps> = ({ children }) => (
+  <ErrorBoundary>
+    <RootLayoutIndex>{children}</RootLayoutIndex>
+  </ErrorBoundary>
+);
 export default RootLayout;
 export const metadata: Metadata = {
   title: 'Refered',
