@@ -1,5 +1,5 @@
 import { cn } from '@/utils/cn.utils';
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { FieldError } from 'react-hook-form';
 import { RiErrorWarningFill } from 'react-icons/ri';
 import { IMaskInput } from 'react-imask';
@@ -42,42 +42,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({
     else if (ref && typeof ref === 'object') ref.current = inputElement;
   };
 
-  useEffect(() => {
-    if (mask && inputRef.current) {
-      const input = inputRef.current;
-      let observer: MutationObserver | null = null;
-
-      const handleAutofill = () => {
-        if (input && input.value) {
-          const event = new Event('input', { bubbles: true });
-          input.dispatchEvent(event);
-        }
-      };
-
-      // Create observer to watch for style changes
-      observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-            handleAutofill();
-          }
-        });
-      });
-
-      // Start observing
-      observer.observe(input, {
-        attributes: true,
-        attributeFilter: ['style']
-      });
-
-      // Also check after a delay
-      const timeoutId = setTimeout(handleAutofill, 100);
-
-      return () => {
-        if (observer) observer.disconnect();
-        clearTimeout(timeoutId);
-      };
+  const handleAccept = (value: string) => {
+    if (onChange) {
+      const event = {
+        target: { value }
+      } as React.ChangeEvent<HTMLInputElement>;
+      onChange(event);
     }
-  }, [mask]);
+  };
 
   return (
     <div className={cn(InputStyles.base(!!error, !!props.disabled), containerClassName)} onClick={() => inputRef.current?.focus()}>
@@ -90,6 +62,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({
           mask={mask.replace(/9/g, '0')}
           value={value?.toString()}
           onChange={onChange}
+          onAccept={handleAccept}
           {...props}
         />
       ) : (
