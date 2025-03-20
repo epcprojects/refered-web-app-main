@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { AppPages } from '@/constants/app-pages.constants';
 import { useAppStore } from '@/hooks/use-app-store';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 interface IProps {}
@@ -13,8 +13,9 @@ interface IProps {}
 const VerificationSuccessIndex: React.FC<IProps> = () => {
   const router = useRouter();
   const globalStore = useAppStore('Global');
+  const searchParams = useSearchParams();
 
-  const handleGoToProfile = () => router.replace(AppPages.HOME);
+  const handleGoToProfile = () => router.replace(searchParams.get('callback') || AppPages.HOME);
 
   useEffect(() => {
     if (globalStore?.isVerifiedRecently) globalStore?.resetIsVerifiedRecently();

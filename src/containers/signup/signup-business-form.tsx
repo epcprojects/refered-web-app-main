@@ -28,6 +28,7 @@ import { z } from 'zod';
 
 interface IProps {
   handleGoBack: () => void;
+  params?:string
 }
 
 export type signupBusinessFormSchemaType = z.infer<typeof signupBusinessFormSchema>;
@@ -62,7 +63,7 @@ export const signupBusinessFormSchema = z.object({
     .regex(AppRegex.ATLEAST_ONE_SPECIAL_CHARACTER, ZOD.ERROR.ATLEAST_ONE_SPECIAL_CHARACTER()),
 });
 
-const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
+const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack, params = ""}) => {
   const router = useRouter();
   const globalStore = useAppStore('Global');
 
@@ -96,7 +97,7 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
       await Signout();
-      router.replace(`${AppPages.VERIFICATION}?type=signup&phone=${handleDeformatPhoneNumberForAPI(values.phoneNumber || '')}`);
+      router.replace(`${AppPages.VERIFICATION}${params}&type=signup&phone=${handleDeformatPhoneNumberForAPI(values.phoneNumber || '')}`);
     }
   };
 
@@ -147,7 +148,7 @@ const SignupBusinessForm: React.FC<IProps> = ({ handleGoBack }) => {
         </div>
       </Form>
       <div className="mt-2 text-sm text-muted-foreground">
-        Already have an account? <Link href={AppPages.SIGNIN} label="Sign In" />
+        Already have an account? <Link href={AppPages.SIGNIN + params} label="Sign In" />
       </div>
     </AuthCardLayout>
   );

@@ -28,7 +28,7 @@ const AppAuthProvider: React.FC<IProps> = ({ children }) => {
 
   const handleRedirect = (targetPath: string) => {
     if (pathname === targetPath) return;
-    setIsRedirecting(true);
+    // setIsRedirecting(true);
     router.replace(targetPath);
     setTimeout(() => setIsRedirecting(false), 50);
   };
@@ -65,7 +65,7 @@ const AppAuthProvider: React.FC<IProps> = ({ children }) => {
     else if (!isAuthenticated && pathname === AppPages.VERIFICATION && (searchParams.get('type') === null || ['signin', 'signup', 'resetPassword'].includes(searchParams.get('type') || '') === false || searchParams.get('phone') === null || (searchParams.get('type') !== 'resetPassword' && globalStore?.emailAuthCredential === null))) handleRedirect(AppPages.SIGNIN);
     else if (!isAuthenticated && isProtectedPath(pathname)) handleRedirect(`${AppPages.SIGNIN}?callback=${pathname}`);
     else if (!isAuthenticated && pathname === AppPages.HOME_DEFAULT) handleRedirect(AppPages.SIGNIN);
-    else if (isAuthenticated && globalStore?.isVerifiedRecently) handleRedirect(AppPages.VERIFICATION_SUCCESS);
+    else if (isAuthenticated && globalStore?.isVerifiedRecently) handleRedirect(AppPages.VERIFICATION_SUCCESS + (callbackUrl ? `?callback=${callbackUrl}` : ''));
     else if (isAuthenticated && !globalStore?.isVerifiedRecently && pathname === AppPages.VERIFICATION_SUCCESS) handleRedirect(AppPages.HOME);
     else if (isAuthenticated && !globalStore?.isResetPasswordSignin && isPublicPath(pathname)) handleRedirect(callbackUrl || AppPages.HOME);
     else if (isAuthenticated && isProtectedPath(pathname) && (globalStore?.isResetPasswordSignin || globalStore?.isTemporarySignin)) {

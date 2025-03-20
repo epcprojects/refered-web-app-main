@@ -13,13 +13,13 @@ const SignupIndex: React.FC<IProps> = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleResetAccountType = () => router.push(AppPages.SIGNUP);
-  const handleSelectAccountType = (type: string) => router.push(`${AppPages.SIGNUP}?accountType=${type}`);
+  const handleResetAccountType = () => router.push(AppPages.SIGNUP + (searchParams.get('callback') ? `?callback=${searchParams.get('callback')}` : ''));
+  const handleSelectAccountType = (type: string) => router.push(`${AppPages.SIGNUP}?${searchParams.get('callback') ? `callback=${searchParams.get('callback')}` : ''}&accountType=${type}`);
   const accountType = useMemo(() => (searchParams.get('accountType') || null) as 'personal' | 'business' | null, [searchParams]);
 
   if (accountType === null) return <SignupSelectAccountTypeForm selectedAccountType={accountType} handleSelectAccountType={handleSelectAccountType} />;
-  else if (accountType === 'business') return <SignupBusinessForm handleGoBack={handleResetAccountType} />;
-  else if (accountType === 'personal') return <SignupPersonalForm handleGoBack={handleResetAccountType} />;
+  else if (accountType === 'business') return <SignupBusinessForm handleGoBack={handleResetAccountType} params={searchParams.get('callback') ? `?callback=${searchParams.get('callback')}` : ''} />;
+  else if (accountType === 'personal') return <SignupPersonalForm handleGoBack={handleResetAccountType} params={searchParams.get('callback') ? `?callback=${searchParams.get('callback')}` : ''} />;
   else return null;
 };
 

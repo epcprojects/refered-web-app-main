@@ -14,7 +14,7 @@ import { useAppStore } from '@/hooks/use-app-store';
 import { asyncGuard } from '@/utils/lodash.utils';
 import { ZOD } from '@/utils/zod.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -32,6 +32,8 @@ const SigninIndex: React.FC<IProps> = () => {
   const router = useRouter();
 
   const globalStore = useAppStore('Global');
+
+  const searchParams = useSearchParams();
 
   const form = useForm<signinFormSchemaType>({ resolver: zodResolver(signinFormSchema) });
 
@@ -68,7 +70,7 @@ const SigninIndex: React.FC<IProps> = () => {
         <FieldButton form={form} type="submit" classes={{ container: 'w-full mt-2.5' }} label="Sign in" variant="secondary" />
       </Form>
       <div className="mt-2 text-sm text-muted-foreground">
-        Don&apos;t have an account? <Link href={AppPages.SIGNUP} label="Create account" />
+        Don&apos;t have an account? <Link href={AppPages.SIGNUP + (searchParams.get('callback') ? `?callback=${searchParams.get('callback')}` : '')} label="Create account" />
       </div>
     </AuthCardLayout>
   );

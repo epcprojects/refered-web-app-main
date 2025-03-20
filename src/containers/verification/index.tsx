@@ -72,10 +72,10 @@ const OtpVerificationIndex: React.FC<IProps> = () => {
     } else {
       const response = await asyncGuard(() => VerifyOTP({ PhoneNo: `${phone.trim()}`, confirmationResult: confirmationResult, otp: values.code }));
       if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
-      else {
-        router.replace(AppPages.VERIFICATION_SUCCESS);
-        toast.success(type === 'signin' ? 'Signed in successfully!' : 'Signed up successfully!');
-      }
+      // else {
+      //   router.replace(AppPages.VERIFICATION_SUCCESS + (searchParams.get('callback') ? `?callback=${searchParams.get('callback')}` : ''));
+      //   toast.success(type === 'signin' ? 'Signed in successfully!' : 'Signed up successfully!');
+      // }
     }
   };
 
