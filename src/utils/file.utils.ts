@@ -77,13 +77,13 @@ const generateShareableCard = async ({ src, headline = '', title = '' }: IImageO
   ctx.stroke();
 
   // Text Styling
-  ctx.font = 'normal 32px Arial';
+  ctx.font = 'bold 50px Arial';
   ctx.fillStyle = 'white';
   ctx.textAlign = 'center';
   ctx.strokeStyle = 'black';
   ctx.lineWidth = 4;
 
-  const nameY = y + overlaySize + 40; // Adjusted for spacing
+  const nameY = y + overlaySize + 55; // Adjusted for spacing
 
   // Add title Below Image
   if (title) {

@@ -38,10 +38,10 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
     if (document.referrer) router.back();
     else router.push(AppPages.HOME);
   };
-
+  // Drew Dixon shared a referral to Ashley Dixon with Alexander Renee Design. Click the link to open Refer’d and get connected with Ashley now.
   const shareReferralLink = async (referralUrl: string) => {
     if (typeof window !== 'undefined' && navigator.share) {
-      const response = await asyncGuard(() => navigator.share({ title: 'Referral Link', text: 'Share this referral link!', url: referralUrl }));
+      const response = await asyncGuard(() => navigator.share({ title: 'Referral Link', text: `${(globalStore?.currentUserProfile?.FirstName + ' ' + globalStore?.currentUserProfile?.LastName).trim()} shared a referral to ${data.FirstName + ' ' + data.LastName} with ${data.BusinessName}. Click the link to open Refer’d and get connected with ${data.FirstName} now.`, url: referralUrl }));
       if (!response.error) {
         const copied = await asyncGuard(() => copy(referralUrl));
         if (copied.result) toast.success('Referral link copied!');
@@ -53,7 +53,11 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   };
 
   const handleShareProfile = async () => {
-    await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
+
+    if(isBusinessProfile){
+      await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
+    } else await shareReferralLink(referralUrl); //NOTE: Adding / slash is important for Whatsapp to fetch url.
+
   };
 
   const handleToggleFavorite = async () => {
