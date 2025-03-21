@@ -11,7 +11,7 @@ import UpdateProfileAvatar from '@/components/ui/update-profile-avatar';
 import { AppPages } from '@/constants/app-pages.constants';
 import { AppRegex } from '@/constants/app-regex.constants';
 import { Mask } from '@/constants/global.constants';
-import { handleDeformatPhoneNumberForAPI, Signout, SignupPersonal } from '@/firebase/auth';
+import { handleDeformatPhoneNumberForAPI, SignupPersonal } from '@/firebase/auth';
 import { useAppStore } from '@/hooks/use-app-store';
 import { cn } from '@/utils/cn.utils';
 import { asyncGuard } from '@/utils/lodash.utils';
@@ -69,13 +69,14 @@ const SignupPersonalForm: React.FC<IProps> = ({ handleGoBack, params = ""}) => {
       return;
     }
 
-    globalStore?.setIsTemporarySignin(true);
+    // globalStore?.setIsTemporarySignin(true);
 
     const response = await asyncGuard(() => SignupPersonal({ profileImageFile: selectedProfilePic, FirstName: values.firstName, LastName: values.lastName, email: values.email, password: values.password, PhoneNo: values.phoneNumber || '', State: values.states, City: values.cities }));
-    globalStore?.setIsTemporarySignin(false);
+    // globalStore?.setIsTemporarySignin(false);
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
-      await Signout();
+      // await Signout();
+      console.log('Response', response);
       router.push(`${AppPages.VERIFICATION+params}?type=signup&phone=${handleDeformatPhoneNumberForAPI(values.phoneNumber || '')}`);
     }
   };

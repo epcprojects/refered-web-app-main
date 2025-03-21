@@ -62,7 +62,7 @@ const AppAuthProvider: React.FC<IProps> = ({ children }) => {
     const callbackUrl = searchParams.get('callback');
 
     if (!isAuthenticated && pathname === AppPages.RESET_PASSWORD) handleRedirect(AppPages.SIGNIN);
-    else if (!isAuthenticated && pathname === AppPages.VERIFICATION && (searchParams.get('type') === null || ['signin', 'signup', 'resetPassword'].includes(searchParams.get('type') || '') === false || searchParams.get('phone') === null || (searchParams.get('type') !== 'resetPassword' && globalStore?.emailAuthCredential === null))) handleRedirect(AppPages.SIGNIN);
+    // else if (!isAuthenticated && pathname === AppPages.VERIFICATION && (searchParams.get('type') === null || ['signin', 'signup', 'resetPassword'].includes(searchParams.get('type') || '') === false || searchParams.get('phone') === null || (searchParams.get('type') !== 'resetPassword' && globalStore?.emailAuthCredential === null))) handleRedirect(AppPages.SIGNIN);
     else if (!isAuthenticated && isProtectedPath(pathname)) handleRedirect(`${AppPages.SIGNIN}?callback=${pathname}`);
     else if (!isAuthenticated && pathname === AppPages.HOME_DEFAULT) handleRedirect(AppPages.SIGNIN);
     else if (isAuthenticated && globalStore?.isVerifiedRecently) handleRedirect(AppPages.VERIFICATION_SUCCESS + (callbackUrl ? `?callback=${callbackUrl}` : ''));
