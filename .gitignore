@@ -38,3 +38,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+parseXlsx.js
+state_cities_sorted.json
+state_cities.json
