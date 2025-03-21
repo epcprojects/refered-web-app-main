@@ -31,7 +31,7 @@ const ProfileCompanySecondRow: React.FC<IProps> = ({ data, classes = '' }) => {
 
   const shareReferralLink = async (referralUrl: string) => {
     if (navigator.share) {
-      const response = await asyncGuard(() => navigator.share({ title: 'Referral Link', text: 'Share this referral link!', url: referralUrl }));
+      const response = await asyncGuard(() => navigator.share({ title: 'Referral Link', text: `${(globalStore?.currentUserProfile?.FirstName + ' ' + globalStore?.currentUserProfile?.LastName).trim()} shared a referral to ${data.FirstName + ' ' + data.LastName} with ${data.BusinessName}. Click the link to open Refer’d and get connected with ${data.FirstName} now.`, url: referralUrl }));
       if (!response.error) {
         const copied = await asyncGuard(() => copy(referralUrl));
         if (copied.result) toast.success('Referral link copied!');

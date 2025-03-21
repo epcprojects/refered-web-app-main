@@ -56,7 +56,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
 
     if(isBusinessProfile){
       await shareReferralLink(referralUrl + `?n=${data.FirstName}&btN=${data.BusinessTypeName}&bN=${data.BusinessName}/`); //NOTE: Adding / slash is important for Whatsapp to fetch url.
-    } else await shareReferralLink(referralUrl); //NOTE: Adding / slash is important for Whatsapp to fetch url.
+    } else await shareReferralLink(referralUrl); 
 
   };
 
