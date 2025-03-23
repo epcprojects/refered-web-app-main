@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { AppPages } from '@/constants/app-pages.constants';
 import { firebase } from '@/firebase';
-import { GetProfilesForSearch, IProfile, IProfileWithFavorites } from '@/firebase/profile';
+import { getAllFavoritesForProfile, GetProfilesForSearch, IProfile, IProfileWithFavorites } from '@/firebase/profile';
 import { useAppStore } from '@/hooks/use-app-store';
 import { asyncGuard, debounce, initials, unionBy } from '@/utils/lodash.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,24 +63,30 @@ const SearchIndex: React.FC<IProps> = () => {
     // const currentUser = globalStore.currentUser;
 
     const response = await asyncGuard(() => GetProfilesForSearch({ lastItemId: isNewQuery || targetShowMore === null || isGoingBack ? undefined : targetShowMore === 'businesses' ? (data.businesses.length <= 0 ? undefined : data.businesses[data.businesses.length - 1].id) : data.users.length <= 0 ? undefined : data.users[data.users.length - 1].id, searchTerm: query, ...(city ? { city } : {}), ...(state ? { state } : {}), targetType: targetShowMore === null ? undefined : targetShowMore === 'businesses' ? 'Business' : 'Normal' }));
-    console.log('Response', response)
+  
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
+      const allFavorites = await getAllFavoritesForProfile(globalStore?.currentUser?.uid || '');
+      console.log('All favorites', allFavorites);
+
+      const businesses = response.result.businesses.map((business) => ({ ...business, isFavorite: !!allFavorites.find((fav) => fav.UserId === business.UserId) }));
+      const users = response.result.users.map((user) => ({ ...user, isFavorite: !!allFavorites.find((fav) => fav.UserId === user.UserId) }));
+
       if (targetShowMore === null || isGoingBack) {
-        setBusinessesData(response.result.businesses);
-        setUsersData(response.result.users);
+        setBusinessesData(businesses);
+        setUsersData(users);
         setData(response.result);
       } else if (targetShowMore === 'businesses') {
-        const businesses = isNewQuery ? response.result?.businesses || [] : unionBy(businessesData, response.result?.businesses, 'id');
-        setBusinessesData(businesses);
+        const businessesForTarget = isNewQuery ? response.result?.businesses || [] : unionBy(businessesData, response.result?.businesses, 'id');
+        setBusinessesData(businessesForTarget);
         setUsersData([]);
-        setData((prev) => ({ users: [], businesses: businesses }));
+        setData((prev) => ({ users: [], businesses: businessesForTarget }));
         if (response.result.businesses.length < firebase.pagination.pageSize) setIsAllFetched(true);
       } else if (targetShowMore === 'users') {
-        const users = isNewQuery ? response.result?.users || [] : unionBy(usersData, response.result?.users, 'id');
+        const usersForTarget = isNewQuery ? response.result?.users || [] : unionBy(usersData, response.result?.users, 'id');
         setBusinessesData([]);
-        setUsersData([]);
-        setData((prev) => ({ users: users, businesses: [] }));
+        setUsersData(usersForTarget);
+        setData((prev) => ({ users: usersForTarget, businesses: [] }));
         if (response.result.users.length < firebase.pagination.pageSize) setIsAllFetched(true);
       }
     }
