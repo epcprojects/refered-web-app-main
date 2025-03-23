@@ -54,20 +54,16 @@ const SearchIndex: React.FC<IProps> = () => {
     setIsAllFetched(false);
   };
 
-  const handleFetchData = async (query: string = '', isNewQuery: boolean = true, isGoingBack: boolean = false, isForcefullyShowMore?: typeof showMore) => {
-    console.log('Fetching data', globalStore?.currentUser);
-    
+  const handleFetchData = async (query: string = '', isNewQuery: boolean = true, isGoingBack: boolean = false, isForcefullyShowMore?: typeof showMore) => {        
     const targetShowMore = isForcefullyShowMore === undefined ? showMore : isForcefullyShowMore;
     setIsFetchingData(true);
     setIsFetchingCompleted(false);
-    // const currentUser = globalStore.currentUser;
 
     const response = await asyncGuard(() => GetProfilesForSearch({ lastItemId: isNewQuery || targetShowMore === null || isGoingBack ? undefined : targetShowMore === 'businesses' ? (data.businesses.length <= 0 ? undefined : data.businesses[data.businesses.length - 1].id) : data.users.length <= 0 ? undefined : data.users[data.users.length - 1].id, searchTerm: query, ...(city ? { city } : {}), ...(state ? { state } : {}), targetType: targetShowMore === null ? undefined : targetShowMore === 'businesses' ? 'Business' : 'Normal' }));
   
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
       const allFavorites = await getAllFavoritesForProfile(globalStore?.currentUser?.uid as string);
-      console.log('All favorites', allFavorites);
 
       const businesses = response.result.businesses.map((business) => ({ ...business, isFavorite: !!allFavorites.find((fav) => fav.UserId === business.UserId) }));
       const users = response.result.users.map((user) => ({ ...user, isFavorite: !!allFavorites.find((fav) => fav.UserId === user.UserId) }));
@@ -103,11 +99,6 @@ const SearchIndex: React.FC<IProps> = () => {
   useEffect(() => {
     handleQueryData(searchTerm);
   }, [searchTerm, city, state]);
-
-  useEffect(() => {
-    setBusinessesData(data.businesses);
-    setUsersData(data.users);
-  }, [data]);
 
   useEffect(() => {
     if(globalStore?.currentUser) handleFetchData();

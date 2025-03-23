@@ -133,6 +133,8 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
           or(
             where('BusinessName', '>=', searchTermLower),
             where('BusinessName', '<=', searchTermLower + '\uf8ff'),
+            where('BusinessTypeName', '>=', searchTermLower),
+            where('BusinessTypeName', '<=', searchTermLower + '\uf8ff'),
             where('Keywords', 'array-contains', searchTermLower)
           )
         );
