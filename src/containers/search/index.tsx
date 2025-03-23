@@ -73,17 +73,17 @@ const SearchIndex: React.FC<IProps> = () => {
         setUsersData(users);
         setData(response.result);
       } else if (targetShowMore === 'businesses') {
-        const businessesForTarget = isNewQuery ? response.result?.businesses || [] : unionBy(businessesData, response.result?.businesses, 'id');
+        const businessesForTarget = isNewQuery ? businesses || [] : unionBy(businessesData, businesses, 'id');
         setBusinessesData(businessesForTarget);
         setUsersData([]);
         setData((prev) => ({ users: [], businesses: businessesForTarget }));
-        if (response.result.businesses.length < firebase.pagination.pageSize) setIsAllFetched(true);
+        if (businesses.length < firebase.pagination.pageSize) setIsAllFetched(true);
       } else if (targetShowMore === 'users') {
-        const usersForTarget = isNewQuery ? response.result?.users || [] : unionBy(usersData, response.result?.users, 'id');
+        const usersForTarget = isNewQuery ? users || [] : unionBy(usersData, users, 'id');
         setBusinessesData([]);
         setUsersData(usersForTarget);
         setData((prev) => ({ users: usersForTarget, businesses: [] }));
-        if (response.result.users.length < firebase.pagination.pageSize) setIsAllFetched(true);
+        if (users.length < firebase.pagination.pageSize) setIsAllFetched(true);
       }
     }
     setIsFetchingData(false);
