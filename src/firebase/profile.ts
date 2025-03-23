@@ -95,7 +95,7 @@ export const GetAllProfiles = async (body: GetAllProfiles_Body): GetAllProfiles_
 
 //TODO: Refactor this to include Referrals by favourites.
 export type GetProfilesForSearch_Body = {
-  loggedInUserId: string;
+  loggedInUserId?: string;
 
   targetType?: IProfile['UserType'];
   lastItemId?: string;
@@ -113,9 +113,9 @@ export type GetProfilesForSearch_Response = Promise<{
 }>;
 
 export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): GetProfilesForSearch_Response => {
-  const favoritesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.favorites), where('ProfileId', '==', body.loggedInUserId))));
+  // const favoritesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.favorites), where('ProfileId', '==', body.loggedInUserId))));
 
-  const allFavorites = favoritesResponse.result?.docs.map((item) => ({ ...item.data(), id: item.id })) as IFavorite[] | undefined;
+  // const allFavorites = favoritesResponse.result?.docs.map((item) => ({ ...item.data(), id: item.id })) as IFavorite[] | undefined;
 
   const fetchProfiles = async (userType: string) => {
     let constraints: any = [where('Verified', '==', '1'), where('UserType', '==', userType), orderBy('FirstName', 'asc')];
@@ -161,7 +161,7 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
         return {
           ...data,
           id: item.id,
-          isFavorite: allFavorites && !!allFavorites.find((fav) => fav.UserId === data.UserId),
+          // isFavorite: allFavorites && !!allFavorites.find((fav) => fav.UserId === data.UserId),
         };
       }),
     ) as Promise<IProfileWithFavorites[]>;

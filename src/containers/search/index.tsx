@@ -55,14 +55,14 @@ const SearchIndex: React.FC<IProps> = () => {
   };
 
   const handleFetchData = async (query: string = '', isNewQuery: boolean = true, isGoingBack: boolean = false, isForcefullyShowMore?: typeof showMore) => {
-    console.log('Fetching data', query, globalStore?.currentUser);
-    if (globalStore === null || globalStore.currentUser === null) return;
+    console.log('Fetching data', globalStore?.currentUser);
+    // if (globalStore === null || globalStore.currentUser === null) return;
     const targetShowMore = isForcefullyShowMore === undefined ? showMore : isForcefullyShowMore;
     setIsFetchingData(true);
     setIsFetchingCompleted(false);
-    const currentUser = globalStore.currentUser;
+    // const currentUser = globalStore.currentUser;
 
-    const response = await asyncGuard(() => GetProfilesForSearch({ loggedInUserId: currentUser.uid, lastItemId: isNewQuery || targetShowMore === null || isGoingBack ? undefined : targetShowMore === 'businesses' ? (data.businesses.length <= 0 ? undefined : data.businesses[data.businesses.length - 1].id) : data.users.length <= 0 ? undefined : data.users[data.users.length - 1].id, searchTerm: query, ...(city ? { city } : {}), ...(state ? { state } : {}), targetType: targetShowMore === null ? undefined : targetShowMore === 'businesses' ? 'Business' : 'Normal' }));
+    const response = await asyncGuard(() => GetProfilesForSearch({ lastItemId: isNewQuery || targetShowMore === null || isGoingBack ? undefined : targetShowMore === 'businesses' ? (data.businesses.length <= 0 ? undefined : data.businesses[data.businesses.length - 1].id) : data.users.length <= 0 ? undefined : data.users[data.users.length - 1].id, searchTerm: query, ...(city ? { city } : {}), ...(state ? { state } : {}), targetType: targetShowMore === null ? undefined : targetShowMore === 'businesses' ? 'Business' : 'Normal' }));
     console.log('Response', response)
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
@@ -108,9 +108,6 @@ const SearchIndex: React.FC<IProps> = () => {
     handleFetchData();
   }, [globalStore?.currentUser]);
 
-  useEffect(() => {
-    console.log('This useEffect is running');
-  }, []);
 
 
   useEventListener('scroll', () => {
