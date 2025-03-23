@@ -1,7 +1,7 @@
 import { profilePaymentInfoFormSchemaType } from '@/containers/profile-edit/profile-edit-form-payment-info';
 import { date } from '@/utils/date.utils';
 import { asyncGuard, firebaseErrorMsg, generateTokensForSentence } from '@/utils/lodash.utils';
-import { collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, or, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { firebase } from '.';
 import { IFavorite } from './favorite';
 import { IGroupType } from './group-types';
@@ -115,18 +115,28 @@ export type GetProfilesForSearch_Response = Promise<{
 export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): GetProfilesForSearch_Response => {
   const favoritesResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.favorites), where('ProfileId', '==', body.loggedInUserId))));
 
-  if (favoritesResponse.error !== null || favoritesResponse.result === null) {
-    throw new Error(firebaseErrorMsg(favoritesResponse.error));
-  }
-
-  const allFavorites = favoritesResponse.result.docs.map((item) => ({ ...item.data(), id: item.id })) as IFavorite[];
+  const allFavorites = favoritesResponse.result?.docs.map((item) => ({ ...item.data(), id: item.id })) as IFavorite[] | undefined;
 
   const fetchProfiles = async (userType: string) => {
-    const constraints: any = [where('Verified', '==', '1'), where('UserType', '==', userType), orderBy('FirstName', 'asc')];
+    let constraints: any = [where('Verified', '==', '1'), where('UserType', '==', userType), orderBy('FirstName', 'asc')];
 
     if (body.searchTerm && body.searchTerm.trim() !== '') {
-      constraints.push(where('Keywords', 'array-contains', body.searchTerm.toLowerCase()));
+      const searchTermLower = body.searchTerm.toLowerCase();
+      if (userType === 'Business') {
+        // For business profiles, search in BusinessName field
+        constraints.push(
+          or(
+            where('BusinessName', '>=', searchTermLower),
+            where('BusinessName', '<=', searchTermLower + '\uf8ff'),
+            where('Keywords', 'array-contains', searchTermLower)
+          )
+        );
+      } else {
+        // For normal profiles, keep the existing Keywords search
+        constraints.push(where('Keywords', 'array-contains', searchTermLower));
+      }
     }
+
     if (body.state) {
       constraints.push(where('State', '==', body.state));
     }
@@ -147,13 +157,11 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
 
     return Promise.all(
       profileResponse.result.docs.map(async (item) => {
-        // const groupDataResult = await asyncGuard(() => getDoc(doc(firebase.firestore, firebase.collections.groupTypes, item.data().GroupId || '')));
-
+        const data = item.data();
         return {
-          ...item.data(),
+          ...data,
           id: item.id,
-          // groupData: groupDataResult.result?.data() || null,
-          isFavorite: !!allFavorites.find((fav) => fav.UserId === item.data().UserId),
+          isFavorite: allFavorites && !!allFavorites.find((fav) => fav.UserId === data.UserId),
         };
       }),
     ) as Promise<IProfileWithFavorites[]>;

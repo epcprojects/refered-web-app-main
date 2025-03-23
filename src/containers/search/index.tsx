@@ -62,6 +62,7 @@ const SearchIndex: React.FC<IProps> = () => {
     const currentUser = globalStore.currentUser;
 
     const response = await asyncGuard(() => GetProfilesForSearch({ loggedInUserId: currentUser.uid, lastItemId: isNewQuery || targetShowMore === null || isGoingBack ? undefined : targetShowMore === 'businesses' ? (data.businesses.length <= 0 ? undefined : data.businesses[data.businesses.length - 1].id) : data.users.length <= 0 ? undefined : data.users[data.users.length - 1].id, searchTerm: query, ...(city ? { city } : {}), ...(state ? { state } : {}), targetType: targetShowMore === null ? undefined : targetShowMore === 'businesses' ? 'Business' : 'Normal' }));
+    console.log('Response', response)
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
       if (targetShowMore === null || isGoingBack) {
