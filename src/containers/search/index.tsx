@@ -110,7 +110,6 @@ const SearchIndex: React.FC<IProps> = () => {
 
   useEffect(() => {
     console.log('This useEffect is running');
-    
   }, []);
 
 
