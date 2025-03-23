@@ -63,10 +63,10 @@ const SearchIndex: React.FC<IProps> = () => {
   
     if (response.error !== null || response.result === null) toast.error(response.error?.toString() || 'Something went wrong!');
     else {
-      const allFavorites = await getAllFavoritesForProfile(globalStore?.currentUser?.uid as string);
+      const { result:allFavorites } = await asyncGuard(() => getAllFavoritesForProfile(globalStore?.currentUser?.uid as string));
 
-      const businesses = response.result.businesses.map((business) => ({ ...business, isFavorite: !!allFavorites.find((fav) => fav.UserId === business.UserId) }));
-      const users = response.result.users.map((user) => ({ ...user, isFavorite: !!allFavorites.find((fav) => fav.UserId === user.UserId) }));
+      const businesses = response.result.businesses.map((business) => ({ ...business, isFavorite: !!allFavorites?.find((fav) => fav.UserId === business.UserId) }));
+      const users = response.result.users.map((user) => ({ ...user, isFavorite: !!allFavorites?.find((fav) => fav.UserId === user.UserId) }));
 
       if (targetShowMore === null || isGoingBack) {
         setBusinessesData(businesses);
