@@ -55,6 +55,7 @@ const SearchIndex: React.FC<IProps> = () => {
   };
 
   const handleFetchData = async (query: string = '', isNewQuery: boolean = true, isGoingBack: boolean = false, isForcefullyShowMore?: typeof showMore) => {
+    console.log('Fetching data', query, globalStore?.currentUser);
     if (globalStore === null || globalStore.currentUser === null) return;
     const targetShowMore = isForcefullyShowMore === undefined ? showMore : isForcefullyShowMore;
     setIsFetchingData(true);
@@ -103,8 +104,15 @@ const SearchIndex: React.FC<IProps> = () => {
   }, [data]);
 
   useEffect(() => {
+    console.log('Fetching data');
     handleFetchData();
   }, [globalStore?.currentUser]);
+
+  useEffect(() => {
+    console.log('This useEffect is running');
+    
+  }, []);
+
 
   useEventListener('scroll', () => {
     if (isAllFetched || isFetchingData || showMore === null) return;
