@@ -113,7 +113,7 @@ export const MutualFavourites: React.FC<IMutualFavourites> = ({ mutualFavourites
         <React.Fragment>
           <div className="flex items-center justify-center gap-1">
             <RiShareForwardFill className="text-info" color={shade === 'dark' ? 'black' : ''} />
-            <span className={`text-xs ${shade === 'light' ? 'text-muted-foreground' : ''}`}>Referred by</span>
+            <span className={`text-xs ${shade === 'light' ? 'text-muted-foreground' : ''}`}>Liked by</span>
           </div>
 
           {data.slice(0, 3).map((value) => (
