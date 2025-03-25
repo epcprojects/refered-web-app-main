@@ -32,4 +32,27 @@ const StateCitySelect: React.FC<IProps> = ({ form }) => {
   );
 };
 
+
+export const StateCitySelectIndependent: React.FC<IProps> = ({ form }) => {
+  const states = useMemo(() => Object.keys(USA_CITY_AND_STATES).map((state) => ({ label: state, value: state })), []);
+
+  const selectedState = form.watch('states') as StateKeys;
+  const selectedCity = form.watch('cities');
+  
+  const cities = useMemo(()=>{
+    if(selectedState){
+      return USA_CITY_AND_STATES[selectedState].map((city) => ({ label: city, value: city }));
+    }
+    return [];
+  },[selectedState]);
+
+
+  return (
+    <div className="grid w-full grid-cols-2 gap-2.5">
+      <FieldSelectDropdown form={form} options={states} onChange={(value) => form.setValue('states', value)} value={selectedState} placeholder="State" name="states" containerClassName="border-grey bg-white" />
+      <FieldSelectDropdown form={form} options={cities} onChange={(value) => form.setValue('cities', value)} value={selectedCity} placeholder="City" name="cities" containerClassName="border-grey bg-white" />
+    </div>
+  );
+};
+
 export default StateCitySelect;

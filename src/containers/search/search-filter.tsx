@@ -1,4 +1,4 @@
-import StateCitySelect from '@/components/form/state-city-select';
+import { StateCitySelectIndependent } from '@/components/form/state-city-select';
 import { Button } from '@/components/ui/button';
 
 import { RiFilter2Line } from 'react-icons/ri';
@@ -41,7 +41,7 @@ export function SearchFilters({ form, className = '' }: ISearchFilters) {
 
   return (
     <Form form={form} className={'mt-2 flex gap-3 ' + className}>
-      <StateCitySelect form={form} />
+      <StateCitySelectIndependent form={form} />
       {city && state ? (
         <Button variant={'background'} onClick={handleClearAllFilters}>
           Clear

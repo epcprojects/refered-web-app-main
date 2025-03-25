@@ -1,7 +1,7 @@
 import { profilePaymentInfoFormSchemaType } from '@/containers/profile-edit/profile-edit-form-payment-info';
 import { date } from '@/utils/date.utils';
 import { asyncGuard, firebaseErrorMsg, generateTokensForSentence } from '@/utils/lodash.utils';
-import { collection, doc, getDoc, getDocs, limit, or, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
+import { and, collection, doc, getDoc, getDocs, limit, or, orderBy, query, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { firebase } from '.';
 import { IFavorite } from './favorite';
 import { IGroupType } from './group-types';
@@ -123,42 +123,47 @@ export const GetProfilesForSearch = async (body: GetProfilesForSearch_Body): Get
 
 
   const fetchProfiles = async (userType: string) => {
-    let constraints: any = [where('Verified', '==', '1'), where('UserType', '==', userType), orderBy('FirstName', 'asc')];
+    let queryConstraints: any[] = [];
 
+    // Base constraints
+    queryConstraints.push(where('Verified', '==', '1'));
+    queryConstraints.push(where('UserType', '==', userType));
+
+    // Search constraints
     if (body.searchTerm && body.searchTerm.trim() !== '') {
       const searchTermLower = body.searchTerm.toLowerCase();
-      if (userType === 'Business') {
-        // For business profiles, search in BusinessName field
-        constraints.push(
+        queryConstraints.push(
           or(
-            where('BusinessName', '>=', searchTermLower),
-            where('BusinessName', '<=', searchTermLower + '\uf8ff'),
-            where('BusinessTypeName', '>=', searchTermLower),
-            where('BusinessTypeName', '<=', searchTermLower + '\uf8ff'),
-            where('Keywords', 'array-contains', searchTermLower)
+            where('Keywords', 'array-contains', searchTermLower),
           )
         );
-      } else {
-        // For normal profiles, keep the existing Keywords search
-        constraints.push(where('Keywords', 'array-contains', searchTermLower));
-      }
     }
 
+    // Location constraints
     if (body.state) {
-      constraints.push(where('State', '==', body.state));
+      queryConstraints.push(where('State', '==', body.state));
     }
     if (body.city) {
-      constraints.push(where('City', '==', body.city));
+      queryConstraints.push(where('City', '==', body.city));
     }
 
+    // Create the query with all constraints
+    let queryRef = query(
+      collection(firebase.firestore, firebase.collections.profile),
+      and(...queryConstraints),
+      orderBy('FirstName', 'asc'),
+      limit(firebase.pagination.pageSize)
+    );
+
+    // Add pagination if needed
     if (body.lastItemId && typeof body.lastItemId === 'string') {
       const lastItemDocSnap = await getDoc(doc(firebase.firestore, firebase.collections.profile, body.lastItemId));
       if (lastItemDocSnap.exists()) {
-        constraints.push(startAfter(lastItemDocSnap));
+        queryRef = query(queryRef, startAfter(lastItemDocSnap));
       }
     }
 
-    const profileResponse = await asyncGuard(() => getDocs(query(collection(firebase.firestore, firebase.collections.profile), ...constraints, limit(firebase.pagination.pageSize))));
+    const profileResponse = await asyncGuard(() => getDocs(queryRef));
 
     if (profileResponse.result === null) return [];
 

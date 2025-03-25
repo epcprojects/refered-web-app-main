@@ -1,7 +1,7 @@
 'use client';
 
-// import { useFCM } from '@/hooks/use-fcm';
-// import { useNotificationPermission } from '@/hooks/use-notification-permission';
+import { useFCM } from '@/hooks/use-fcm';
+import { useNotificationPermission } from '@/hooks/use-notification-permission';
 import { cn } from '@/utils/cn.utils';
 import React from 'react';
 import AppBottomNav from './app-bottom-nav';
@@ -18,8 +18,8 @@ const mainWidthAndHeightClasses = cn('h-full w-full max-w-full lg:max-w-[65rem] 
 const asideClasses = cn('h-max z-10 sticky hidden lg:flex top-20 w-[12.5rem] transition-all lg:w-[15rem] xl:w-[17.5rem] rounded-md');
 
 const AppLayoutIndex: React.FC<IProps> = ({ children }) => {
-  // useNotificationPermission();
-  // useFCM();
+  useNotificationPermission();
+  useFCM();
 
   return (
     <div className="relative flex min-h-page flex-1 flex-col items-center justify-center bg-muted/60">

@@ -64,7 +64,7 @@ export const SignupBusiness = async (body: Omit<SignupBusiness_Body, 'UserType'>
     BusinessName: body.BusinessName,
     BusinessTypeName: body.BusinessTypeName,
     ImageUrl: imageUrl,
-    Keywords: [...generateTokensForSentence([body.FirstName, body.LastName].join(' ')), ...(!!body.BusinessName ? generateTokensForSentence(body.BusinessName.trim().toLowerCase()) : [])],
+    Keywords: [...generateTokensForSentence([body.FirstName, body.LastName].join(' ')), ...(!!body.BusinessName ? generateTokensForSentence(body.BusinessName.trim().toLowerCase()) : []), ...(!!body.BusinessTypeName ? generateTokensForSentence(body.BusinessTypeName.trim().toLowerCase()) : [])],
     ReferralAmount: process.env.NEXT_PUBLIC_DEFAULT_REFERRAL_AMOUNT || '5',
   };
   const updateProfileResponse = await asyncGuard(() => setDoc(doc(firebase.firestore, firebase.collections.profile, signedUpUser.uid), profileDataCompiled));
