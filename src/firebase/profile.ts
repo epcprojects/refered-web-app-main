@@ -230,7 +230,9 @@ export type UpdateBusinessUserProfile_Response = Promise<IProfile>;
 export const UpdateBusinessUserProfile = async ({ id, ...body }: UpdateBusinessUserProfile_Body): UpdateBusinessUserProfile_Response => {
   const querySnapshot = await getDocs(getProfileByUserIdQuery(id));
   if (querySnapshot.docs.length <= 0) throw new Error('User not found!');
-  const response = await asyncGuard(() => updateDoc(querySnapshot.docs[0].ref, { ...body, Keywords: [...generateTokensForSentence([body.FirstName, body.LastName].join(' ')), ...(!!body.BusinessName ? generateTokensForSentence(body.BusinessName.trim().toLowerCase()) : [])] }));
+  const response = await asyncGuard(() => updateDoc(querySnapshot.docs[0].ref, { ...body, 
+    Keywords: [...generateTokensForSentence([body.FirstName, body.LastName].join(' ')), ...(!!body.BusinessName ? generateTokensForSentence(body.BusinessName.trim().toLowerCase()) : []), ...(!!body.BusinessTypeName ? generateTokensForSentence(body.BusinessTypeName.trim().toLowerCase()) : [])],
+   }));
   if (response.error !== null || response.result === null) throw new Error(firebaseErrorMsg(response.error));
   return { ...querySnapshot.docs[0].data(), id: querySnapshot.docs[0].id, ...body } as IProfile;
 };

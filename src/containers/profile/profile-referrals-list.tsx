@@ -232,9 +232,11 @@ const ReferralItem: React.FC<IProps & { data: IReferral; isRedeemed: boolean }> 
           </div>
           {/* {type === 'business' ? ( */}
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            <ReferralUserChip id={data.referredByUser?.UserId || ''} className="rounded-sm" src={data.referredByUser?.ImageUrl} name={[data.referredByUser?.FirstName].join(' ').trim()} />
-            <span className="text-xs text-muted-foreground">refer'd to</span>
+            <span className="text-xs text-muted-foreground">Refer'd to</span>
             <ReferralUserChip id={data.referredToUser?.UserId || ''} className="rounded-sm" src={data.referredToUser?.ImageUrl} name={[data.referredToUser?.FirstName].join(' ').trim()} />
+           <span className="text-xs text-muted-foreground">by</span>
+            <ReferralUserChip id={data.referredByUser?.UserId || ''} className="rounded-sm" src={data.referredByUser?.ImageUrl} name={[data.referredByUser?.FirstName].join(' ').trim()} />
+
           </div>
           {/* // ) : (
           //   <div className="mt-1.5 flex flex-col items-start gap-1.5 2xs:flex-row 2xs:items-center">
