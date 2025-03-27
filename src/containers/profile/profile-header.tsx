@@ -10,7 +10,7 @@ import { asyncGuard, initials } from '@/utils/lodash.utils';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
-import { RiAddLine, RiArrowLeftSLine, RiClipboardLine, RiEditBoxLine, RiHeart2Fill, RiHeart2Line, RiMapPin2Line, RiNewsLine, RiPencilFill, RiShareBoxLine } from 'react-icons/ri';
+import { RiAddLine, RiArrowLeftSLine, RiClipboardLine, RiEditBoxLine, RiHeart2Fill, RiHeart2Line, RiMapPin2Line, RiNewsLine, RiPencilFill, RiSecurePaymentLine, RiShareBoxLine } from 'react-icons/ri';
 import { toast } from 'sonner';
 import { useCopyToClipboard } from 'usehooks-ts';
 import { MutualFavourites } from './profile-referrals-list';
@@ -33,6 +33,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
   const isMyProfile = useMemo(() => Boolean(globalStore?.currentUserProfile?.UserId === data.UserId), [data, globalStore]);
   const referralUrl = useMemo(() => `${process.env.NEXT_PUBLIC_FRONTEND_URL}${isBusinessProfile ? `${AppPages.REFERRAL}/${data.UserId}/${globalStore?.currentUserProfile?.UserId}` : `${AppPages.PROFILE}/${data.UserId}`}`, [data, isBusinessProfile, globalStore]);
   const hasPaymentIdAdded = useMemo(() => Boolean(data.paypalId || data.cashAppId || data.venmoId), [data]);
+  const defaultPaymentMethod = useMemo(() => data.default && data.default[0].toUpperCase() + data.default.substring(1) || '', [data]);
 
   const handleGoBack = () => {
     if (document.referrer) router.back();
@@ -128,14 +129,22 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
           ))}
 
           {/* Select Payment */}
-          {globalStore?.currentUser?.uid === data?.UserId && (
+          {globalStore?.currentUser?.uid === data?.UserId ? (
             <NextLink href={AppPages.EDIT_PROFILE + '?q=payment'} className="rounded-full p-1 pl-0 transition-all duration-300 hover:bg-foreground/5 hover:pl-1">
               <button className="flex flex-row items-center gap-2 text-sm font-medium">
                 <span>{hasPaymentIdAdded ? <RiEditBoxLine size={17} /> : <RiAddLine size={17} />}</span>
                 <span>{hasPaymentIdAdded ? 'Edit payment method' : 'Select Venmo, Paypal, CashApp'}</span>
               </button>
             </NextLink>
-          )}
+          ): defaultPaymentMethod && !isBusinessProfile ?
+              (
+              <div className="flex flex-row items-center gap-1.5 text-sm">
+                    <span><RiSecurePaymentLine size={17} /></span>
+                    <span>Payment Method: <b>{defaultPaymentMethod}</b></span>
+              </div>
+          )
+          :null}
+          
 
           {/* Referred by */}
           {globalStore?.currentUser && data && globalStore?.currentUser?.uid !== data?.UserId && <MutualFavourites shade="dark" mutualFavourites={data.mutualFavourites} businessOrProfileId={data.UserId} profileData={globalStore.currentUser as unknown as IProfile} />}
