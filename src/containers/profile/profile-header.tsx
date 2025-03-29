@@ -101,7 +101,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
               <RiArrowLeftSLine size={25} className="transition-all group-hover:-translate-x-0.5" />
             </button>
           )}
-          <h3 className="line-clamp-1 w-full text-xl font-medium">{!isProfileDetailsPage ? 'Profile' : [data.FirstName, data.LastName].join(' ').trim()}</h3>
+          <h3 className="line-clamp-1 w-full text-xl font-medium">Profile</h3>
         </div>
         <div className="flex flex-row gap-1">
           {getButtonsConfig().map((item, index) =>
@@ -120,7 +120,7 @@ const ProfileHeader: React.FC<IProps> = ({ data }) => {
       <div className="flex flex-row gap-3">
         <Avatar src={data.ImageUrl} alt={[data.FirstName, data.LastName].join(' ').trim()} fallback={initials([data.FirstName, data.LastName].join(' ').trim()).slice(0, 2)} className="!h-14 !w-14" />
         <div className="flex flex-col justify-center gap-1">
-          {!isProfileDetailsPage ? <h5 className="text-base font-medium">{[data.FirstName, data.LastName].join(' ').trim()}</h5> : null}
+          <h5 className="text-base font-medium">{[data.FirstName, data.LastName].join(' ').trim()}</h5>
           {(isBusinessProfile ? getCompanyInfoConfig() : getPersonalInfoConfig()).map((item, index) => (
             <div key={index} className="flex flex-row items-center gap-2 text-sm font-normal">
               <span>{item.icon}</span>
